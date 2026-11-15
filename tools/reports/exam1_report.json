@@ -12,11 +12,12 @@
   "chapter_errors": [],
   "totals": {
     "exact_pages": 42,
-    "diff_pixels": 1607042,
+    "diff_pixels": 1593164,
     "capture_lines": 1568,
-    "render_lines": 1568,
+    "render_lines": 1567,
     "pos_exact_lines": 1402,
-    "pos_indep_lines": 1410
+    "pos_indep_lines": 1411,
+    "displaced_lines": 9
   },
   "chapters": [
     {
@@ -30,7 +31,8 @@
       "capture_lines": 1,
       "render_lines": 1,
       "pos_exact_lines": 0,
-      "pos_indep_lines": 0
+      "pos_indep_lines": 0,
+      "displaced_lines": 0
     },
     {
       "chapter": "nav",
@@ -43,7 +45,8 @@
       "capture_lines": 21,
       "render_lines": 21,
       "pos_exact_lines": 1,
-      "pos_indep_lines": 1
+      "pos_indep_lines": 1,
+      "displaced_lines": 0
     },
     {
       "chapter": "e01_prologue",
@@ -56,7 +59,8 @@
       "capture_lines": 36,
       "render_lines": 36,
       "pos_exact_lines": 32,
-      "pos_indep_lines": 32
+      "pos_indep_lines": 32,
+      "displaced_lines": 0
     },
     {
       "chapter": "e02_headings",
@@ -69,7 +73,8 @@
       "capture_lines": 142,
       "render_lines": 142,
       "pos_exact_lines": 142,
-      "pos_indep_lines": 142
+      "pos_indep_lines": 142,
+      "displaced_lines": 0
     },
     {
       "chapter": "e03_story",
@@ -82,7 +87,8 @@
       "capture_lines": 83,
       "render_lines": 83,
       "pos_exact_lines": 82,
-      "pos_indep_lines": 82
+      "pos_indep_lines": 82,
+      "displaced_lines": 0
     },
     {
       "chapter": "e04_essay",
@@ -95,7 +101,8 @@
       "capture_lines": 67,
       "render_lines": 67,
       "pos_exact_lines": 66,
-      "pos_indep_lines": 66
+      "pos_indep_lines": 66,
+      "displaced_lines": 0
     },
     {
       "chapter": "e05_longwords_en",
@@ -108,7 +115,8 @@
       "capture_lines": 298,
       "render_lines": 298,
       "pos_exact_lines": 292,
-      "pos_indep_lines": 292
+      "pos_indep_lines": 292,
+      "displaced_lines": 0
     },
     {
       "chapter": "e06_deutsch",
@@ -121,7 +129,8 @@
       "capture_lines": 46,
       "render_lines": 46,
       "pos_exact_lines": 38,
-      "pos_indep_lines": 38
+      "pos_indep_lines": 38,
+      "displaced_lines": 0
     },
     {
       "chapter": "e07_francais",
@@ -134,7 +143,8 @@
       "capture_lines": 43,
       "render_lines": 43,
       "pos_exact_lines": 40,
-      "pos_indep_lines": 40
+      "pos_indep_lines": 40,
+      "displaced_lines": 0
     },
     {
       "chapter": "e08_punct",
@@ -147,7 +157,8 @@
       "capture_lines": 53,
       "render_lines": 53,
       "pos_exact_lines": 34,
-      "pos_indep_lines": 34
+      "pos_indep_lines": 34,
+      "displaced_lines": 0
     },
     {
       "chapter": "e09_ligatures",
@@ -160,7 +171,8 @@
       "capture_lines": 76,
       "render_lines": 76,
       "pos_exact_lines": 76,
-      "pos_indep_lines": 76
+      "pos_indep_lines": 76,
+      "displaced_lines": 0
     },
     {
       "chapter": "e10_inline",
@@ -173,7 +185,8 @@
       "capture_lines": 65,
       "render_lines": 65,
       "pos_exact_lines": 59,
-      "pos_indep_lines": 59
+      "pos_indep_lines": 59,
+      "displaced_lines": 0
     },
     {
       "chapter": "e11_blocks",
@@ -182,11 +195,12 @@
       "rendered_pages": 5,
       "compared_pages": 5,
       "exact_pages": 0,
-      "diff_pixels": 1022264,
+      "diff_pixels": 1008386,
       "capture_lines": 76,
-      "render_lines": 77,
+      "render_lines": 76,
       "pos_exact_lines": 3,
-      "pos_indep_lines": 11
+      "pos_indep_lines": 12,
+      "displaced_lines": 9
     },
     {
       "chapter": "e12_scripts",
@@ -199,7 +213,8 @@
       "capture_lines": 53,
       "render_lines": 52,
       "pos_exact_lines": 38,
-      "pos_indep_lines": 38
+      "pos_indep_lines": 38,
+      "displaced_lines": 0
     },
     {
       "chapter": "e13_pagination",
@@ -212,7 +227,8 @@
       "capture_lines": 486,
       "render_lines": 486,
       "pos_exact_lines": 477,
-      "pos_indep_lines": 477
+      "pos_indep_lines": 477,
+      "displaced_lines": 0
     },
     {
       "chapter": "e14_verse",
@@ -225,7 +241,8 @@
       "capture_lines": 22,
       "render_lines": 22,
       "pos_exact_lines": 22,
-      "pos_indep_lines": 22
+      "pos_indep_lines": 22,
+      "displaced_lines": 0
     }
   ],
   "pages": {
@@ -240,7 +257,8 @@
       "capture_lines": 1,
       "render_lines": 1,
       "pos_exact_lines": 0,
-      "pos_indep_lines": 0
+      "pos_indep_lines": 0,
+      "displaced_lines": 0
     },
     "2": {
       "page": 2,
@@ -253,7 +271,8 @@
       "capture_lines": 21,
       "render_lines": 21,
       "pos_exact_lines": 1,
-      "pos_indep_lines": 1
+      "pos_indep_lines": 1,
+      "displaced_lines": 0
     },
     "3": {
       "page": 3,
@@ -266,7 +285,8 @@
       "capture_lines": 23,
       "render_lines": 23,
       "pos_exact_lines": 19,
-      "pos_indep_lines": 19
+      "pos_indep_lines": 19,
+      "displaced_lines": 0
     },
     "4": {
       "page": 4,
@@ -279,7 +299,8 @@
       "capture_lines": 13,
       "render_lines": 13,
       "pos_exact_lines": 13,
-      "pos_indep_lines": 13
+      "pos_indep_lines": 13,
+      "displaced_lines": 0
     },
     "5": {
       "page": 5,
@@ -292,7 +313,8 @@
       "capture_lines": 12,
       "render_lines": 12,
       "pos_exact_lines": 12,
-      "pos_indep_lines": 12
+      "pos_indep_lines": 12,
+      "displaced_lines": 0
     },
     "6": {
       "page": 6,
@@ -305,7 +327,8 @@
       "capture_lines": 12,
       "render_lines": 12,
       "pos_exact_lines": 12,
-      "pos_indep_lines": 12
+      "pos_indep_lines": 12,
+      "displaced_lines": 0
     },
     "7": {
       "page": 7,
@@ -318,7 +341,8 @@
       "capture_lines": 13,
       "render_lines": 13,
       "pos_exact_lines": 13,
-      "pos_indep_lines": 13
+      "pos_indep_lines": 13,
+      "displaced_lines": 0
     },
     "8": {
       "page": 8,
@@ -331,7 +355,8 @@
       "capture_lines": 13,
       "render_lines": 13,
       "pos_exact_lines": 13,
-      "pos_indep_lines": 13
+      "pos_indep_lines": 13,
+      "displaced_lines": 0
     },
     "9": {
       "page": 9,
@@ -344,7 +369,8 @@
       "capture_lines": 15,
       "render_lines": 15,
       "pos_exact_lines": 15,
-      "pos_indep_lines": 15
+      "pos_indep_lines": 15,
+      "displaced_lines": 0
     },
     "10": {
       "page": 10,
@@ -357,7 +383,8 @@
       "capture_lines": 15,
       "render_lines": 15,
       "pos_exact_lines": 15,
-      "pos_indep_lines": 15
+      "pos_indep_lines": 15,
+      "displaced_lines": 0
     },
     "11": {
       "page": 11,
@@ -370,7 +397,8 @@
       "capture_lines": 16,
       "render_lines": 16,
       "pos_exact_lines": 16,
-      "pos_indep_lines": 16
+      "pos_indep_lines": 16,
+      "displaced_lines": 0
     },
     "12": {
       "page": 12,
@@ -383,7 +411,8 @@
       "capture_lines": 15,
       "render_lines": 15,
       "pos_exact_lines": 15,
-      "pos_indep_lines": 15
+      "pos_indep_lines": 15,
+      "displaced_lines": 0
     },
     "13": {
       "page": 13,
@@ -396,7 +425,8 @@
       "capture_lines": 17,
       "render_lines": 17,
       "pos_exact_lines": 17,
-      "pos_indep_lines": 17
+      "pos_indep_lines": 17,
+      "displaced_lines": 0
     },
     "14": {
       "page": 14,
@@ -409,7 +439,8 @@
       "capture_lines": 14,
       "render_lines": 14,
       "pos_exact_lines": 14,
-      "pos_indep_lines": 14
+      "pos_indep_lines": 14,
+      "displaced_lines": 0
     },
     "15": {
       "page": 15,
@@ -422,7 +453,8 @@
       "capture_lines": 24,
       "render_lines": 24,
       "pos_exact_lines": 24,
-      "pos_indep_lines": 24
+      "pos_indep_lines": 24,
+      "displaced_lines": 0
     },
     "16": {
       "page": 16,
@@ -435,7 +467,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 29,
-      "pos_indep_lines": 29
+      "pos_indep_lines": 29,
+      "displaced_lines": 0
     },
     "17": {
       "page": 17,
@@ -448,7 +481,8 @@
       "capture_lines": 28,
       "render_lines": 28,
       "pos_exact_lines": 27,
-      "pos_indep_lines": 27
+      "pos_indep_lines": 27,
+      "displaced_lines": 0
     },
     "18": {
       "page": 18,
@@ -461,7 +495,8 @@
       "capture_lines": 2,
       "render_lines": 2,
       "pos_exact_lines": 2,
-      "pos_indep_lines": 2
+      "pos_indep_lines": 2,
+      "displaced_lines": 0
     },
     "19": {
       "page": 19,
@@ -474,7 +509,8 @@
       "capture_lines": 23,
       "render_lines": 23,
       "pos_exact_lines": 23,
-      "pos_indep_lines": 23
+      "pos_indep_lines": 23,
+      "displaced_lines": 0
     },
     "20": {
       "page": 20,
@@ -487,7 +523,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 28,
-      "pos_indep_lines": 28
+      "pos_indep_lines": 28,
+      "displaced_lines": 0
     },
     "21": {
       "page": 21,
@@ -500,7 +537,8 @@
       "capture_lines": 15,
       "render_lines": 15,
       "pos_exact_lines": 15,
-      "pos_indep_lines": 15
+      "pos_indep_lines": 15,
+      "displaced_lines": 0
     },
     "22": {
       "page": 22,
@@ -513,7 +551,8 @@
       "capture_lines": 25,
       "render_lines": 25,
       "pos_exact_lines": 24,
-      "pos_indep_lines": 24
+      "pos_indep_lines": 24,
+      "displaced_lines": 0
     },
     "23": {
       "page": 23,
@@ -526,7 +565,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 28,
-      "pos_indep_lines": 28
+      "pos_indep_lines": 28,
+      "displaced_lines": 0
     },
     "24": {
       "page": 24,
@@ -539,7 +579,8 @@
       "capture_lines": 28,
       "render_lines": 28,
       "pos_exact_lines": 28,
-      "pos_indep_lines": 28
+      "pos_indep_lines": 28,
+      "displaced_lines": 0
     },
     "25": {
       "page": 25,
@@ -552,7 +593,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 26,
-      "pos_indep_lines": 26
+      "pos_indep_lines": 26,
+      "displaced_lines": 0
     },
     "26": {
       "page": 26,
@@ -565,7 +607,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 28,
-      "pos_indep_lines": 28
+      "pos_indep_lines": 28,
+      "displaced_lines": 0
     },
     "27": {
       "page": 27,
@@ -578,7 +621,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 29,
-      "pos_indep_lines": 29
+      "pos_indep_lines": 29,
+      "displaced_lines": 0
     },
     "28": {
       "page": 28,
@@ -591,7 +635,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 29,
-      "pos_indep_lines": 29
+      "pos_indep_lines": 29,
+      "displaced_lines": 0
     },
     "29": {
       "page": 29,
@@ -604,7 +649,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 29,
-      "pos_indep_lines": 29
+      "pos_indep_lines": 29,
+      "displaced_lines": 0
     },
     "30": {
       "page": 30,
@@ -617,7 +663,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 29,
-      "pos_indep_lines": 29
+      "pos_indep_lines": 29,
+      "displaced_lines": 0
     },
     "31": {
       "page": 31,
@@ -630,7 +677,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 29,
-      "pos_indep_lines": 29
+      "pos_indep_lines": 29,
+      "displaced_lines": 0
     },
     "32": {
       "page": 32,
@@ -643,7 +691,8 @@
       "capture_lines": 13,
       "render_lines": 13,
       "pos_exact_lines": 13,
-      "pos_indep_lines": 13
+      "pos_indep_lines": 13,
+      "displaced_lines": 0
     },
     "33": {
       "page": 33,
@@ -656,7 +705,8 @@
       "capture_lines": 25,
       "render_lines": 25,
       "pos_exact_lines": 21,
-      "pos_indep_lines": 21
+      "pos_indep_lines": 21,
+      "displaced_lines": 0
     },
     "34": {
       "page": 34,
@@ -669,7 +719,8 @@
       "capture_lines": 21,
       "render_lines": 21,
       "pos_exact_lines": 17,
-      "pos_indep_lines": 17
+      "pos_indep_lines": 17,
+      "displaced_lines": 0
     },
     "35": {
       "page": 35,
@@ -682,7 +733,8 @@
       "capture_lines": 25,
       "render_lines": 25,
       "pos_exact_lines": 23,
-      "pos_indep_lines": 23
+      "pos_indep_lines": 23,
+      "displaced_lines": 0
     },
     "36": {
       "page": 36,
@@ -695,7 +747,8 @@
       "capture_lines": 18,
       "render_lines": 18,
       "pos_exact_lines": 17,
-      "pos_indep_lines": 17
+      "pos_indep_lines": 17,
+      "displaced_lines": 0
     },
     "37": {
       "page": 37,
@@ -708,7 +761,8 @@
       "capture_lines": 24,
       "render_lines": 24,
       "pos_exact_lines": 20,
-      "pos_indep_lines": 20
+      "pos_indep_lines": 20,
+      "displaced_lines": 0
     },
     "38": {
       "page": 38,
@@ -721,7 +775,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 14,
-      "pos_indep_lines": 14
+      "pos_indep_lines": 14,
+      "displaced_lines": 0
     },
     "39": {
       "page": 39,
@@ -734,7 +789,8 @@
       "capture_lines": 23,
       "render_lines": 23,
       "pos_exact_lines": 23,
-      "pos_indep_lines": 23
+      "pos_indep_lines": 23,
+      "displaced_lines": 0
     },
     "40": {
       "page": 40,
@@ -747,7 +803,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 29,
-      "pos_indep_lines": 29
+      "pos_indep_lines": 29,
+      "displaced_lines": 0
     },
     "41": {
       "page": 41,
@@ -760,7 +817,8 @@
       "capture_lines": 24,
       "render_lines": 24,
       "pos_exact_lines": 24,
-      "pos_indep_lines": 24
+      "pos_indep_lines": 24,
+      "displaced_lines": 0
     },
     "42": {
       "page": 42,
@@ -773,7 +831,8 @@
       "capture_lines": 25,
       "render_lines": 25,
       "pos_exact_lines": 19,
-      "pos_indep_lines": 19
+      "pos_indep_lines": 19,
+      "displaced_lines": 0
     },
     "43": {
       "page": 43,
@@ -786,7 +845,8 @@
       "capture_lines": 20,
       "render_lines": 20,
       "pos_exact_lines": 20,
-      "pos_indep_lines": 20
+      "pos_indep_lines": 20,
+      "displaced_lines": 0
     },
     "44": {
       "page": 44,
@@ -799,7 +859,8 @@
       "capture_lines": 20,
       "render_lines": 20,
       "pos_exact_lines": 20,
-      "pos_indep_lines": 20
+      "pos_indep_lines": 20,
+      "displaced_lines": 0
     },
     "45": {
       "page": 45,
@@ -812,7 +873,8 @@
       "capture_lines": 24,
       "render_lines": 24,
       "pos_exact_lines": 2,
-      "pos_indep_lines": 6
+      "pos_indep_lines": 6,
+      "displaced_lines": 4
     },
     "46": {
       "page": 46,
@@ -825,20 +887,22 @@
       "capture_lines": 27,
       "render_lines": 27,
       "pos_exact_lines": 0,
-      "pos_indep_lines": 1
+      "pos_indep_lines": 1,
+      "displaced_lines": 1
     },
     "47": {
       "page": 47,
       "chapter": "e11_blocks",
-      "sha256": "3a7413e62860ac4fd5a449ff4d0b64342669ce9dee8eb0be18ce13fac43eeca0",
+      "sha256": "d67b0ec3fb8ad1e66c07492a230f62b68d758262c66a556110fa2dc72f48b256",
       "has_capture": true,
-      "layout_sha256": "11177c5f3763b16e7dc54edfd43726cd05b010553c74f0b2820bdc7bf20c5256",
+      "layout_sha256": "c395c025d69969d64951aba0268422130d9bef38ab87106d1f616e02f823c778",
       "exact_page": false,
-      "diff_pixels": 156847,
+      "diff_pixels": 142969,
       "capture_lines": 19,
-      "render_lines": 20,
+      "render_lines": 19,
       "pos_exact_lines": 1,
-      "pos_indep_lines": 4
+      "pos_indep_lines": 5,
+      "displaced_lines": 4
     },
     "48": {
       "page": 48,
@@ -851,7 +915,8 @@
       "capture_lines": 5,
       "render_lines": 5,
       "pos_exact_lines": 0,
-      "pos_indep_lines": 0
+      "pos_indep_lines": 0,
+      "displaced_lines": 0
     },
     "49": {
       "page": 49,
@@ -864,7 +929,8 @@
       "capture_lines": 1,
       "render_lines": 1,
       "pos_exact_lines": 0,
-      "pos_indep_lines": 0
+      "pos_indep_lines": 0,
+      "displaced_lines": 0
     },
     "50": {
       "page": 50,
@@ -877,7 +943,8 @@
       "capture_lines": 28,
       "render_lines": 27,
       "pos_exact_lines": 19,
-      "pos_indep_lines": 19
+      "pos_indep_lines": 19,
+      "displaced_lines": 0
     },
     "51": {
       "page": 51,
@@ -890,7 +957,8 @@
       "capture_lines": 25,
       "render_lines": 25,
       "pos_exact_lines": 19,
-      "pos_indep_lines": 19
+      "pos_indep_lines": 19,
+      "displaced_lines": 0
     },
     "52": {
       "page": 52,
@@ -903,7 +971,8 @@
       "capture_lines": 20,
       "render_lines": 20,
       "pos_exact_lines": 20,
-      "pos_indep_lines": 20
+      "pos_indep_lines": 20,
+      "displaced_lines": 0
     },
     "53": {
       "page": 53,
@@ -916,7 +985,8 @@
       "capture_lines": 26,
       "render_lines": 26,
       "pos_exact_lines": 26,
-      "pos_indep_lines": 26
+      "pos_indep_lines": 26,
+      "displaced_lines": 0
     },
     "54": {
       "page": 54,
@@ -929,7 +999,8 @@
       "capture_lines": 28,
       "render_lines": 28,
       "pos_exact_lines": 28,
-      "pos_indep_lines": 28
+      "pos_indep_lines": 28,
+      "displaced_lines": 0
     },
     "55": {
       "page": 55,
@@ -942,7 +1013,8 @@
       "capture_lines": 26,
       "render_lines": 26,
       "pos_exact_lines": 24,
-      "pos_indep_lines": 24
+      "pos_indep_lines": 24,
+      "displaced_lines": 0
     },
     "56": {
       "page": 56,
@@ -955,7 +1027,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 29,
-      "pos_indep_lines": 29
+      "pos_indep_lines": 29,
+      "displaced_lines": 0
     },
     "57": {
       "page": 57,
@@ -968,7 +1041,8 @@
       "capture_lines": 26,
       "render_lines": 26,
       "pos_exact_lines": 26,
-      "pos_indep_lines": 26
+      "pos_indep_lines": 26,
+      "displaced_lines": 0
     },
     "58": {
       "page": 58,
@@ -981,7 +1055,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 28,
-      "pos_indep_lines": 28
+      "pos_indep_lines": 28,
+      "displaced_lines": 0
     },
     "59": {
       "page": 59,
@@ -994,7 +1069,8 @@
       "capture_lines": 25,
       "render_lines": 25,
       "pos_exact_lines": 23,
-      "pos_indep_lines": 23
+      "pos_indep_lines": 23,
+      "displaced_lines": 0
     },
     "60": {
       "page": 60,
@@ -1007,7 +1083,8 @@
       "capture_lines": 28,
       "render_lines": 28,
       "pos_exact_lines": 28,
-      "pos_indep_lines": 28
+      "pos_indep_lines": 28,
+      "displaced_lines": 0
     },
     "61": {
       "page": 61,
@@ -1020,7 +1097,8 @@
       "capture_lines": 26,
       "render_lines": 26,
       "pos_exact_lines": 26,
-      "pos_indep_lines": 26
+      "pos_indep_lines": 26,
+      "displaced_lines": 0
     },
     "62": {
       "page": 62,
@@ -1033,7 +1111,8 @@
       "capture_lines": 28,
       "render_lines": 28,
       "pos_exact_lines": 28,
-      "pos_indep_lines": 28
+      "pos_indep_lines": 28,
+      "displaced_lines": 0
     },
     "63": {
       "page": 63,
@@ -1046,7 +1125,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 29,
-      "pos_indep_lines": 29
+      "pos_indep_lines": 29,
+      "displaced_lines": 0
     },
     "64": {
       "page": 64,
@@ -1059,7 +1139,8 @@
       "capture_lines": 26,
       "render_lines": 26,
       "pos_exact_lines": 26,
-      "pos_indep_lines": 26
+      "pos_indep_lines": 26,
+      "displaced_lines": 0
     },
     "65": {
       "page": 65,
@@ -1072,7 +1153,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 28,
-      "pos_indep_lines": 28
+      "pos_indep_lines": 28,
+      "displaced_lines": 0
     },
     "66": {
       "page": 66,
@@ -1085,7 +1167,8 @@
       "capture_lines": 26,
       "render_lines": 26,
       "pos_exact_lines": 23,
-      "pos_indep_lines": 23
+      "pos_indep_lines": 23,
+      "displaced_lines": 0
     },
     "67": {
       "page": 67,
@@ -1098,7 +1181,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 29,
-      "pos_indep_lines": 29
+      "pos_indep_lines": 29,
+      "displaced_lines": 0
     },
     "68": {
       "page": 68,
@@ -1111,7 +1195,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 29,
-      "pos_indep_lines": 29
+      "pos_indep_lines": 29,
+      "displaced_lines": 0
     },
     "69": {
       "page": 69,
@@ -1124,7 +1209,8 @@
       "capture_lines": 27,
       "render_lines": 27,
       "pos_exact_lines": 27,
-      "pos_indep_lines": 27
+      "pos_indep_lines": 27,
+      "displaced_lines": 0
     },
     "70": {
       "page": 70,
@@ -1137,7 +1223,8 @@
       "capture_lines": 22,
       "render_lines": 22,
       "pos_exact_lines": 22,
-      "pos_indep_lines": 22
+      "pos_indep_lines": 22,
+      "displaced_lines": 0
     }
   }
 }

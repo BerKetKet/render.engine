@@ -1,0 +1,37 @@
+{
+  "corpora": {
+    "probe": {
+      "compared_pages": 86,
+      "exact_pages": 37,
+      "diff_pixels": 476566,
+      "capture_lines": 2863,
+      "pos_exact_lines": 2703,
+      "pos_indep_lines": 2705,
+      "displaced_lines": 2,
+      "golden_passed": true,
+      "layout_golden_passed": true
+    },
+    "exam1": {
+      "compared_pages": 70,
+      "exact_pages": 42,
+      "diff_pixels": 1593164,
+      "capture_lines": 1568,
+      "pos_exact_lines": 1402,
+      "pos_indep_lines": 1411,
+      "displaced_lines": 9,
+      "golden_passed": true,
+      "layout_golden_passed": true
+    },
+    "exam2": {
+      "compared_pages": 65,
+      "exact_pages": 35,
+      "diff_pixels": 1140913,
+      "capture_lines": 1529,
+      "pos_exact_lines": 1322,
+      "pos_indep_lines": 1343,
+      "displaced_lines": 21,
+      "golden_passed": true,
+      "layout_golden_passed": true
+    }
+  }
+}

@@ -63,6 +63,7 @@ class Config:
     place_phase: float = 0.5
     overhang_shift: bool = True
     exact_raster: bool = True
+    allow_unshaped: bool = False
     fg: Tuple[int, int, int] = (0, 0, 0)
     bg: Tuple[int, int, int] = (255, 255, 255)
 

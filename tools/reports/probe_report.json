@@ -12,11 +12,12 @@
   "chapter_errors": [],
   "totals": {
     "exact_pages": 37,
-    "diff_pixels": 486515,
+    "diff_pixels": 476566,
     "capture_lines": 2863,
     "render_lines": 2863,
     "pos_exact_lines": 2703,
-    "pos_indep_lines": 2705
+    "pos_indep_lines": 2705,
+    "displaced_lines": 2
   },
   "chapters": [
     {
@@ -30,7 +31,8 @@
       "capture_lines": 3,
       "render_lines": 3,
       "pos_exact_lines": 2,
-      "pos_indep_lines": 2
+      "pos_indep_lines": 2,
+      "displaced_lines": 0
     },
     {
       "chapter": "nav",
@@ -43,7 +45,8 @@
       "capture_lines": 27,
       "render_lines": 27,
       "pos_exact_lines": 1,
-      "pos_indep_lines": 1
+      "pos_indep_lines": 1,
+      "displaced_lines": 0
     },
     {
       "chapter": "a1_census_regular",
@@ -56,7 +59,8 @@
       "capture_lines": 512,
       "render_lines": 512,
       "pos_exact_lines": 502,
-      "pos_indep_lines": 502
+      "pos_indep_lines": 502,
+      "displaced_lines": 0
     },
     {
       "chapter": "a2_census_bold",
@@ -69,7 +73,8 @@
       "capture_lines": 255,
       "render_lines": 255,
       "pos_exact_lines": 248,
-      "pos_indep_lines": 248
+      "pos_indep_lines": 248,
+      "displaced_lines": 0
     },
     {
       "chapter": "a3_census_italic",
@@ -82,7 +87,8 @@
       "capture_lines": 257,
       "render_lines": 257,
       "pos_exact_lines": 251,
-      "pos_indep_lines": 251
+      "pos_indep_lines": 251,
+      "displaced_lines": 0
     },
     {
       "chapter": "a4_census_bolditalic",
@@ -95,7 +101,8 @@
       "capture_lines": 258,
       "render_lines": 258,
       "pos_exact_lines": 251,
-      "pos_indep_lines": 251
+      "pos_indep_lines": 251,
+      "displaced_lines": 0
     },
     {
       "chapter": "x1_exam_regular",
@@ -108,7 +115,8 @@
       "capture_lines": 0,
       "render_lines": 0,
       "pos_exact_lines": 0,
-      "pos_indep_lines": 0
+      "pos_indep_lines": 0,
+      "displaced_lines": 0
     },
     {
       "chapter": "x2_exam_bold",
@@ -121,7 +129,8 @@
       "capture_lines": 0,
       "render_lines": 0,
       "pos_exact_lines": 0,
-      "pos_indep_lines": 0
+      "pos_indep_lines": 0,
+      "displaced_lines": 0
     },
     {
       "chapter": "x3_exam_italic",
@@ -134,7 +143,8 @@
       "capture_lines": 0,
       "render_lines": 0,
       "pos_exact_lines": 0,
-      "pos_indep_lines": 0
+      "pos_indep_lines": 0,
+      "displaced_lines": 0
     },
     {
       "chapter": "x4_exam_bolditalic",
@@ -147,7 +157,8 @@
       "capture_lines": 0,
       "render_lines": 0,
       "pos_exact_lines": 0,
-      "pos_indep_lines": 0
+      "pos_indep_lines": 0,
+      "displaced_lines": 0
     },
     {
       "chapter": "c1_prose",
@@ -160,7 +171,8 @@
       "capture_lines": 216,
       "render_lines": 216,
       "pos_exact_lines": 212,
-      "pos_indep_lines": 212
+      "pos_indep_lines": 212,
+      "displaced_lines": 0
     },
     {
       "chapter": "c2_breaks",
@@ -173,7 +185,8 @@
       "capture_lines": 180,
       "render_lines": 180,
       "pos_exact_lines": 176,
-      "pos_indep_lines": 176
+      "pos_indep_lines": 176,
+      "displaced_lines": 0
     },
     {
       "chapter": "c3_hyph_en",
@@ -186,7 +199,8 @@
       "capture_lines": 181,
       "render_lines": 181,
       "pos_exact_lines": 174,
-      "pos_indep_lines": 174
+      "pos_indep_lines": 174,
+      "displaced_lines": 0
     },
     {
       "chapter": "c4_hyph_de",
@@ -199,7 +213,8 @@
       "capture_lines": 121,
       "render_lines": 121,
       "pos_exact_lines": 113,
-      "pos_indep_lines": 113
+      "pos_indep_lines": 113,
+      "displaced_lines": 0
     },
     {
       "chapter": "c5_hyph_fr",
@@ -212,7 +227,8 @@
       "capture_lines": 78,
       "render_lines": 78,
       "pos_exact_lines": 76,
-      "pos_indep_lines": 76
+      "pos_indep_lines": 76,
+      "displaced_lines": 0
     },
     {
       "chapter": "c6_soft",
@@ -225,7 +241,8 @@
       "capture_lines": 97,
       "render_lines": 97,
       "pos_exact_lines": 88,
-      "pos_indep_lines": 88
+      "pos_indep_lines": 88,
+      "displaced_lines": 0
     },
     {
       "chapter": "c7_punct",
@@ -238,7 +255,8 @@
       "capture_lines": 173,
       "render_lines": 173,
       "pos_exact_lines": 171,
-      "pos_indep_lines": 171
+      "pos_indep_lines": 171,
+      "displaced_lines": 0
     },
     {
       "chapter": "d1_typography",
@@ -251,7 +269,8 @@
       "capture_lines": 62,
       "render_lines": 62,
       "pos_exact_lines": 59,
-      "pos_indep_lines": 59
+      "pos_indep_lines": 59,
+      "displaced_lines": 0
     },
     {
       "chapter": "e1_headings",
@@ -264,7 +283,8 @@
       "capture_lines": 30,
       "render_lines": 30,
       "pos_exact_lines": 30,
-      "pos_indep_lines": 30
+      "pos_indep_lines": 30,
+      "displaced_lines": 0
     },
     {
       "chapter": "e2_para_css",
@@ -277,7 +297,8 @@
       "capture_lines": 132,
       "render_lines": 132,
       "pos_exact_lines": 126,
-      "pos_indep_lines": 126
+      "pos_indep_lines": 126,
+      "displaced_lines": 0
     },
     {
       "chapter": "e3_blocks",
@@ -286,11 +307,12 @@
       "rendered_pages": 4,
       "compared_pages": 4,
       "exact_pages": 1,
-      "diff_pixels": 276614,
+      "diff_pixels": 266665,
       "capture_lines": 46,
       "render_lines": 46,
       "pos_exact_lines": 6,
-      "pos_indep_lines": 8
+      "pos_indep_lines": 8,
+      "displaced_lines": 2
     },
     {
       "chapter": "f1_scripts",
@@ -303,7 +325,8 @@
       "capture_lines": 31,
       "render_lines": 31,
       "pos_exact_lines": 24,
-      "pos_indep_lines": 24
+      "pos_indep_lines": 24,
+      "displaced_lines": 0
     },
     {
       "chapter": "g1_pagination",
@@ -316,7 +339,8 @@
       "capture_lines": 204,
       "render_lines": 204,
       "pos_exact_lines": 193,
-      "pos_indep_lines": 193
+      "pos_indep_lines": 193,
+      "displaced_lines": 0
     }
   ],
   "pages": {
@@ -331,7 +355,8 @@
       "capture_lines": 3,
       "render_lines": 3,
       "pos_exact_lines": 2,
-      "pos_indep_lines": 2
+      "pos_indep_lines": 2,
+      "displaced_lines": 0
     },
     "2": {
       "page": 2,
@@ -344,7 +369,8 @@
       "capture_lines": 27,
       "render_lines": 27,
       "pos_exact_lines": 1,
-      "pos_indep_lines": 1
+      "pos_indep_lines": 1,
+      "displaced_lines": 0
     },
     "3": {
       "page": 3,
@@ -357,7 +383,8 @@
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_indep_lines": 35,
+      "displaced_lines": 0
     },
     "4": {
       "page": 4,
@@ -370,7 +397,8 @@
       "capture_lines": 36,
       "render_lines": 36,
       "pos_exact_lines": 36,
-      "pos_indep_lines": 36
+      "pos_indep_lines": 36,
+      "displaced_lines": 0
     },
     "5": {
       "page": 5,
@@ -383,7 +411,8 @@
       "capture_lines": 38,
       "render_lines": 38,
       "pos_exact_lines": 38,
-      "pos_indep_lines": 38
+      "pos_indep_lines": 38,
+      "displaced_lines": 0
     },
     "6": {
       "page": 6,
@@ -396,7 +425,8 @@
       "capture_lines": 49,
       "render_lines": 49,
       "pos_exact_lines": 48,
-      "pos_indep_lines": 48
+      "pos_indep_lines": 48,
+      "displaced_lines": 0
     },
     "7": {
       "page": 7,
@@ -409,7 +439,8 @@
       "capture_lines": 64,
       "render_lines": 64,
       "pos_exact_lines": 61,
-      "pos_indep_lines": 61
+      "pos_indep_lines": 61,
+      "displaced_lines": 0
     },
     "8": {
       "page": 8,
@@ -422,7 +453,8 @@
       "capture_lines": 65,
       "render_lines": 65,
       "pos_exact_lines": 63,
-      "pos_indep_lines": 63
+      "pos_indep_lines": 63,
+      "displaced_lines": 0
     },
     "9": {
       "page": 9,
@@ -435,7 +467,8 @@
       "capture_lines": 61,
       "render_lines": 61,
       "pos_exact_lines": 59,
-      "pos_indep_lines": 59
+      "pos_indep_lines": 59,
+      "displaced_lines": 0
     },
     "10": {
       "page": 10,
@@ -448,7 +481,8 @@
       "capture_lines": 58,
       "render_lines": 58,
       "pos_exact_lines": 58,
-      "pos_indep_lines": 58
+      "pos_indep_lines": 58,
+      "displaced_lines": 0
     },
     "11": {
       "page": 11,
@@ -461,7 +495,8 @@
       "capture_lines": 65,
       "render_lines": 65,
       "pos_exact_lines": 63,
-      "pos_indep_lines": 63
+      "pos_indep_lines": 63,
+      "displaced_lines": 0
     },
     "12": {
       "page": 12,
@@ -474,7 +509,8 @@
       "capture_lines": 41,
       "render_lines": 41,
       "pos_exact_lines": 41,
-      "pos_indep_lines": 41
+      "pos_indep_lines": 41,
+      "displaced_lines": 0
     },
     "13": {
       "page": 13,
@@ -487,7 +523,8 @@
       "capture_lines": 37,
       "render_lines": 37,
       "pos_exact_lines": 37,
-      "pos_indep_lines": 37
+      "pos_indep_lines": 37,
+      "displaced_lines": 0
     },
     "14": {
       "page": 14,
@@ -500,7 +537,8 @@
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_indep_lines": 35,
+      "displaced_lines": 0
     },
     "15": {
       "page": 15,
@@ -513,7 +551,8 @@
       "capture_lines": 39,
       "render_lines": 39,
       "pos_exact_lines": 39,
-      "pos_indep_lines": 39
+      "pos_indep_lines": 39,
+      "displaced_lines": 0
     },
     "16": {
       "page": 16,
@@ -526,7 +565,8 @@
       "capture_lines": 49,
       "render_lines": 49,
       "pos_exact_lines": 47,
-      "pos_indep_lines": 47
+      "pos_indep_lines": 47,
+      "displaced_lines": 0
     },
     "17": {
       "page": 17,
@@ -539,7 +579,8 @@
       "capture_lines": 63,
       "render_lines": 63,
       "pos_exact_lines": 60,
-      "pos_indep_lines": 60
+      "pos_indep_lines": 60,
+      "displaced_lines": 0
     },
     "18": {
       "page": 18,
@@ -552,7 +593,8 @@
       "capture_lines": 32,
       "render_lines": 32,
       "pos_exact_lines": 30,
-      "pos_indep_lines": 30
+      "pos_indep_lines": 30,
+      "displaced_lines": 0
     },
     "19": {
       "page": 19,
@@ -565,7 +607,8 @@
       "capture_lines": 37,
       "render_lines": 37,
       "pos_exact_lines": 37,
-      "pos_indep_lines": 37
+      "pos_indep_lines": 37,
+      "displaced_lines": 0
     },
     "20": {
       "page": 20,
@@ -578,7 +621,8 @@
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_indep_lines": 35,
+      "displaced_lines": 0
     },
     "21": {
       "page": 21,
@@ -591,7 +635,8 @@
       "capture_lines": 39,
       "render_lines": 39,
       "pos_exact_lines": 39,
-      "pos_indep_lines": 39
+      "pos_indep_lines": 39,
+      "displaced_lines": 0
     },
     "22": {
       "page": 22,
@@ -604,7 +649,8 @@
       "capture_lines": 50,
       "render_lines": 50,
       "pos_exact_lines": 49,
-      "pos_indep_lines": 49
+      "pos_indep_lines": 49,
+      "displaced_lines": 0
     },
     "23": {
       "page": 23,
@@ -617,7 +663,8 @@
       "capture_lines": 64,
       "render_lines": 64,
       "pos_exact_lines": 61,
-      "pos_indep_lines": 61
+      "pos_indep_lines": 61,
+      "displaced_lines": 0
     },
     "24": {
       "page": 24,
@@ -630,7 +677,8 @@
       "capture_lines": 32,
       "render_lines": 32,
       "pos_exact_lines": 30,
-      "pos_indep_lines": 30
+      "pos_indep_lines": 30,
+      "displaced_lines": 0
     },
     "25": {
       "page": 25,
@@ -643,7 +691,8 @@
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_indep_lines": 35,
+      "displaced_lines": 0
     },
     "26": {
       "page": 26,
@@ -656,7 +705,8 @@
       "capture_lines": 36,
       "render_lines": 36,
       "pos_exact_lines": 36,
-      "pos_indep_lines": 36
+      "pos_indep_lines": 36,
+      "displaced_lines": 0
     },
     "27": {
       "page": 27,
@@ -669,7 +719,8 @@
       "capture_lines": 38,
       "render_lines": 38,
       "pos_exact_lines": 38,
-      "pos_indep_lines": 38
+      "pos_indep_lines": 38,
+      "displaced_lines": 0
     },
     "28": {
       "page": 28,
@@ -682,7 +733,8 @@
       "capture_lines": 49,
       "render_lines": 49,
       "pos_exact_lines": 47,
-      "pos_indep_lines": 47
+      "pos_indep_lines": 47,
+      "displaced_lines": 0
     },
     "29": {
       "page": 29,
@@ -695,7 +747,8 @@
       "capture_lines": 64,
       "render_lines": 64,
       "pos_exact_lines": 61,
-      "pos_indep_lines": 61
+      "pos_indep_lines": 61,
+      "displaced_lines": 0
     },
     "30": {
       "page": 30,
@@ -708,7 +761,8 @@
       "capture_lines": 36,
       "render_lines": 36,
       "pos_exact_lines": 34,
-      "pos_indep_lines": 34
+      "pos_indep_lines": 34,
+      "displaced_lines": 0
     },
     "31": {
       "page": 31,
@@ -805,7 +859,8 @@
       "capture_lines": 31,
       "render_lines": 31,
       "pos_exact_lines": 31,
-      "pos_indep_lines": 31
+      "pos_indep_lines": 31,
+      "displaced_lines": 0
     },
     "44": {
       "page": 44,
@@ -818,7 +873,8 @@
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 34,
-      "pos_indep_lines": 34
+      "pos_indep_lines": 34,
+      "displaced_lines": 0
     },
     "45": {
       "page": 45,
@@ -831,7 +887,8 @@
       "capture_lines": 34,
       "render_lines": 34,
       "pos_exact_lines": 34,
-      "pos_indep_lines": 34
+      "pos_indep_lines": 34,
+      "displaced_lines": 0
     },
     "46": {
       "page": 46,
@@ -844,7 +901,8 @@
       "capture_lines": 34,
       "render_lines": 34,
       "pos_exact_lines": 33,
-      "pos_indep_lines": 33
+      "pos_indep_lines": 33,
+      "displaced_lines": 0
     },
     "47": {
       "page": 47,
@@ -857,7 +915,8 @@
       "capture_lines": 34,
       "render_lines": 34,
       "pos_exact_lines": 33,
-      "pos_indep_lines": 33
+      "pos_indep_lines": 33,
+      "displaced_lines": 0
     },
     "48": {
       "page": 48,
@@ -870,7 +929,8 @@
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 34,
-      "pos_indep_lines": 34
+      "pos_indep_lines": 34,
+      "displaced_lines": 0
     },
     "49": {
       "page": 49,
@@ -883,7 +943,8 @@
       "capture_lines": 13,
       "render_lines": 13,
       "pos_exact_lines": 13,
-      "pos_indep_lines": 13
+      "pos_indep_lines": 13,
+      "displaced_lines": 0
     },
     "50": {
       "page": 50,
@@ -896,7 +957,8 @@
       "capture_lines": 30,
       "render_lines": 30,
       "pos_exact_lines": 29,
-      "pos_indep_lines": 29
+      "pos_indep_lines": 29,
+      "displaced_lines": 0
     },
     "51": {
       "page": 51,
@@ -909,7 +971,8 @@
       "capture_lines": 36,
       "render_lines": 36,
       "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_indep_lines": 35,
+      "displaced_lines": 0
     },
     "52": {
       "page": 52,
@@ -922,7 +985,8 @@
       "capture_lines": 34,
       "render_lines": 34,
       "pos_exact_lines": 32,
-      "pos_indep_lines": 32
+      "pos_indep_lines": 32,
+      "displaced_lines": 0
     },
     "53": {
       "page": 53,
@@ -935,7 +999,8 @@
       "capture_lines": 34,
       "render_lines": 34,
       "pos_exact_lines": 34,
-      "pos_indep_lines": 34
+      "pos_indep_lines": 34,
+      "displaced_lines": 0
     },
     "54": {
       "page": 54,
@@ -948,7 +1013,8 @@
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_indep_lines": 35,
+      "displaced_lines": 0
     },
     "55": {
       "page": 55,
@@ -961,7 +1027,8 @@
       "capture_lines": 11,
       "render_lines": 11,
       "pos_exact_lines": 11,
-      "pos_indep_lines": 11
+      "pos_indep_lines": 11,
+      "displaced_lines": 0
     },
     "56": {
       "page": 56,
@@ -974,7 +1041,8 @@
       "capture_lines": 30,
       "render_lines": 30,
       "pos_exact_lines": 30,
-      "pos_indep_lines": 30
+      "pos_indep_lines": 30,
+      "displaced_lines": 0
     },
     "57": {
       "page": 57,
@@ -987,7 +1055,8 @@
       "capture_lines": 34,
       "render_lines": 34,
       "pos_exact_lines": 32,
-      "pos_indep_lines": 32
+      "pos_indep_lines": 32,
+      "displaced_lines": 0
     },
     "58": {
       "page": 58,
@@ -1000,7 +1069,8 @@
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 32,
-      "pos_indep_lines": 32
+      "pos_indep_lines": 32,
+      "displaced_lines": 0
     },
     "59": {
       "page": 59,
@@ -1013,7 +1083,8 @@
       "capture_lines": 34,
       "render_lines": 34,
       "pos_exact_lines": 34,
-      "pos_indep_lines": 34
+      "pos_indep_lines": 34,
+      "displaced_lines": 0
     },
     "60": {
       "page": 60,
@@ -1026,7 +1097,8 @@
       "capture_lines": 34,
       "render_lines": 34,
       "pos_exact_lines": 33,
-      "pos_indep_lines": 33
+      "pos_indep_lines": 33,
+      "displaced_lines": 0
     },
     "61": {
       "page": 61,
@@ -1039,7 +1111,8 @@
       "capture_lines": 14,
       "render_lines": 14,
       "pos_exact_lines": 13,
-      "pos_indep_lines": 13
+      "pos_indep_lines": 13,
+      "displaced_lines": 0
     },
     "62": {
       "page": 62,
@@ -1052,7 +1125,8 @@
       "capture_lines": 32,
       "render_lines": 32,
       "pos_exact_lines": 24,
-      "pos_indep_lines": 24
+      "pos_indep_lines": 24,
+      "displaced_lines": 0
     },
     "63": {
       "page": 63,
@@ -1065,7 +1139,8 @@
       "capture_lines": 34,
       "render_lines": 34,
       "pos_exact_lines": 34,
-      "pos_indep_lines": 34
+      "pos_indep_lines": 34,
+      "displaced_lines": 0
     },
     "64": {
       "page": 64,
@@ -1078,7 +1153,8 @@
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_indep_lines": 35,
+      "displaced_lines": 0
     },
     "65": {
       "page": 65,
@@ -1091,7 +1167,8 @@
       "capture_lines": 20,
       "render_lines": 20,
       "pos_exact_lines": 20,
-      "pos_indep_lines": 20
+      "pos_indep_lines": 20,
+      "displaced_lines": 0
     },
     "66": {
       "page": 66,
@@ -1104,7 +1181,8 @@
       "capture_lines": 32,
       "render_lines": 32,
       "pos_exact_lines": 31,
-      "pos_indep_lines": 31
+      "pos_indep_lines": 31,
+      "displaced_lines": 0
     },
     "67": {
       "page": 67,
@@ -1117,7 +1195,8 @@
       "capture_lines": 34,
       "render_lines": 34,
       "pos_exact_lines": 34,
-      "pos_indep_lines": 34
+      "pos_indep_lines": 34,
+      "displaced_lines": 0
     },
     "68": {
       "page": 68,
@@ -1130,7 +1209,8 @@
       "capture_lines": 12,
       "render_lines": 12,
       "pos_exact_lines": 11,
-      "pos_indep_lines": 11
+      "pos_indep_lines": 11,
+      "displaced_lines": 0
     },
     "69": {
       "page": 69,
@@ -1143,7 +1223,8 @@
       "capture_lines": 30,
       "render_lines": 30,
       "pos_exact_lines": 27,
-      "pos_indep_lines": 27
+      "pos_indep_lines": 27,
+      "displaced_lines": 0
     },
     "70": {
       "page": 70,
@@ -1156,7 +1237,8 @@
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 32,
-      "pos_indep_lines": 32
+      "pos_indep_lines": 32,
+      "displaced_lines": 0
     },
     "71": {
       "page": 71,
@@ -1169,7 +1251,8 @@
       "capture_lines": 32,
       "render_lines": 32,
       "pos_exact_lines": 29,
-      "pos_indep_lines": 29
+      "pos_indep_lines": 29,
+      "displaced_lines": 0
     },
     "72": {
       "page": 72,
@@ -1182,7 +1265,8 @@
       "capture_lines": 31,
       "render_lines": 31,
       "pos_exact_lines": 31,
-      "pos_indep_lines": 31
+      "pos_indep_lines": 31,
+      "displaced_lines": 0
     },
     "73": {
       "page": 73,
@@ -1195,7 +1279,8 @@
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_indep_lines": 35,
+      "displaced_lines": 0
     },
     "74": {
       "page": 74,
@@ -1208,7 +1293,8 @@
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_indep_lines": 35,
+      "displaced_lines": 0
     },
     "75": {
       "page": 75,
@@ -1221,7 +1307,8 @@
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_indep_lines": 35,
+      "displaced_lines": 0
     },
     "76": {
       "page": 76,
@@ -1234,7 +1321,8 @@
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 33,
-      "pos_indep_lines": 33
+      "pos_indep_lines": 33,
+      "displaced_lines": 0
     },
     "77": {
       "page": 77,
@@ -1247,7 +1335,8 @@
       "capture_lines": 2,
       "render_lines": 2,
       "pos_exact_lines": 2,
-      "pos_indep_lines": 2
+      "pos_indep_lines": 2,
+      "displaced_lines": 0
     },
     "78": {
       "page": 78,
@@ -1260,7 +1349,8 @@
       "capture_lines": 31,
       "render_lines": 31,
       "pos_exact_lines": 31,
-      "pos_indep_lines": 31
+      "pos_indep_lines": 31,
+      "displaced_lines": 0
     },
     "79": {
       "page": 79,
@@ -1273,7 +1363,8 @@
       "capture_lines": 31,
       "render_lines": 31,
       "pos_exact_lines": 28,
-      "pos_indep_lines": 28
+      "pos_indep_lines": 28,
+      "displaced_lines": 0
     },
     "80": {
       "page": 80,
@@ -1286,7 +1377,8 @@
       "capture_lines": 20,
       "render_lines": 20,
       "pos_exact_lines": 20,
-      "pos_indep_lines": 20
+      "pos_indep_lines": 20,
+      "displaced_lines": 0
     },
     "81": {
       "page": 81,
@@ -1299,7 +1391,8 @@
       "capture_lines": 10,
       "render_lines": 10,
       "pos_exact_lines": 10,
-      "pos_indep_lines": 10
+      "pos_indep_lines": 10,
+      "displaced_lines": 0
     },
     "82": {
       "page": 82,
@@ -1312,7 +1405,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 29,
-      "pos_indep_lines": 29
+      "pos_indep_lines": 29,
+      "displaced_lines": 0
     },
     "83": {
       "page": 83,
@@ -1325,7 +1419,8 @@
       "capture_lines": 32,
       "render_lines": 32,
       "pos_exact_lines": 31,
-      "pos_indep_lines": 31
+      "pos_indep_lines": 31,
+      "displaced_lines": 0
     },
     "84": {
       "page": 84,
@@ -1338,7 +1433,8 @@
       "capture_lines": 30,
       "render_lines": 30,
       "pos_exact_lines": 30,
-      "pos_indep_lines": 30
+      "pos_indep_lines": 30,
+      "displaced_lines": 0
     },
     "85": {
       "page": 85,
@@ -1351,7 +1447,8 @@
       "capture_lines": 34,
       "render_lines": 34,
       "pos_exact_lines": 30,
-      "pos_indep_lines": 30
+      "pos_indep_lines": 30,
+      "displaced_lines": 0
     },
     "86": {
       "page": 86,
@@ -1364,7 +1461,8 @@
       "capture_lines": 7,
       "render_lines": 7,
       "pos_exact_lines": 6,
-      "pos_indep_lines": 6
+      "pos_indep_lines": 6,
+      "displaced_lines": 0
     },
     "87": {
       "page": 87,
@@ -1377,20 +1475,22 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 4,
-      "pos_indep_lines": 4
+      "pos_indep_lines": 4,
+      "displaced_lines": 0
     },
     "88": {
       "page": 88,
       "chapter": "e3_blocks",
-      "sha256": "1958c4552710588ee97ab7ed38409b02931221f118335eb91b0c0d9077605419",
+      "sha256": "feeb161c93c688675010918f26ad08745855b293d983c42902ba80f6f8e2b68f",
       "has_capture": true,
-      "layout_sha256": "9e3bf85ea8268357163b8c40f5b959c8ade942d65c63ab8fb6486716272f4360",
+      "layout_sha256": "36d0f45466e71a97044e931c3eb124556c016b6a6029d1b93cdd42a70b67fcac",
       "exact_page": false,
-      "diff_pixels": 115753,
+      "diff_pixels": 105804,
       "capture_lines": 15,
       "render_lines": 15,
       "pos_exact_lines": 1,
-      "pos_indep_lines": 3
+      "pos_indep_lines": 3,
+      "displaced_lines": 2
     },
     "89": {
       "page": 89,
@@ -1403,7 +1503,8 @@
       "capture_lines": 1,
       "render_lines": 1,
       "pos_exact_lines": 0,
-      "pos_indep_lines": 0
+      "pos_indep_lines": 0,
+      "displaced_lines": 0
     },
     "90": {
       "page": 90,
@@ -1416,7 +1517,8 @@
       "capture_lines": 1,
       "render_lines": 1,
       "pos_exact_lines": 1,
-      "pos_indep_lines": 1
+      "pos_indep_lines": 1,
+      "displaced_lines": 0
     },
     "91": {
       "page": 91,
@@ -1429,7 +1531,8 @@
       "capture_lines": 31,
       "render_lines": 31,
       "pos_exact_lines": 24,
-      "pos_indep_lines": 24
+      "pos_indep_lines": 24,
+      "displaced_lines": 0
     },
     "92": {
       "page": 92,
@@ -1442,7 +1545,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 27,
-      "pos_indep_lines": 27
+      "pos_indep_lines": 27,
+      "displaced_lines": 0
     },
     "93": {
       "page": 93,
@@ -1455,7 +1559,8 @@
       "capture_lines": 34,
       "render_lines": 34,
       "pos_exact_lines": 31,
-      "pos_indep_lines": 31
+      "pos_indep_lines": 31,
+      "displaced_lines": 0
     },
     "94": {
       "page": 94,
@@ -1468,7 +1573,8 @@
       "capture_lines": 33,
       "render_lines": 33,
       "pos_exact_lines": 31,
-      "pos_indep_lines": 31
+      "pos_indep_lines": 31,
+      "displaced_lines": 0
     },
     "95": {
       "page": 95,
@@ -1481,7 +1587,8 @@
       "capture_lines": 34,
       "render_lines": 34,
       "pos_exact_lines": 33,
-      "pos_indep_lines": 33
+      "pos_indep_lines": 33,
+      "displaced_lines": 0
     },
     "96": {
       "page": 96,
@@ -1494,7 +1601,8 @@
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 34,
-      "pos_indep_lines": 34
+      "pos_indep_lines": 34,
+      "displaced_lines": 0
     },
     "97": {
       "page": 97,
@@ -1507,7 +1615,8 @@
       "capture_lines": 34,
       "render_lines": 34,
       "pos_exact_lines": 33,
-      "pos_indep_lines": 33
+      "pos_indep_lines": 33,
+      "displaced_lines": 0
     },
     "98": {
       "page": 98,
@@ -1520,7 +1629,8 @@
       "capture_lines": 5,
       "render_lines": 5,
       "pos_exact_lines": 4,
-      "pos_indep_lines": 4
+      "pos_indep_lines": 4,
+      "displaced_lines": 0
     }
   }
 }

@@ -82,6 +82,46 @@
         83,
         2240
       ]
+    },
+    "exam3_normal": {
+      "epub": "kindle_exam_v3.epub",
+      "captures_zip": "exam_v3_screenshots.zip",
+      "max_pages": 82,
+      "ignore_captures": [],
+      "valid_capture_ranges": [
+        [
+          1,
+          82
+        ]
+      ],
+      "config": {
+        "size26": 2880,
+        "x0": 79,
+        "right": 1001,
+        "pitch": 68,
+        "top": 168,
+        "page_bottom": 2203
+      }
+    },
+    "exam3_small": {
+      "epub": "kindle_exam_v3.epub",
+      "captures_zip": "exam_v3_screenshots_smallfont.zip",
+      "max_pages": 54,
+      "ignore_captures": [],
+      "valid_capture_ranges": [
+        [
+          1,
+          54
+        ]
+      ],
+      "config": {
+        "size26": 2176,
+        "x0": 79,
+        "right": 1001,
+        "pitch": 51,
+        "top": 168,
+        "page_bottom": 2203
+      }
     }
   }
 }

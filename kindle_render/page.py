@@ -933,7 +933,7 @@ class Pager:
                         if is_h or len(w_words) <= 2 or w_full <= avail_w / float(max(1, ncols)):
                             w_eff = w_full
                         else:
-                            w_eff = max(w_full / 2.86, max(_text_w_px(f1, w) for w in w_words))
+                            w_eff = max(w_full / (2.112 if has_spans else 2.863), max(_text_w_px(f1, w) for w in w_words))
                         if w_eff > col_w_pref:
                             col_w_pref = w_eff
                 pref_cols_1x.append(col_w_pref + pad_col_pref)
@@ -951,7 +951,7 @@ class Pager:
             top_pad = 0
         elif sc_tbl < 1.0:
             row_pad = 10 if is_col else 15
-            top_pad = 1 if is_col else 0
+            top_pad = 0
         else:
             row_pad = 11 if is_col else 16
             top_pad = 3 if is_col else -1
@@ -1243,7 +1243,7 @@ class Pager:
         if sc_tbl <= 0.75:
             rule_y_float = last_base + 17.745
         elif has_spans:
-            rule_y_float = last_base + 23.753
+            rule_y_float = last_base + 22.753
         elif not is_col and sc_tbl < 1.0:
             rule_y_float = last_base + 29.102
         elif not is_col:

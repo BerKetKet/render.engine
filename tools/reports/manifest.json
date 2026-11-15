@@ -1,8 +1,29 @@
 {
-  "engine_version": "1.7.0",
-  "git_commit": "158c7055b6174919087b4c8e7726f607475cff57",
+  "engine_version": "1.8.0",
+  "git_commit": "acc9e70649377c6b7363e49237ef61aeff5ac513",
   "python_version": "3.11.2",
+  "os_arch": "Linux-6.12.105+-x86_64",
+  "pillow_version": "11.1.0",
+  "pillow_features": {
+    "jpg": "6.2",
+    "zlib": "1.2.13",
+    "freetype2": "2.13.2",
+    "harfbuzz": "10.1.0",
+    "raqm": "0.10.1",
+    "fribidi": "1.0.8",
+    "webp": "1.5.0",
+    "libtiff": "4.6.0",
+    "littlecms2": "2.16",
+    "jpg_2000": "2.5.3"
+  },
+  "numpy_version": "2.1.3",
   "freetype_version": "2.12.1",
+  "harfbuzz": {
+    "loaded": true,
+    "version": "6.0.0",
+    "path": "libharfbuzz.so.0"
+  },
+  "environment_fingerprint": "0a54d71bb5a5988b99f67f4281f2ff9d339c91c8324fc6496a50d77ebf952e3d",
   "fonts_sha256": {
     "kindle_render/fonts/Bookerly-Bold.ttf": "c151ccad313fbefe0e733510fbc1b8d937748a4f4d20b0eed5236192acb7547c",
     "kindle_render/fonts/Bookerly-BoldItalic.ttf": "d9379d485cd9bf3f8c6ef453fe4c114a744e27c7c08190f172c1846734a741b5",
@@ -38,10 +59,6 @@
   },
   "corpus_files_sha256": {
     "probe:epub:master_probe_v1.epub": "95d450c6d0f80d883b6498be86a6d73d497f7b2eb211c8b324bde5f43d9799e6",
-    "probe:captures:master_probe_captures.zip": "e36bf2fc0d9390ec6ce04a8fa2b2a8ee0ec4ff86f3db9984777d73ab857120a0",
-    "exam1:epub:kindle_exam_v1.epub": "dcb38806168f8cc721a282b4a036ea7a49417be993afebdb5bce8f5c7d87c319",
-    "exam1:captures:exam_screen.zip": "c13ffdac76fefa3810c32bfb8c685d4fd7d29de211c2394f467194e8fcf92e6b",
-    "exam2:epub:kindle_exam_v2.epub": "e13af963bbe0c91b88b1a51be1b95bc9604ba408b4de854003d3a70d64f9e325",
-    "exam2:captures:exam_v2.zip": "186e21c268e4640faa34e5efed5a5a18a600163abe238e06fa3f5e063952d530"
+    "probe:captures:master_probe_captures.zip": "e36bf2fc0d9390ec6ce04a8fa2b2a8ee0ec4ff86f3db9984777d73ab857120a0"
   }
 }

@@ -6,10 +6,25 @@ from .config import BOLDNESS_FUNITS_RAMP
 
 import ctypes
 
+import ctypes.util
+
+_hb_lib_path = ctypes.util.find_library("harfbuzz") or "/usr/lib/x86_64-linux-gnu/libharfbuzz.so.0"
 try:
-    _hb_cdll = ctypes.CDLL("/usr/lib/x86_64-linux-gnu/libharfbuzz.so.0")
+    _hb_cdll = ctypes.CDLL(_hb_lib_path)
+    _hb_cdll.hb_version_string.argtypes = []
+    _hb_cdll.hb_version_string.restype = ctypes.c_char_p
+    _HB_VERSION = _hb_cdll.hb_version_string().decode("utf-8")
 except Exception:
     _hb_cdll = None
+    _HB_VERSION = "missing"
+
+
+def get_harfbuzz_info() -> dict:
+    return {
+        "loaded": _hb_cdll is not None,
+        "version": _HB_VERSION,
+        "path": _hb_lib_path if _hb_cdll is not None else None,
+    }
 
 if _hb_cdll is not None:
     class _hb_glyph_info_t(ctypes.Structure):

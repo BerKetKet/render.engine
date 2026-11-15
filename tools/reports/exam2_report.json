@@ -12,11 +12,12 @@
   "chapter_errors": [],
   "totals": {
     "exact_pages": 35,
-    "diff_pixels": 1176881,
+    "diff_pixels": 1140913,
     "capture_lines": 1529,
-    "render_lines": 1529,
-    "pos_exact_lines": 1318,
-    "pos_indep_lines": 1339
+    "render_lines": 1530,
+    "pos_exact_lines": 1322,
+    "pos_indep_lines": 1343,
+    "displaced_lines": 21
   },
   "chapters": [
     {
@@ -30,7 +31,8 @@
       "capture_lines": 1,
       "render_lines": 1,
       "pos_exact_lines": 0,
-      "pos_indep_lines": 0
+      "pos_indep_lines": 0,
+      "displaced_lines": 0
     },
     {
       "chapter": "nav",
@@ -43,7 +45,8 @@
       "capture_lines": 27,
       "render_lines": 27,
       "pos_exact_lines": 1,
-      "pos_indep_lines": 1
+      "pos_indep_lines": 1,
+      "displaced_lines": 0
     },
     {
       "chapter": "x01_victorian",
@@ -56,7 +59,8 @@
       "capture_lines": 64,
       "render_lines": 64,
       "pos_exact_lines": 64,
-      "pos_indep_lines": 64
+      "pos_indep_lines": 64,
+      "displaced_lines": 0
     },
     {
       "chapter": "x02_dialogue",
@@ -69,7 +73,8 @@
       "capture_lines": 44,
       "render_lines": 44,
       "pos_exact_lines": 44,
-      "pos_indep_lines": 44
+      "pos_indep_lines": 44,
+      "displaced_lines": 0
     },
     {
       "chapter": "x03_manual",
@@ -78,11 +83,12 @@
       "rendered_pages": 3,
       "compared_pages": 3,
       "exact_pages": 0,
-      "diff_pixels": 70998,
+      "diff_pixels": 61797,
       "capture_lines": 63,
       "render_lines": 63,
-      "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_exact_lines": 38,
+      "pos_indep_lines": 38,
+      "displaced_lines": 0
     },
     {
       "chapter": "x04_science",
@@ -95,7 +101,8 @@
       "capture_lines": 48,
       "render_lines": 48,
       "pos_exact_lines": 33,
-      "pos_indep_lines": 33
+      "pos_indep_lines": 33,
+      "displaced_lines": 0
     },
     {
       "chapter": "x05_recipe",
@@ -104,11 +111,12 @@
       "rendered_pages": 2,
       "compared_pages": 2,
       "exact_pages": 0,
-      "diff_pixels": 57712,
+      "diff_pixels": 43001,
       "capture_lines": 43,
       "render_lines": 43,
       "pos_exact_lines": 17,
-      "pos_indep_lines": 17
+      "pos_indep_lines": 17,
+      "displaced_lines": 0
     },
     {
       "chapter": "x06_legal",
@@ -121,7 +129,8 @@
       "capture_lines": 43,
       "render_lines": 43,
       "pos_exact_lines": 43,
-      "pos_indep_lines": 43
+      "pos_indep_lines": 43,
+      "displaced_lines": 0
     },
     {
       "chapter": "x07_news",
@@ -134,7 +143,8 @@
       "capture_lines": 34,
       "render_lines": 34,
       "pos_exact_lines": 31,
-      "pos_indep_lines": 31
+      "pos_indep_lines": 31,
+      "displaced_lines": 0
     },
     {
       "chapter": "x08_childrens",
@@ -147,7 +157,8 @@
       "capture_lines": 21,
       "render_lines": 21,
       "pos_exact_lines": 21,
-      "pos_indep_lines": 21
+      "pos_indep_lines": 21,
+      "displaced_lines": 0
     },
     {
       "chapter": "x09_languages",
@@ -160,7 +171,8 @@
       "capture_lines": 57,
       "render_lines": 57,
       "pos_exact_lines": 53,
-      "pos_indep_lines": 53
+      "pos_indep_lines": 53,
+      "displaced_lines": 0
     },
     {
       "chapter": "x10_headings",
@@ -173,7 +185,8 @@
       "capture_lines": 106,
       "render_lines": 106,
       "pos_exact_lines": 106,
-      "pos_indep_lines": 106
+      "pos_indep_lines": 106,
+      "displaced_lines": 0
     },
     {
       "chapter": "x11_hyphenation",
@@ -186,7 +199,8 @@
       "capture_lines": 173,
       "render_lines": 173,
       "pos_exact_lines": 171,
-      "pos_indep_lines": 171
+      "pos_indep_lines": 171,
+      "displaced_lines": 0
     },
     {
       "chapter": "x12_structure",
@@ -195,11 +209,12 @@
       "rendered_pages": 5,
       "compared_pages": 5,
       "exact_pages": 0,
-      "diff_pixels": 521825,
+      "diff_pixels": 509769,
       "capture_lines": 52,
-      "render_lines": 51,
-      "pos_exact_lines": 11,
-      "pos_indep_lines": 18
+      "render_lines": 52,
+      "pos_exact_lines": 12,
+      "pos_indep_lines": 19,
+      "displaced_lines": 7
     },
     {
       "chapter": "x13_inline",
@@ -212,7 +227,8 @@
       "capture_lines": 56,
       "render_lines": 56,
       "pos_exact_lines": 30,
-      "pos_indep_lines": 44
+      "pos_indep_lines": 44,
+      "displaced_lines": 14
     },
     {
       "chapter": "x14_scripts",
@@ -225,7 +241,8 @@
       "capture_lines": 36,
       "render_lines": 37,
       "pos_exact_lines": 10,
-      "pos_indep_lines": 10
+      "pos_indep_lines": 10,
+      "displaced_lines": 0
     },
     {
       "chapter": "x15_novel",
@@ -238,7 +255,8 @@
       "capture_lines": 39,
       "render_lines": 39,
       "pos_exact_lines": 34,
-      "pos_indep_lines": 34
+      "pos_indep_lines": 34,
+      "displaced_lines": 0
     },
     {
       "chapter": "x16_pagination",
@@ -251,7 +269,8 @@
       "capture_lines": 610,
       "render_lines": 610,
       "pos_exact_lines": 602,
-      "pos_indep_lines": 602
+      "pos_indep_lines": 602,
+      "displaced_lines": 0
     },
     {
       "chapter": "x17_overwide",
@@ -264,7 +283,8 @@
       "capture_lines": 12,
       "render_lines": 12,
       "pos_exact_lines": 12,
-      "pos_indep_lines": 12
+      "pos_indep_lines": 12,
+      "displaced_lines": 0
     }
   ],
   "pages": {
@@ -279,7 +299,8 @@
       "capture_lines": 1,
       "render_lines": 1,
       "pos_exact_lines": 0,
-      "pos_indep_lines": 0
+      "pos_indep_lines": 0,
+      "displaced_lines": 0
     },
     "2": {
       "page": 2,
@@ -292,7 +313,8 @@
       "capture_lines": 27,
       "render_lines": 27,
       "pos_exact_lines": 1,
-      "pos_indep_lines": 1
+      "pos_indep_lines": 1,
+      "displaced_lines": 0
     },
     "3": {
       "page": 3,
@@ -305,7 +327,8 @@
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 29,
-      "pos_indep_lines": 29
+      "pos_indep_lines": 29,
+      "displaced_lines": 0
     },
     "4": {
       "page": 4,
@@ -318,7 +341,8 @@
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_indep_lines": 35,
+      "displaced_lines": 0
     },
     "5": {
       "page": 5,
@@ -331,7 +355,8 @@
       "capture_lines": 32,
       "render_lines": 32,
       "pos_exact_lines": 32,
-      "pos_indep_lines": 32
+      "pos_indep_lines": 32,
+      "displaced_lines": 0
     },
     "6": {
       "page": 6,
@@ -344,7 +369,8 @@
       "capture_lines": 12,
       "render_lines": 12,
       "pos_exact_lines": 12,
-      "pos_indep_lines": 12
+      "pos_indep_lines": 12,
+      "displaced_lines": 0
     },
     "7": {
       "page": 7,
@@ -357,384 +383,414 @@
       "capture_lines": 25,
       "render_lines": 25,
       "pos_exact_lines": 22,
-      "pos_indep_lines": 22
+      "pos_indep_lines": 22,
+      "displaced_lines": 0
     },
     "8": {
       "page": 8,
       "chapter": "x03_manual",
-      "sha256": "624f4e29bed423e414df036133f9c3733b2cf7e927542144262c58eca5695f1e",
+      "sha256": "be837f993cd682eb058097cd807515cdecf985b39615d23c2c70889d46748781",
       "has_capture": true,
-      "layout_sha256": "b0f2d59f16b3a4ed16883c818e7e8a3c2aae2e80085db17d879c50ca8fe7383c",
+      "layout_sha256": "e77d9f223e63c7b4e1e30737e4267a67d186b453d3a7f4253e0c4a4234cf2e96",
       "exact_page": false,
-      "diff_pixels": 57561,
+      "diff_pixels": 48360,
       "capture_lines": 31,
       "render_lines": 31,
-      "pos_exact_lines": 7,
-      "pos_indep_lines": 7
+      "pos_exact_lines": 10,
+      "pos_indep_lines": 10,
+      "displaced_lines": 0
     },
     "9": {
       "page": 9,
       "chapter": "x03_manual",
       "sha256": "01ba2e361b0f5b95e02f90e58d00d6081d27138dc1c49ca1fdee3248d0562ee9",
       "has_capture": true,
-      "layout_sha256": "f7d969cb897db6b1dbac32dba74c25820db1e0b4a6d0718c147c2cac7ec48b32",
+      "layout_sha256": "27532c473fea7ddf958ded8fdef12b093451ad0c144289f401e43e147fd0cd11",
       "exact_page": false,
       "diff_pixels": 9128,
       "capture_lines": 7,
       "render_lines": 7,
       "pos_exact_lines": 6,
-      "pos_indep_lines": 6
+      "pos_indep_lines": 6,
+      "displaced_lines": 0
     },
     "10": {
       "page": 10,
       "chapter": "x04_science",
       "sha256": "cd69dd712125c756935f5010381775e899d0ce61d4807a0c5f3facd78ae1ea1f",
       "has_capture": true,
-      "layout_sha256": "892d4b4a0cae387fa3b3bb0271f99816c24a34e064b4aea8e84f58800dee79e2",
+      "layout_sha256": "b4dc0d3e6727dee8fcda226e8531a75696579afda7053e59e5964c11bade235d",
       "exact_page": false,
       "diff_pixels": 6427,
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 27,
-      "pos_indep_lines": 27
+      "pos_indep_lines": 27,
+      "displaced_lines": 0
     },
     "11": {
       "page": 11,
       "chapter": "x04_science",
       "sha256": "bc76b655b4cd091f20aac9cf70cea3b1155013dca116cde81fbaa096766b6214",
       "has_capture": true,
-      "layout_sha256": "28b05d917dd9b6a144eb33db3bb05e12aa02f6e42687a3996ef18d114cff0d05",
+      "layout_sha256": "205024ffcfe16425a3c9cca050d945bb31738c0402cb44aca019337d2cf4cbc5",
       "exact_page": false,
       "diff_pixels": 62888,
       "capture_lines": 19,
       "render_lines": 19,
       "pos_exact_lines": 6,
-      "pos_indep_lines": 6
+      "pos_indep_lines": 6,
+      "displaced_lines": 0
     },
     "12": {
       "page": 12,
       "chapter": "x05_recipe",
       "sha256": "4006cd5c7e68c541e78210ba8d3f832ee8f6246c094e18dfb49b54d17f38470e",
       "has_capture": true,
-      "layout_sha256": "fb058672f4afb284f749b3544cfbedd5b448a71a43c5a8166f43bf86b265f080",
+      "layout_sha256": "da9cc76dbbd7ad979c144989da3ea07e51cccc1ae8ada75ce9cc5eb574dc4dbe",
       "exact_page": false,
       "diff_pixels": 14528,
       "capture_lines": 27,
       "render_lines": 27,
       "pos_exact_lines": 16,
-      "pos_indep_lines": 16
+      "pos_indep_lines": 16,
+      "displaced_lines": 0
     },
     "13": {
       "page": 13,
       "chapter": "x05_recipe",
-      "sha256": "cf94c8b1ae6333e230995d28b21cb327b602b39dd126ecfdcf55f81eaca2f927",
+      "sha256": "d2eea0210ad58a0c110e62b89d50b23c426dfff7f600c693abd5208ea01d4103",
       "has_capture": true,
-      "layout_sha256": "0c63c6dd541d9883adc944d6867af2411a4b4c3bf6ce043396e198c147c017ec",
+      "layout_sha256": "3623c511041c9ba79ef04a45a0c8d8a596f8e7c23bba1c4decb806c5d17b9005",
       "exact_page": false,
-      "diff_pixels": 43184,
+      "diff_pixels": 28473,
       "capture_lines": 16,
       "render_lines": 16,
       "pos_exact_lines": 1,
-      "pos_indep_lines": 1
+      "pos_indep_lines": 1,
+      "displaced_lines": 0
     },
     "14": {
       "page": 14,
       "chapter": "x06_legal",
       "sha256": "1db70224b12078b72c788bbf21a91a2b539c4dd324055a02f3020f3c0cb25ceb",
       "has_capture": true,
-      "layout_sha256": "5ace9a3624f65dae5978ad0e0ee821f0ba249c17132a50c1d88523ab36316698",
+      "layout_sha256": "f7da3fc205ef99dd973a190e64165ae42dd982fbf2fa3e26442f0c50b791d47e",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 27,
       "render_lines": 27,
       "pos_exact_lines": 27,
-      "pos_indep_lines": 27
+      "pos_indep_lines": 27,
+      "displaced_lines": 0
     },
     "15": {
       "page": 15,
       "chapter": "x06_legal",
       "sha256": "98e92bf336ed70ac96aaa4248d67d99b0a79674016649e4887afd5093eff8975",
       "has_capture": true,
-      "layout_sha256": "16a1c1e48ffaf570b9bac4515b57f317c688d2619816fadedf6d6c16f4db4481",
+      "layout_sha256": "218ed42dc6af3993057b87f5bb13bce71194fe07e477510feee376b96de398ec",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 16,
       "render_lines": 16,
       "pos_exact_lines": 16,
-      "pos_indep_lines": 16
+      "pos_indep_lines": 16,
+      "displaced_lines": 0
     },
     "16": {
       "page": 16,
       "chapter": "x07_news",
       "sha256": "c7b6bad1e960c9b9bd82196094ed760f64fa8c65f48d401b2565f4a184cc5a9c",
       "has_capture": true,
-      "layout_sha256": "e11cd473bbe622bb34250bbd96a3b7f545fca34765b94e0a77a71e4269b6ce61",
+      "layout_sha256": "d40f28b3755661b2da888d1c8d292eb3c6f142d709113b82d9d41c67be0eec58",
       "exact_page": false,
       "diff_pixels": 488,
       "capture_lines": 25,
       "render_lines": 25,
       "pos_exact_lines": 24,
-      "pos_indep_lines": 24
+      "pos_indep_lines": 24,
+      "displaced_lines": 0
     },
     "17": {
       "page": 17,
       "chapter": "x07_news",
       "sha256": "27cb3bd0a0d8e67a9c8d0a24bc33a54be021a65821201eddba92cd9e9af1f0bf",
       "has_capture": true,
-      "layout_sha256": "2a79e20ef1520db5d6820883152c6e71c542eb4f1659841d09bd0ae5d266763a",
+      "layout_sha256": "15aced577672e15cc241aa952acf45cabca6ba6f9f01df49d5c56a5dedb83982",
       "exact_page": false,
       "diff_pixels": 1913,
       "capture_lines": 9,
       "render_lines": 9,
       "pos_exact_lines": 7,
-      "pos_indep_lines": 7
+      "pos_indep_lines": 7,
+      "displaced_lines": 0
     },
     "18": {
       "page": 18,
       "chapter": "x08_childrens",
       "sha256": "251fe30c6169bcd1d11236ae19f2bd879c632882bb1138535bdbb6d35449bf74",
       "has_capture": true,
-      "layout_sha256": "4d2abef372b85a628833906bcbd0db504a0ac268d983a4da175ce5e82370aef4",
+      "layout_sha256": "6df41f15c09f600d7c59decc5787a9f938ca8c5898a7683ff3d246cc6ffd11a0",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 21,
       "render_lines": 21,
       "pos_exact_lines": 21,
-      "pos_indep_lines": 21
+      "pos_indep_lines": 21,
+      "displaced_lines": 0
     },
     "19": {
       "page": 19,
       "chapter": "x09_languages",
       "sha256": "d30b58a0b502c9527ab688dc20131ad432e7b8df4430063ba0d34f9a9b5d9f1e",
       "has_capture": true,
-      "layout_sha256": "e15eea55d10acefd1c84c08eae2f5c6ad9fd7a757ca85efbb984f46a1536001e",
+      "layout_sha256": "dc6dd9fa5f0ad2b12ada9aac919547fb575fc8596b9029198bb4a8d54f662819",
       "exact_page": false,
       "diff_pixels": 116,
       "capture_lines": 25,
       "render_lines": 25,
       "pos_exact_lines": 22,
-      "pos_indep_lines": 22
+      "pos_indep_lines": 22,
+      "displaced_lines": 0
     },
     "20": {
       "page": 20,
       "chapter": "x09_languages",
       "sha256": "e8abbebf9458ea032cd946cc60bd9103d914f9e8e64d510c7e5a509fe7232394",
       "has_capture": true,
-      "layout_sha256": "814ee1aff581f18941bff4576b3dba3fdab8296f50c3acaf6af4e1d5071fa2e0",
+      "layout_sha256": "c20df388a4ad4aa20b63984b383bd7df91b8ea1b7e00eac3ec7abd3f7dcc4f03",
       "exact_page": false,
       "diff_pixels": 219,
       "capture_lines": 27,
       "render_lines": 27,
       "pos_exact_lines": 26,
-      "pos_indep_lines": 26
+      "pos_indep_lines": 26,
+      "displaced_lines": 0
     },
     "21": {
       "page": 21,
       "chapter": "x09_languages",
       "sha256": "3adc629d45ca6b4195aaf82bb35e7646f0b56d587187a0b3f4c7fbc5a67896e2",
       "has_capture": true,
-      "layout_sha256": "1ecf48fefe8a57bd0b989c7a1cbe0241c20672f9afa4dfea9a8195382c64eaab",
+      "layout_sha256": "b72cf54ea8368c4323612cbf442b570fd055ffc2fae78d891e3cca93e76ce48b",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 5,
       "render_lines": 5,
       "pos_exact_lines": 5,
-      "pos_indep_lines": 5
+      "pos_indep_lines": 5,
+      "displaced_lines": 0
     },
     "22": {
       "page": 22,
       "chapter": "x10_headings",
       "sha256": "468720d1d238f70ca358e1c1cf375653275d3dac6191767830e823689123d16d",
       "has_capture": true,
-      "layout_sha256": "c6a206eb444ed79b0aefb117a74fc038fd94350072615f581f6d01166cf661de",
+      "layout_sha256": "1d4f1073b99dcde389f407b7cd4eda0476dc72d216e51db2b9dbfeab9faaf77f",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 13,
       "render_lines": 13,
       "pos_exact_lines": 13,
-      "pos_indep_lines": 13
+      "pos_indep_lines": 13,
+      "displaced_lines": 0
     },
     "23": {
       "page": 23,
       "chapter": "x10_headings",
       "sha256": "2332e4caff34b515e039681cfb20954c7519d6652279c3e57040ae3e4eb53537",
       "has_capture": true,
-      "layout_sha256": "3a410d47d3ca7e77fa458f866d365d646f8329c85ef27caf255091304fd31201",
+      "layout_sha256": "1c8ff005f1b495b8a9db706f9ef88484b1269adf84fdb09f47794d67057b5ba6",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 15,
       "render_lines": 15,
       "pos_exact_lines": 15,
-      "pos_indep_lines": 15
+      "pos_indep_lines": 15,
+      "displaced_lines": 0
     },
     "24": {
       "page": 24,
       "chapter": "x10_headings",
       "sha256": "30a16a786c366ed8d529c853c2bb17551857f46993f6b65d4c136ac716d96015",
       "has_capture": true,
-      "layout_sha256": "6b1b468db382bf7de54dcc3b6fe358a306cd97f3855b57cf4f297af27c2192d0",
+      "layout_sha256": "dff9f3a10d6e1ca56fdb5683091cda7601be27ab9a01e9d3a34e7721ae8895e0",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 17,
       "render_lines": 17,
       "pos_exact_lines": 17,
-      "pos_indep_lines": 17
+      "pos_indep_lines": 17,
+      "displaced_lines": 0
     },
     "25": {
       "page": 25,
       "chapter": "x10_headings",
       "sha256": "980996c1cabf92005a70b478589b8df60c80c2040977c3637f96a09a2c57c865",
       "has_capture": true,
-      "layout_sha256": "b1f45837fe086374f09a9b0ff2e074d5b448b582fff0a2ece2a4977d6f4ac6f5",
+      "layout_sha256": "dd6207b7d5b7d02ff0b85c420b01dac1a4f6d19b9e3241315203858d8d932c4e",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 19,
       "render_lines": 19,
       "pos_exact_lines": 19,
-      "pos_indep_lines": 19
+      "pos_indep_lines": 19,
+      "displaced_lines": 0
     },
     "26": {
       "page": 26,
       "chapter": "x10_headings",
       "sha256": "1d0730ed3bd5734a0d83246973fb1321048c8c1747b969cad10cdf9184cc3079",
       "has_capture": true,
-      "layout_sha256": "ec0191187f7a6fa6d7557072fe03c28834c898549cd85a97b34a00e426737f7c",
+      "layout_sha256": "15e89fc61ce69d2e0801153e88d9695cded39699cb7a774df450af56f50ad4f1",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 19,
       "render_lines": 19,
       "pos_exact_lines": 19,
-      "pos_indep_lines": 19
+      "pos_indep_lines": 19,
+      "displaced_lines": 0
     },
     "27": {
       "page": 27,
       "chapter": "x10_headings",
       "sha256": "e9ea9f2ffc214d4bbb4e2d776843c5c587759a3c12697f4571500befb4a5e8ef",
       "has_capture": true,
-      "layout_sha256": "13f4b13799752ac592264b74b0e8019ba239b32f2e835a26c3a46bd76c724c75",
+      "layout_sha256": "35569516a3999d754055d2365c59441cdf035d42a9220a6b1f6085aa3a0269ba",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 20,
       "render_lines": 20,
       "pos_exact_lines": 20,
-      "pos_indep_lines": 20
+      "pos_indep_lines": 20,
+      "displaced_lines": 0
     },
     "28": {
       "page": 28,
       "chapter": "x10_headings",
       "sha256": "d6b0ca65987b6aa7a9aa400d23aa56c7d9a3bec1ea8597a9b756d3d436c7f1aa",
       "has_capture": true,
-      "layout_sha256": "5f72f7ed388f6764f42acc12eec793a2a399bacaf2c8683db490f2cd78179fb6",
+      "layout_sha256": "4e63f6ff7bf3326d77237d7f768addeaf53c542857d887b7b6c8eee4c919943e",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 3,
       "render_lines": 3,
       "pos_exact_lines": 3,
-      "pos_indep_lines": 3
+      "pos_indep_lines": 3,
+      "displaced_lines": 0
     },
     "29": {
       "page": 29,
       "chapter": "x11_hyphenation",
       "sha256": "cd37d4e9d5075a9502a3e4a853ad6b0d05d515a3d0de12838220daea2b6a5353",
       "has_capture": true,
-      "layout_sha256": "9cb7c41f6afce01972eaff99b2dd2628678a32ae99d59c626fa706c9b18628ec",
+      "layout_sha256": "2e89df2df658201ba7cf09ccb80b734f3ad69d45f66ee2be84076c1991bb646a",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 29,
-      "pos_indep_lines": 29
+      "pos_indep_lines": 29,
+      "displaced_lines": 0
     },
     "30": {
       "page": 30,
       "chapter": "x11_hyphenation",
       "sha256": "25d61e58c02af5ecd51eb4affa94ca0c1379014fa6941cb9c07d07e577c5bda8",
       "has_capture": true,
-      "layout_sha256": "4e6891a49e64e3dc0228920024f7a14a50fc04d6f428379327becd2dfc7435f6",
+      "layout_sha256": "3901f3f544371c1bdd6cd02c221b134b1e9c539cd772418aac7efb872ba5fc56",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_indep_lines": 35,
+      "displaced_lines": 0
     },
     "31": {
       "page": 31,
       "chapter": "x11_hyphenation",
       "sha256": "86d0d70351093ac41972d77f6cbed0f149022af7ee96eb8787572a280c74f3f9",
       "has_capture": true,
-      "layout_sha256": "eca2bac6aa65c1b63e39aac530237539d3f08e72f2faae6cce862174baf4a4a8",
+      "layout_sha256": "4f7eb2b6cf8078301f1218ad9fc42f2b8457c9126c0a964be66cffcde174a701",
       "exact_page": false,
       "diff_pixels": 418,
       "capture_lines": 33,
       "render_lines": 33,
       "pos_exact_lines": 31,
-      "pos_indep_lines": 31
+      "pos_indep_lines": 31,
+      "displaced_lines": 0
     },
     "32": {
       "page": 32,
       "chapter": "x11_hyphenation",
       "sha256": "8ba62cf9c9fab8faaf2685d3b7996d1d0371d948c77f6d06f9c0227d5e3936df",
       "has_capture": true,
-      "layout_sha256": "8f6008690e1f6f6e0fb12e0cd88f81ae8716257a0169040712eaca0c4e511379",
+      "layout_sha256": "f3ed49b37018d4a69366a934fbfc1ca3da33978b2554b432d01149cd09302140",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_indep_lines": 35,
+      "displaced_lines": 0
     },
     "33": {
       "page": 33,
       "chapter": "x11_hyphenation",
       "sha256": "4430aee956d2427876e133e423193aba5b07e0dd8fef99c16f5793900b3d7955",
       "has_capture": true,
-      "layout_sha256": "e3a40eb735faabe5e898bbe29c638553187c785480cf4f46a46319170eba3362",
+      "layout_sha256": "51de3f5497094f869b11802956de587e7e13242d929d92a1adb2dcdb0e71ee0d",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_indep_lines": 35,
+      "displaced_lines": 0
     },
     "34": {
       "page": 34,
       "chapter": "x11_hyphenation",
       "sha256": "a1439cb9db55db3d829bcea735c0402339cab18d881453fab5177d65c0bc554a",
       "has_capture": true,
-      "layout_sha256": "908bb95c8c9aaec529e95bf44c84813374eb0702a0a935630fd24c79ec67b796",
+      "layout_sha256": "0a7d41b5d22f56388e642f454523d2583999b21d69dbac68627c7f2599aec2d2",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 6,
       "render_lines": 6,
       "pos_exact_lines": 6,
-      "pos_indep_lines": 6
+      "pos_indep_lines": 6,
+      "displaced_lines": 0
     },
     "35": {
       "page": 35,
       "chapter": "x12_structure",
       "sha256": "284f4fdcc4176c0777ab1e1af429ef1e6c015352b845e2360144ee6fc082f9f5",
       "has_capture": true,
-      "layout_sha256": "d5b5a2edb589aa0c06932c124e25b6c625ed1983aebec36f3ea912c2d0df8304",
+      "layout_sha256": "04b299def6a09d2cd01a8faa7f9c504fae771f430ba0e78970825ca35ae692aa",
       "exact_page": false,
       "diff_pixels": 32942,
       "capture_lines": 24,
       "render_lines": 24,
       "pos_exact_lines": 8,
-      "pos_indep_lines": 8
+      "pos_indep_lines": 8,
+      "displaced_lines": 0
     },
     "36": {
       "page": 36,
       "chapter": "x12_structure",
-      "sha256": "872b7816e966f82166668380b3c0c39ca0d5358370e611f7c3b679e5a27069a3",
+      "sha256": "0ddbcdbee7d6d643c2eeea2d34d8e8bc23e8c4a13216df06869d51e331c9cd0b",
       "has_capture": true,
-      "layout_sha256": "dcf594dc1ec259a3aaa23758815f67acba245379288d2bdd1e2360b9c54b28a3",
+      "layout_sha256": "a372af820f1869f55dd39a05e9a76496e51311a606de442345d772506d683e11",
       "exact_page": false,
-      "diff_pixels": 274572,
+      "diff_pixels": 262516,
       "capture_lines": 24,
-      "render_lines": 23,
-      "pos_exact_lines": 2,
-      "pos_indep_lines": 9
+      "render_lines": 24,
+      "pos_exact_lines": 3,
+      "pos_indep_lines": 10,
+      "displaced_lines": 7
     },
     "37": {
       "page": 37,
@@ -747,7 +803,8 @@
       "capture_lines": 1,
       "render_lines": 1,
       "pos_exact_lines": 0,
-      "pos_indep_lines": 0
+      "pos_indep_lines": 0,
+      "displaced_lines": 0
     },
     "38": {
       "page": 38,
@@ -760,358 +817,386 @@
       "capture_lines": 1,
       "render_lines": 1,
       "pos_exact_lines": 0,
-      "pos_indep_lines": 0
+      "pos_indep_lines": 0,
+      "displaced_lines": 0
     },
     "39": {
       "page": 39,
       "chapter": "x12_structure",
       "sha256": "86f301e21784c95a6296e1444861984fde926a487a95440890ff83a16c3308a2",
       "has_capture": true,
-      "layout_sha256": "bdc556cc3e3813f152ab3cb5ef3d80af90b7cbd7a5a3ee9141fe2ec3ce702181",
+      "layout_sha256": "0175e116f77ee8debe37b70fba6f63916cd245db715504b326d14f3b978a422e",
       "exact_page": false,
       "diff_pixels": 10766,
       "capture_lines": 2,
       "render_lines": 2,
       "pos_exact_lines": 1,
-      "pos_indep_lines": 1
+      "pos_indep_lines": 1,
+      "displaced_lines": 0
     },
     "40": {
       "page": 40,
       "chapter": "x13_inline",
       "sha256": "b9eadb826d09436a07c6d8c070e7fcc454bad49157586ed5c782b6fdc38d7480",
       "has_capture": true,
-      "layout_sha256": "29299b496b2c9d73412da9844ba48c1555f2e026c52195e992a71aad33a9bbb0",
+      "layout_sha256": "4361d9b2244c023f0c935de08f6ebb3c998815d921848aeb4080e01eb70e16fd",
       "exact_page": false,
       "diff_pixels": 59067,
       "capture_lines": 28,
       "render_lines": 28,
       "pos_exact_lines": 21,
-      "pos_indep_lines": 21
+      "pos_indep_lines": 21,
+      "displaced_lines": 0
     },
     "41": {
       "page": 41,
       "chapter": "x13_inline",
       "sha256": "79ccbd6be5427a28078ecc5280b62025b0551c4c1447cecd495b86ddf850340d",
       "has_capture": true,
-      "layout_sha256": "b1af4fc830ff58bc9e70c8970e11ca9f1def67fdb848ff1767c07ebfea407e1c",
+      "layout_sha256": "9790016d56775d1faaee05f485de3910c115eed4167845d72e62d99e125e4228",
       "exact_page": false,
       "diff_pixels": 121055,
       "capture_lines": 28,
       "render_lines": 28,
       "pos_exact_lines": 9,
-      "pos_indep_lines": 23
+      "pos_indep_lines": 23,
+      "displaced_lines": 14
     },
     "42": {
       "page": 42,
       "chapter": "x14_scripts",
       "sha256": "5adcdbe8f3b89bf09f1c7f2d895c8570e700c797429af468a415cf65beafe6ca",
       "has_capture": true,
-      "layout_sha256": "f21dc3d28054c09334c97cf754fe5376cd3e5f897d7af9b00dc3aed553a0f0e8",
+      "layout_sha256": "28354573d3560376105c39ffff279a36214058102a9d9d67e422faff9105bfc9",
       "exact_page": false,
       "diff_pixels": 94528,
       "capture_lines": 34,
       "render_lines": 35,
       "pos_exact_lines": 10,
-      "pos_indep_lines": 10
+      "pos_indep_lines": 10,
+      "displaced_lines": 0
     },
     "43": {
       "page": 43,
       "chapter": "x14_scripts",
       "sha256": "90a3fe6718abbbe3dcc3c8244b0145e2b398abc9c32faac80ade99492a75eb34",
       "has_capture": true,
-      "layout_sha256": "ce0bbfa110c98374659aa8c0e916eb55bdbb828044c075fcb3a22e1fdf9b641b",
+      "layout_sha256": "1cd43b9b426b0c858e2ceb5bb5efd020e60ea941501d0d9ed9a69630e7962612",
       "exact_page": false,
       "diff_pixels": 6683,
       "capture_lines": 2,
       "render_lines": 2,
       "pos_exact_lines": 0,
-      "pos_indep_lines": 0
+      "pos_indep_lines": 0,
+      "displaced_lines": 0
     },
     "44": {
       "page": 44,
       "chapter": "x15_novel",
       "sha256": "8e9432558e281937333a0005379f53425747220a2589536600468ba516656de0",
       "has_capture": true,
-      "layout_sha256": "e2f0565e33911d4faee2caabbd74361235158d3e2983fe299c9f438c3d1298e9",
+      "layout_sha256": "d3c0ab8642676d6539d65d568fae971f67184ece47e6237920dfd5b3cc8867ad",
       "exact_page": false,
       "diff_pixels": 16654,
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 25,
-      "pos_indep_lines": 25
+      "pos_indep_lines": 25,
+      "displaced_lines": 0
     },
     "45": {
       "page": 45,
       "chapter": "x15_novel",
       "sha256": "8fce7562250b3f7ee54996528c3c229092ef1031ba999ccdacab7e3f9c4c518c",
       "has_capture": true,
-      "layout_sha256": "471f79d8fa5ef76c13fb495241d9b3a36c8726fc376e6d95341d2062d09eefc3",
+      "layout_sha256": "8ade97fec5d5822b04cbb917cdbe6ef20f93358785f03bb9e1d09e32ab36f5f4",
       "exact_page": false,
       "diff_pixels": 5740,
       "capture_lines": 10,
       "render_lines": 10,
       "pos_exact_lines": 9,
-      "pos_indep_lines": 9
+      "pos_indep_lines": 9,
+      "displaced_lines": 0
     },
     "46": {
       "page": 46,
       "chapter": "x16_pagination",
       "sha256": "bc965a743e2e2d42f8f7330b7d7f0670fb4650fe1b9ce570af53f4325b626244",
       "has_capture": true,
-      "layout_sha256": "54bc725a67faae175aff1f38c008def2cb4144a09d8f384f7b44bc2d18121349",
+      "layout_sha256": "0c0a7cbaa7ce2a6c2f3e52892fbc99bf008b62aedaa5cf8e18a626771e1c50c4",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 31,
       "render_lines": 31,
       "pos_exact_lines": 31,
-      "pos_indep_lines": 31
+      "pos_indep_lines": 31,
+      "displaced_lines": 0
     },
     "47": {
       "page": 47,
       "chapter": "x16_pagination",
       "sha256": "2f9e1622383461c34018e697d8b639544371564da92d3e309a1c065f96ba2d51",
       "has_capture": true,
-      "layout_sha256": "25604802e999cf36244907a7e155c3f2e56015d3e7e62130f8654eb8fb6aa639",
+      "layout_sha256": "a71334b72b3725dd1b881a7e3adece913926d3e945020c2abe5621f416bb49fa",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 33,
       "render_lines": 33,
       "pos_exact_lines": 33,
-      "pos_indep_lines": 33
+      "pos_indep_lines": 33,
+      "displaced_lines": 0
     },
     "48": {
       "page": 48,
       "chapter": "x16_pagination",
       "sha256": "47d89390039db5acf26d86ba330735f38273d530f69c9f8bc8d8209712c1cd16",
       "has_capture": true,
-      "layout_sha256": "b7bfd863fd47e36d03d0eb3dfaab28bf48629faa9ba46cbe66c139ef1f1b7d2a",
+      "layout_sha256": "ba155f0f005e229031f5b88008b900d3c0c69b7705c9907e1b147ddc3f5fdd55",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_indep_lines": 35,
+      "displaced_lines": 0
     },
     "49": {
       "page": 49,
       "chapter": "x16_pagination",
       "sha256": "63c4580a04c8b082f57538df8de0fee38e54cc8b839c56c1ae7644246fae1406",
       "has_capture": true,
-      "layout_sha256": "90a5cb12a38a1c10b7ebf2e47070dfc9e3cbabc5464092f5f27d2821cf553450",
+      "layout_sha256": "a4662f503525f11f25791005818c91bba8236d15ae1792c3c33f784df9b51e6f",
       "exact_page": false,
       "diff_pixels": 19895,
       "capture_lines": 30,
       "render_lines": 30,
       "pos_exact_lines": 28,
-      "pos_indep_lines": 28
+      "pos_indep_lines": 28,
+      "displaced_lines": 0
     },
     "50": {
       "page": 50,
       "chapter": "x16_pagination",
       "sha256": "f1848ca7778e337352cfdeb2c0afb5dfada4992e290fcaf471d5aa629286d65f",
       "has_capture": true,
-      "layout_sha256": "cbc0815364f969439e4e49df47b467a0eae8a6acb1ad0954e9ad6f13e4882c17",
+      "layout_sha256": "0bbf47c3cb1da8e59666b7d4dcc4e67a9c99aa6475e3eccfe12448d28011dcc3",
       "exact_page": false,
       "diff_pixels": 39356,
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 32,
-      "pos_indep_lines": 32
+      "pos_indep_lines": 32,
+      "displaced_lines": 0
     },
     "51": {
       "page": 51,
       "chapter": "x16_pagination",
       "sha256": "d39febc98db07a731191929a5fb7f59ab3bc3804986e5ebca46a8dd3eeb1b609",
       "has_capture": true,
-      "layout_sha256": "9bb0aaac4e7e3fe2810cf7635da62b28b937c96d471e8ea846437931728ada8c",
+      "layout_sha256": "742e5b9201ec7f73763dd12f43c1b78e680f7f29243ce32d13c7fdf971d157b9",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 32,
       "render_lines": 32,
       "pos_exact_lines": 32,
-      "pos_indep_lines": 32
+      "pos_indep_lines": 32,
+      "displaced_lines": 0
     },
     "52": {
       "page": 52,
       "chapter": "x16_pagination",
       "sha256": "16d54f35886fe0f21a152f05626fe2abe9276637819a2b897c1cbd2a1c6cad33",
       "has_capture": true,
-      "layout_sha256": "2d2ef5bdf47e2d153026963718b262624be0e6d7a76255afa1c22c063a4a4857",
+      "layout_sha256": "a54dd7dfae088cc4f2a645e11858ac993716df2d0fcad2d45b42baa975dc03c2",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_indep_lines": 35,
+      "displaced_lines": 0
     },
     "53": {
       "page": 53,
       "chapter": "x16_pagination",
       "sha256": "f1a718ea3f13ac06136b597412b8e7e9840aedd334a915c5c0d3dbb3614e0f3d",
       "has_capture": true,
-      "layout_sha256": "c1665dc967c323668ec7a7bfb7d3896c5e3cf06c586ed96f82c0046d64ccc7fc",
+      "layout_sha256": "58362a1cf67f20c7bc16e4dab9dafcc3e368c02a2384851ec53934186a6ea8cb",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 33,
       "render_lines": 33,
       "pos_exact_lines": 33,
-      "pos_indep_lines": 33
+      "pos_indep_lines": 33,
+      "displaced_lines": 0
     },
     "54": {
       "page": 54,
       "chapter": "x16_pagination",
       "sha256": "11d875cd6fd54bee1ce12d259ae2e65ad17a6b89aba01c1481c2d1734fb57d47",
       "has_capture": true,
-      "layout_sha256": "72d8a6e71502de229939461582729c37bbee681f07d19dae339191d27b1b7701",
+      "layout_sha256": "937d424ed16fe7da317fa7da24ea882685776bdfd3854acdc869ec06352e4d7f",
       "exact_page": false,
       "diff_pixels": 10304,
       "capture_lines": 29,
       "render_lines": 29,
       "pos_exact_lines": 28,
-      "pos_indep_lines": 28
+      "pos_indep_lines": 28,
+      "displaced_lines": 0
     },
     "55": {
       "page": 55,
       "chapter": "x16_pagination",
       "sha256": "366c9f17739694da48c34a03f02005595e40d03fd4e4dead4d8502341e10ec36",
       "has_capture": true,
-      "layout_sha256": "0d99262fdced04309905b2fe71c280719155d3e07bab10409d34f6c38661edda",
+      "layout_sha256": "51111c88ba0b8582a117df446cfd44e75249198e7a8abfcbe593b8d93c80a38b",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 32,
       "render_lines": 32,
       "pos_exact_lines": 32,
-      "pos_indep_lines": 32
+      "pos_indep_lines": 32,
+      "displaced_lines": 0
     },
     "56": {
       "page": 56,
       "chapter": "x16_pagination",
       "sha256": "103658fe27bdaeabc947b2e9f34e94754ff32afa3f9adf9c47d967265164e7ba",
       "has_capture": true,
-      "layout_sha256": "82cf6e8a8059603068dd1f7b05c590012b476aa47f5bff2d22242863c3602aa3",
+      "layout_sha256": "789ca9024fa23f6cce56c608d31085d2c14671cd5f49b8cffb52ca4f1bad2d40",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_indep_lines": 35,
+      "displaced_lines": 0
     },
     "57": {
       "page": 57,
       "chapter": "x16_pagination",
       "sha256": "29611ab2aab0998a2c467a09ffae346d9f5c5277b7cf35dbfd219589254cedf8",
       "has_capture": true,
-      "layout_sha256": "9998573f3aad1f9ae70c9dcd087b32194f81ac55cdf95ebb555442cc6bf3d919",
+      "layout_sha256": "09bef68b766d2301b848cd2f6a22a35801de5c5a1176db979ca8e090c6e89743",
       "exact_page": false,
       "diff_pixels": 10304,
       "capture_lines": 27,
       "render_lines": 27,
       "pos_exact_lines": 26,
-      "pos_indep_lines": 26
+      "pos_indep_lines": 26,
+      "displaced_lines": 0
     },
     "58": {
       "page": 58,
       "chapter": "x16_pagination",
       "sha256": "674f9c9e18b316c287b299282c235e89f6fa5cb31db3e8966c5e6eebdf09f3d4",
       "has_capture": true,
-      "layout_sha256": "5d93a86b2f78e094477e90858e73ed37024979b7a5e9cd2823a28c4cfb183ac5",
+      "layout_sha256": "720d417bb2242046017f21eac6d99dded6da3907a723e6bd50554d159b495be5",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 34,
       "render_lines": 34,
       "pos_exact_lines": 34,
-      "pos_indep_lines": 34
+      "pos_indep_lines": 34,
+      "displaced_lines": 0
     },
     "59": {
       "page": 59,
       "chapter": "x16_pagination",
       "sha256": "085a7de131f59633f730ebc001cc5c97f9b5df49281a79a7c30bfd84e5fa917c",
       "has_capture": true,
-      "layout_sha256": "03fd98d03dfb4e1ddfa4f9a0ab2591bc611abe6489fb0ac49db9f35fd26f52ec",
+      "layout_sha256": "804a7a79599490c9ea9733aed8f13c3f9106e89701fb15474dbf285762146d74",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 33,
       "render_lines": 33,
       "pos_exact_lines": 33,
-      "pos_indep_lines": 33
+      "pos_indep_lines": 33,
+      "displaced_lines": 0
     },
     "60": {
       "page": 60,
       "chapter": "x16_pagination",
       "sha256": "90839c19d75ab9ccba146409cf55bbce9efd3edb37fc7a3b836f90a68c52201b",
       "has_capture": true,
-      "layout_sha256": "e8af4d70fd3ae1da6dd1078f926f0c74c10a8ef8bf4bc3b5f8b2e847b690bfcc",
+      "layout_sha256": "479aa285c21cc2ea4f3b87358f6123910d346fc0512a4fbf6636b090fc78074f",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_indep_lines": 35,
+      "displaced_lines": 0
     },
     "61": {
       "page": 61,
       "chapter": "x16_pagination",
       "sha256": "0b3980deba1d39a75445e63831aa2d27e3b795a9d28883301192a843886ea1bf",
       "has_capture": true,
-      "layout_sha256": "05cf12f691d5d8f46d2034e28fa9ff9615ff791aa32f45686cf647e002dcc009",
+      "layout_sha256": "e2dd169b40a8a39f211ea180e9e74b14971ef8bdb84c71fac47e8fa5f965a2cf",
       "exact_page": false,
       "diff_pixels": 10304,
       "capture_lines": 27,
       "render_lines": 27,
       "pos_exact_lines": 26,
-      "pos_indep_lines": 26
+      "pos_indep_lines": 26,
+      "displaced_lines": 0
     },
     "62": {
       "page": 62,
       "chapter": "x16_pagination",
       "sha256": "da1bd9c99fd716dfe98259e6acae33247237ee3fe31999fc71568151cde1b785",
       "has_capture": true,
-      "layout_sha256": "798e0aa79a12eb81906866756bd644d3b0e7d949bf44b2edac8389c88917047c",
+      "layout_sha256": "5e5562bec5f34db4c14982b31f8319fb24ac62c74c9cb86b98f0b429861a7748",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_indep_lines": 35,
+      "displaced_lines": 0
     },
     "63": {
       "page": 63,
       "chapter": "x16_pagination",
       "sha256": "b5aeab3b15ea8068b16c4053e2ba6979d7764024a58933b0adba3a94a6705689",
       "has_capture": true,
-      "layout_sha256": "0711571a1c94e3770d6363181d9464a6bfdc84631c467875f14a4f0a0d49c88f",
+      "layout_sha256": "92197039fd17fea417f4d97734c50a9b71de506006416991b969bc75927fced6",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 35,
       "render_lines": 35,
       "pos_exact_lines": 35,
-      "pos_indep_lines": 35
+      "pos_indep_lines": 35,
+      "displaced_lines": 0
     },
     "64": {
       "page": 64,
       "chapter": "x16_pagination",
       "sha256": "50c2e71e9c12d6a0380fdfd2a12c477b33f17213541d506de2215a6f83668821",
       "has_capture": true,
-      "layout_sha256": "228baa0feac2459aa4f8f97680dafaf92b1eadd21a07f4d52e1e379e91337707",
+      "layout_sha256": "2b126d52bf9ee340c105b404f22c60d4c8b3fd8ffcd75f417ddbe44b69ddcf46",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 24,
       "render_lines": 24,
       "pos_exact_lines": 24,
-      "pos_indep_lines": 24
+      "pos_indep_lines": 24,
+      "displaced_lines": 0
     },
     "65": {
       "page": 65,
       "chapter": "x17_overwide",
       "sha256": "bffa5306e4160286d3f909d37c01577ebe48c5d652d62d9078e7d1b82f586957",
       "has_capture": true,
-      "layout_sha256": "1ea1262f7a621ad8809171509204f60490ec80c708bb7f11be0c145451d6855d",
+      "layout_sha256": "f97145c4480082bd651082453de6066d498e5d68b34a074b4154461c4f318186",
       "exact_page": true,
       "diff_pixels": 0,
       "capture_lines": 12,
       "render_lines": 12,
       "pos_exact_lines": 12,
-      "pos_indep_lines": 12
+      "pos_indep_lines": 12,
+      "displaced_lines": 0
     }
   }
 }

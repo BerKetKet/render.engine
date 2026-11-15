@@ -1,0 +1,80 @@
+{
+  "h1 -> h1": {
+    "42px_pitch57": {
+      "count": 1,
+      "status": "insufficient"
+    }
+  },
+  "h1 -> h1 (same)": {
+    "42px_pitch57": {
+      "count": 13,
+      "status": "ok"
+    }
+  },
+  "h1 -> paragraph": {
+    "42px_pitch57": {
+      "count": 15,
+      "status": "ok"
+    }
+  },
+  "h2 -> paragraph": {
+    "42px_pitch57": {
+      "count": 1,
+      "status": "insufficient"
+    }
+  },
+  "h3 -> paragraph": {
+    "42px_pitch57": {
+      "count": 1,
+      "status": "insufficient"
+    }
+  },
+  "h4 -> paragraph": {
+    "42px_pitch57": {
+      "count": 1,
+      "status": "insufficient"
+    }
+  },
+  "h5 -> paragraph": {
+    "42px_pitch57": {
+      "count": 1,
+      "status": "insufficient"
+    }
+  },
+  "h6 -> paragraph": {
+    "42px_pitch57": {
+      "count": 1,
+      "status": "insufficient"
+    }
+  },
+  "paragraph -> h2": {
+    "42px_pitch57": {
+      "count": 1,
+      "status": "insufficient"
+    }
+  },
+  "paragraph -> h3": {
+    "42px_pitch57": {
+      "count": 1,
+      "status": "insufficient"
+    }
+  },
+  "paragraph -> h4": {
+    "42px_pitch57": {
+      "count": 1,
+      "status": "insufficient"
+    }
+  },
+  "paragraph -> h6": {
+    "42px_pitch57": {
+      "count": 1,
+      "status": "insufficient"
+    }
+  },
+  "paragraph -> paragraph": {
+    "42px_pitch57": {
+      "count": 1107,
+      "status": "ok"
+    }
+  }
+}

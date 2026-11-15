@@ -39,7 +39,9 @@ if str(REPO_ROOT) not in sys.path:
 import kindle_render
 from kindle_render.config import Config
 from kindle_render.epub import load_epub
-from kindle_render.fonts import Family
+from kindle_render.fonts import Family, get_harfbuzz_info
+from PIL import features as pil_features
+import PIL
 from kindle_render.page import render_blocks
 from kindle_render.raster import get_freetype_version
 from tools.check_imports import check_imports
@@ -113,11 +115,37 @@ def build_manifest(profiles_data: dict, selected_corpora: List[str], epub_overri
         except FileNotFoundError:
             corpus_hashes[f"{cname}:captures:{cprof['captures_zip']}"] = "missing"
 
+    pil_feats = {}
+    for k in ["jpg", "zlib", "freetype2", "harfbuzz", "raqm", "fribidi", "webp", "libtiff", "littlecms2", "jpg_2000"]:
+        try:
+            pil_feats[k] = pil_features.version(k) or str(pil_features.check(k))
+        except Exception:
+            pil_feats[k] = "none"
+    hb_info = get_harfbuzz_info()
+    ft_ver = get_freetype_version()
+    os_arch = f"{platform.system()}-{platform.release()}-{platform.machine()}"
+    fp_payload = {
+        "python_version": platform.python_version(),
+        "os_arch": os_arch,
+        "pillow_version": PIL.__version__,
+        "pillow_features": pil_feats,
+        "numpy_version": np.__version__,
+        "freetype_version": ft_ver,
+        "harfbuzz_version": hb_info.get("version"),
+        "harfbuzz_path": hb_info.get("path"),
+    }
+    env_fp = hashlib.sha256(json.dumps(fp_payload, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
     return {
         "engine_version": getattr(kindle_render, "__version__", "unknown"),
         "git_commit": get_git_commit(),
         "python_version": platform.python_version(),
-        "freetype_version": get_freetype_version(),
+        "os_arch": os_arch,
+        "pillow_version": PIL.__version__,
+        "pillow_features": pil_feats,
+        "numpy_version": np.__version__,
+        "freetype_version": ft_ver,
+        "harfbuzz": hb_info,
+        "environment_fingerprint": env_fp,
         "fonts_sha256": font_hashes,
         "hyphen_sha256": hyph_hashes,
         "corpus_files_sha256": corpus_hashes,
@@ -191,6 +219,7 @@ def compare_page_to_capture(
         "render_lines": len(ren_bands),
         "pos_exact_lines": pos_exact,
         "pos_indep_lines": pos_indep,
+        "displaced_lines": pos_indep - pos_exact,
     }
 
 
@@ -344,6 +373,7 @@ def run_single_corpus(
             "render_lines": sum(per_page[p]["render_lines"] for p in cmp_pnos),
             "pos_exact_lines": sum(per_page[p]["pos_exact_lines"] for p in cmp_pnos),
             "pos_indep_lines": sum(per_page[p]["pos_indep_lines"] for p in cmp_pnos),
+            "displaced_lines": sum(per_page[p]["pos_indep_lines"] - per_page[p]["pos_exact_lines"] for p in cmp_pnos),
         })
 
     cmp_all = [p for p in per_page.values() if p["has_capture"]]
@@ -354,6 +384,7 @@ def run_single_corpus(
         "render_lines": sum(p["render_lines"] for p in cmp_all),
         "pos_exact_lines": sum(p["pos_exact_lines"] for p in cmp_all),
         "pos_indep_lines": sum(p["pos_indep_lines"] for p in cmp_all),
+        "displaced_lines": sum(p["pos_indep_lines"] - p["pos_exact_lines"] for p in cmp_all),
     }
 
     golden_path = REPO_ROOT / "tools" / "golden" / f"{cname}.json"
@@ -365,6 +396,7 @@ def run_single_corpus(
     if update_golden:
         golden_payload = {
             "corpus": cname,
+            "environment_fingerprint": build_manifest({"corpora": {}, "search_paths": []}, [], {})["environment_fingerprint"],
             "engine_version": getattr(kindle_render, "__version__", "unknown"),
             "page_count": len(imgs),
             "pages": {str(i + 1): h for i, h in enumerate(page_hashes)},
@@ -380,6 +412,10 @@ def run_single_corpus(
         else:
             with open(golden_path, "r") as gf:
                 gdata = json.load(gf)
+            cur_fp = build_manifest({"corpora": {}, "search_paths": []}, [], {})["environment_fingerprint"]
+            g_fp = gdata.get("environment_fingerprint")
+            if g_fp and g_fp != cur_fp:
+                print(f"[WARNING] {cname}: golden environment_fingerprint ({g_fp[:12]}) != current ({cur_fp[:12]})")
             gpages = gdata.get("pages", {})
             if pages_limit is None and len(imgs) != gdata.get("page_count", len(gpages)):
                 golden_ok = False
@@ -487,7 +523,8 @@ def run_synthetic_suite(prof_cfg: dict, update_golden: bool, check_golden: bool,
 
 def main():
     ap = argparse.ArgumentParser(description="Corpus runner and golden verifier for kindle_render.")
-    ap.add_argument("--only", choices=["probe", "exam1", "exam2", "synthetic"], help="Run only a single corpus")
+    ap.add_argument("--only", choices=["probe", "exam1", "exam2", "exam3_normal", "exam3_small", "ferryman_small", "synthetic"], help="Run only a single corpus")
+    ap.add_argument("--allow-unshaped", action="store_true", help="Debug flag: allow fallback shaper if HarfBuzz is unavailable")
     ap.add_argument("--pages", type=int, default=None, help="Render at most N pages")
     ap.add_argument("--update-golden", action="store_true", help="Explicitly write tools/golden/<corpus>.json")
     ap.add_argument("--no-golden", action="store_true", help="Skip golden comparison (for pre-golden runs)")
@@ -583,7 +620,8 @@ def main():
             f"layout_golden_passed={res.get('layout_golden_passed', True)} "
             f"exact_pages={res['totals']['exact_pages']}/{res['compared_pages']} "
             f"pos_lines={res['totals']['pos_exact_lines']}/{res['totals']['capture_lines']} "
-            f"pi_lines={res['totals']['pos_indep_lines']}/{res['totals']['capture_lines']}\n"
+            f"pi_lines={res['totals']['pos_indep_lines']}/{res['totals']['capture_lines']} "
+            f"displaced_lines={res['totals']['displaced_lines']}\n"
         )
         md_sections.append(f"## Corpus: `{cname}`")
         md_sections.append("```text")
