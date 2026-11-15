@@ -1,20 +1,18 @@
 from typing import Optional, List, Dict, Any
 import os
 import re
-"""Pagination and drawing engine.
+"""Pagination and IR layout engine.
 Implements:
-1. Subpixel 26.6 pen placement and float32/rounded-uint8 alpha blending
+1. Subpixel 26.6 pen placement and integer pixel coordinate snapping into PositionedDocument / PositionedPage IR
 2. Dynamic vertical CSS em unit (vem_px = std_pitch / 1.2) across all viewport presets
 3. Multi-line heading pagination, widow/orphan protection, and heading keep-with-next
 4. Native Bookerly-Display and Bookerly-Regular (.dc::first-letter) drop caps
 5. Solitary cover canvas with Skia 16.16 fixed-point bilinear resampling, <ol>/<ul> markers, <pre>, <table>, and <img>
-6. Dual-path IR emission (PositionedDocument -> PositionedPage -> RenderCommand) verified bit-for-bit against canvas
 """
 import math
 import numpy as np
 from PIL import Image
 from .layout import build_items, make_lines, layout_line, Run
-from .raster import GlyphCache, Rasterizer
 from .ir import (
     PositionedDocument,
     PositionedPage,
@@ -48,32 +46,20 @@ def _skia_bilerp_rgb(im: Image.Image, W_out: int, H_out: int, x0: float = -0.009
     return np.round(val).astype(np.uint8)
 
 class Pager:
-    def __init__(self, cfg, family, verify_ir: bool = True):
+    def __init__(self, cfg, family):
         self.cfg, self.fam = cfg, family
-        self.verify_ir = verify_ir
-        self.cache = GlyphCache(cfg.exact_raster)
-        self.ir_rasterizer = Rasterizer(cfg) if verify_ir else None
-        self.images = []
-        self.ir_pages = []
-        self.page_chapters = []
-        self.chapter_errors = []
+        self.ir_pages: List[PositionedPage] = []
+        self.page_chapters: List[str] = []
+        self.chapter_errors: List[Dict[str, Any]] = []
         self.current_chapter = ""
         self.cur_page_chapter = ""
-        self.canvas = None
-        self.cur_ir_page = None
+        self.cur_ir_page: Optional[PositionedPage] = None
         self._block_counter = 0
         self._line_counter = 0
         self.new_page()
         self.prev_mb = 0
         self.prev_kind = None
         self.prev_heading = 0
-
-    @property
-    def pages(self):
-        return self.images + [None]
-
-    def _to_image(self):
-        return Image.fromarray(np.clip(self.canvas + 0.5, 0, 255).astype(np.uint8), "RGB")
 
     def _mark_page_non_empty(self):
         if self.page_empty and not self.cur_page_chapter:
@@ -83,25 +69,15 @@ class Pager:
         self.page_empty = False
 
     def _finalize_current_page(self):
-        old_im = self._to_image()
         self.cur_ir_page.chapter = self.cur_page_chapter or self.current_chapter
-        if self.verify_ir and self.ir_rasterizer is not None:
-            ir_im = self.ir_rasterizer.rasterize_page(self.cur_ir_page)
-            if not np.array_equal(np.asarray(old_im), np.asarray(ir_im)):
-                raise AssertionError(
-                    f"IR rasterization mismatch on page {self.cur_ir_page.page_number} (chapter={self.cur_ir_page.chapter})"
-                )
-        self.images.append(old_im)
         self.ir_pages.append(self.cur_ir_page)
         self.page_chapters.append(self.cur_ir_page.chapter)
 
     def new_page(self):
         c = self.cfg
-        if self.canvas is not None:
+        if self.cur_ir_page is not None:
             self._finalize_current_page()
         self.cur_page_chapter = ""
-        self.canvas = np.empty((c.screen_h, c.screen_w, 3), dtype=np.float32)
-        self.canvas[:] = np.array(c.bg, dtype=np.float32)
         self.cur_ir_page = PositionedPage(
             page_number=len(self.ir_pages) + 1,
             chapter=self.current_chapter,
@@ -116,20 +92,6 @@ class Pager:
         self.prev_kind = None
         self.prev_heading = 0
 
-    def draw_glyph(self, g, x, baseline, fg_override=None):
-        cov = g.cov.astype(np.float32) / 255.0
-        h, w = cov.shape
-        x0, y0 = x + g.left, baseline - g.top
-        H, W = self.canvas.shape[:2]
-        sx0, sy0 = max(0, -x0), max(0, -y0)
-        ex, ey = min(w, W - x0), min(h, H - y0)
-        if ex <= sx0 or ey <= sy0:
-            return
-        reg = self.canvas[y0 + sy0:y0 + ey, x0 + sx0:x0 + ex]
-        a = cov[sy0:ey, sx0:ex][..., None]
-        fg = np.array(fg_override if fg_override is not None else self.cfg.fg, dtype=np.float32)
-        reg[:] = reg * (1.0 - a) + fg * a
-
     def overhang(self, placements):
         if not self.cfg.overhang_shift or not placements:
             return 0
@@ -141,7 +103,7 @@ class Pager:
 
     def draw_line(self, placements, start26, baseline, block_idx: int = -1, line_idx: int = -1, is_list_marker: bool = False, is_table_chrome: bool = False, is_drop_cap: bool = False):
         start26 += self.overhang(placements)
-        H, W = self.canvas.shape[:2]
+        H, W = self.cfg.screen_h, self.cfg.screen_w
         for pl_tup in placements:
             s_meta_bg = pl_tup[4] if len(pl_tup) > 4 else None
             if s_meta_bg and s_meta_bg.get("bg"):
@@ -151,7 +113,6 @@ class Pager:
                 x1_bg = math.floor((start26 + off_bg + adv_bg) / 64.0 + self.cfg.place_phase) + 1
                 y0_bg = max(0, baseline - int(round(0.81 * self.cfg.size_px())))
                 y1_bg = min(H, baseline + int(round(0.33 * self.cfg.size_px())) + 1)
-                self.canvas[y0_bg:y1_bg, max(0, x0_bg):min(W, x1_bg)] = np.array(s_meta_bg["bg"], dtype=np.float32)
                 self.cur_ir_page.commands.append(RectCommand(
                     x0=max(0, x0_bg), y0=y0_bg, x1=min(W, x1_bg), y1=y1_bg,
                     color=tuple(s_meta_bg["bg"]), role="mark_bg"
@@ -167,7 +128,6 @@ class Pager:
                 y = baseline - im.height + 1
                 if 0 <= y and y + im.height <= H and 0 <= x and x + im.width <= W:
                     im_arr = np.array(im, dtype=np.uint8)
-                    self.canvas[y:y + im.height, x:x + im.width] = im_arr.astype(np.float32)
                     self.cur_ir_page.commands.append(ImageCommand(
                         x=x, y=y, width=im.width, height=im.height, pixels=im_arr, role="inline"
                     ))
@@ -178,73 +138,59 @@ class Pager:
             fg_col = s_meta.get("fg") if s_meta else None
             x = math.floor((start26 + off) / 64.0 + self.cfg.place_phase) + dx_px
 
-            if name != '__space__':
-                colr_layers = face.get_colr_layers(name) if (face is not None and hasattr(face, "get_colr_layers")) else None
-                ir_colr = None
-                if colr_layers:
-                    ir_colr = [(l_gn, face.gid.get(l_gn, 0), tuple(l_rgb)) for l_gn, l_rgb in colr_layers]
-                    for l_gname, l_rgb in colr_layers:
-                        lg = self.cache.get(face, l_gname)
-                        if lg is not None:
-                            self.draw_glyph(lg, x, baseline + dy_px, fg_override=l_rgb)
-                else:
-                    g = self.cache.get(face, name)
-                    if g is not None:
-                        self.draw_glyph(g, x, baseline + dy_px, fg_override=fg_col)
-
-                if face is not None:
-                    use_adv26 = adv26 if adv26 > 0 else face.adv26(name)
-                    bbox_px = face.glyph_bbox_px(name, x, baseline + dy_px, use_adv26, W, H)
-                    ctxt = s_meta.get("cluster_text", "") if s_meta else ""
-                    is_synth_hy = bool(s_meta.get("is_synthetic_hyphen", False)) if s_meta else False
-                    is_lig = bool(s_meta.get("is_ligature", False)) if s_meta else False
-                    w_idx = int(s_meta.get("word_idx", 0)) if s_meta else 0
-                    lw_idx = int(s_meta.get("logical_word_idx", w_idx)) if s_meta else w_idx
-                    lc_idx = int(s_meta.get("logical_char_idx", 0)) if s_meta else 0
-                    g_dir = str(s_meta.get("direction", "ltr")) if s_meta else "ltr"
-                    l_href = s_meta.get("link_href") if s_meta else None
-                    self.cur_ir_page.commands.append(GlyphCommand(
-                        font_id=os.path.basename(face.path),
-                        font_path=face.path,
-                        glyph_id=face.gid.get(name, 0),
-                        glyph_name=name,
-                        size26=face.size26,
-                        boldness_level=getattr(face, "boldness_level", 0),
-                        x=x,
-                        baseline=baseline + dy_px,
-                        start26=start26,
-                        off26=off,
-                        adv26=use_adv26,
-                        dx_px=dx_px,
-                        dy_px=dy_px,
-                        color=tuple(fg_col if fg_col is not None else self.cfg.fg),
-                        colr_layers=ir_colr,
-                        bbox=bbox_px,
-                        unicode_text=ctxt,
-                        is_synthetic_hyphen=is_synth_hy,
-                        is_list_marker=is_list_marker,
-                        is_table_chrome=is_table_chrome,
-                        is_drop_cap=is_drop_cap,
-                        is_ligature=is_lig,
-                        block_idx=block_idx,
-                        line_idx=line_idx,
-                        word_idx=w_idx,
-                        logical_word_idx=lw_idx,
-                        logical_char_idx=lc_idx,
-                        direction=g_dir,
-                        link_href=l_href,
-                    ))
+            if name != '__space__' and face is not None:
+                colr_layers = face.get_colr_layers(name) if hasattr(face, "get_colr_layers") else None
+                ir_colr = [(l_gn, face.gid.get(l_gn, 0), tuple(l_rgb)) for l_gn, l_rgb in colr_layers] if colr_layers else None
+                use_adv26 = adv26 if adv26 > 0 else face.adv26(name)
+                bbox_px = face.glyph_bbox_px(name, x, baseline + dy_px, use_adv26, W, H)
+                ctxt = s_meta.get("cluster_text", "") if s_meta else ""
+                is_synth_hy = bool(s_meta.get("is_synthetic_hyphen", False)) if s_meta else False
+                is_lig = bool(s_meta.get("is_ligature", False)) if s_meta else False
+                w_idx = int(s_meta.get("word_idx", 0)) if s_meta else 0
+                lw_idx = int(s_meta.get("logical_word_idx", w_idx)) if s_meta else w_idx
+                lc_idx = int(s_meta.get("logical_char_idx", 0)) if s_meta else 0
+                g_dir = str(s_meta.get("direction", "ltr")) if s_meta else "ltr"
+                l_href = s_meta.get("link_href") if s_meta else None
+                self.cur_ir_page.commands.append(GlyphCommand(
+                    font_id=os.path.basename(face.path),
+                    font_path=face.path,
+                    glyph_id=face.gid.get(name, 0),
+                    glyph_name=name,
+                    size26=face.size26,
+                    boldness_level=getattr(face, "boldness_level", 0),
+                    x=x,
+                    baseline=baseline + dy_px,
+                    start26=start26,
+                    off26=off,
+                    adv26=use_adv26,
+                    dx_px=dx_px,
+                    dy_px=dy_px,
+                    color=tuple(fg_col if fg_col is not None else self.cfg.fg),
+                    colr_layers=ir_colr,
+                    bbox=bbox_px,
+                    unicode_text=ctxt,
+                    is_synthetic_hyphen=is_synth_hy,
+                    is_list_marker=is_list_marker,
+                    is_table_chrome=is_table_chrome,
+                    is_drop_cap=is_drop_cap,
+                    is_ligature=is_lig,
+                    block_idx=block_idx,
+                    line_idx=line_idx,
+                    word_idx=w_idx,
+                    logical_word_idx=lw_idx,
+                    logical_char_idx=lc_idx,
+                    direction=g_dir,
+                    link_href=l_href,
+                ))
 
             if s_meta and (s_meta.get("underline") or s_meta.get("strike")):
                 x_end = math.floor((start26 + off + adv26) / 64.0 + self.cfg.place_phase)
                 col_rgb = tuple(fg_col if fg_col is not None else self.cfg.fg)
-                col_arr = np.array(col_rgb, dtype=np.float32)
                 stroke_h = int(self.cfg.size_px() // 22.5) + 1
                 l_href = s_meta.get("link_href")
                 if s_meta.get("underline"):
                     uy = baseline + dy_px + (7 - stroke_h)
                     if 0 <= uy < H - stroke_h:
-                        self.canvas[uy:uy + stroke_h, max(0, x):min(W, x_end + 1)] = col_arr
                         self.cur_ir_page.commands.append(RuleCommand(
                             x0=max(0, x), y0=uy, x1=min(W, x_end + 1), y1=uy + stroke_h,
                             color=col_rgb, role="underline", link_href=l_href
@@ -252,7 +198,6 @@ class Pager:
                 if s_meta.get("strike"):
                     sy = baseline + dy_px - int(0.21 * self.cfg.pitch_px())
                     if 0 <= sy < H - stroke_h:
-                        self.canvas[sy:sy + stroke_h, max(0, x):min(W, x_end + 1)] = col_arr
                         self.cur_ir_page.commands.append(RuleCommand(
                             x0=max(0, x), y0=sy, x1=min(W, x_end + 1), y1=sy + stroke_h,
                             color=col_rgb, role="strike", link_href=l_href
@@ -286,13 +231,6 @@ class Pager:
                 cx = int(round(c.x0 + left_px - 17))
                 cy = baseline - 11
                 r = 4
-                for dy in range(-r - 1, r + 2):
-                    for dx in range(-r - 1, r + 2):
-                        dist = math.hypot(dx, dy)
-                        if r - 0.8 <= dist <= r + 0.8:
-                            py, px = cy + dy, cx + dx
-                            if 0 <= py < c.screen_h and 0 <= px < c.screen_w:
-                                self.canvas[py, px] = np.array(c.fg, dtype=np.float32)
                 self.cur_ir_page.commands.append(RingBulletCommand(cx=cx, cy=cy, r=r, color=tuple(c.fg)))
             elif b.bullet == "\u25aa":
                 cx = int(round(c.x0 + left_px - 17))
@@ -300,7 +238,6 @@ class Pager:
                 r = 4
                 x0_b, y0_b = max(0, cx - r), max(0, cy - r)
                 x1_b, y1_b = min(c.screen_w, cx + r + 1), min(c.screen_h, cy + r + 1)
-                self.canvas[y0_b:y1_b, x0_b:x1_b] = np.array(c.fg, dtype=np.float32)
                 self.cur_ir_page.commands.append(RectCommand(x0=x0_b, y0=y0_b, x1=x1_b, y1=y1_b, color=tuple(c.fg), role="square_bullet"))
             elif b.bullet == "\u25a0":
                 shaped = face.shape_with_clusters("\u25a0")
@@ -903,7 +840,6 @@ class Pager:
         row_pad = 7 if sc_tbl < 1.0 else (10 if is_col else 6)
         cell_pad = c.collapsed_table_pad_scaled if sc_tbl < 1.0 else (c.collapsed_table_pad_1x if is_col else 10)
 
-        has_right_cols = any(align == "right" for _, _, _, _, align, _, _ in grid_cells)
         col_align = ["left"] * ncols
         for ri, ci, txt, is_h, align, cs, rs in grid_cells:
             if cs == 1 and align == "right":
@@ -1126,28 +1062,22 @@ class Pager:
                     x_px = x_left + l_pad
                 self.draw_line(pl, int(round(x_px * 64)), base, block_idx=block_idx, line_idx=cur_line_idx)
 
-        if lines_c:
-            pass
         self.y = (last_base + (17 if sc_tbl < 1.0 else 24)) if is_col else row_ys[-1]
         if self.y + 70 < c.page_bottom:
             rule_h = c.collapsed_table_rule_h if is_col else 3
             rule_w = (avail_w + 1) if is_col else table_w
             rx0, rx1 = c.x0, min(c.right, c.x0 + rule_w)
-            self.canvas[self.y:self.y + rule_h, rx0:rx1] = 0
             self.cur_ir_page.commands.append(RuleCommand(
                 x0=rx0, y0=self.y, x1=rx1, y1=self.y + rule_h, color=(0, 0, 0), role="table_rule"
             ))
             bx0, by0, bw, bh = c.x0 + 17, self.y + 13, (95 if is_col else 94), (53 if is_col else 52)
-            self.canvas[by0:by0 + bh, bx0:bx0 + bw] = 0
             self.cur_ir_page.commands.append(RectCommand(
                 x0=bx0, y0=by0, x1=bx0 + bw, y1=by0 + bh, color=(0, 0, 0), role="table_icon_box"
             ))
             for t in range(14):
-                self.canvas[by0 + 12 + t, bx0 + bw - 22 - t:bx0 + bw - 19 - t] = 255
                 self.cur_ir_page.commands.append(RuleCommand(
                     x0=bx0 + bw - 22 - t, y0=by0 + 12 + t, x1=bx0 + bw - 19 - t, y1=by0 + 13 + t, color=(255, 255, 255), role="table_icon_arrow"
                 ))
-                self.canvas[by0 + bh - 13 - t, bx0 + 19 + t:bx0 + 22 + t] = 255
                 self.cur_ir_page.commands.append(RuleCommand(
                     x0=bx0 + 19 + t, y0=by0 + bh - 13 - t, x1=bx0 + 22 + t, y1=by0 + bh - 12 - t, color=(255, 255, 255), role="table_icon_arrow"
                 ))
@@ -1165,7 +1095,6 @@ class Pager:
             if not self.page_empty:
                 self.new_page()
             self._ensure_block_meta_on_page(block_idx, b, kind_override="image")
-            self.canvas[:] = 0
             self.cur_ir_page.commands.append(RectCommand(
                 x0=0, y0=0, x1=c.screen_w, y1=c.screen_h, color=(0, 0, 0), role="cover_bg"
             ))
@@ -1175,7 +1104,6 @@ class Pager:
             im_arr = _skia_bilerp_rgb(im, w, h)
             x = (c.screen_w - w) // 2
             y = (c.screen_h - h) // 2
-            self.canvas[y:y + h, x:x + w] = im_arr.astype(np.float32)
             self.cur_ir_page.commands.append(ImageCommand(
                 x=x, y=y, width=w, height=h, pixels=im_arr, role="cover"
             ))
@@ -1218,7 +1146,6 @@ class Pager:
         )
         y_draw = (y - 1) if ((getattr(b, 'border_collapse', False) or not self.page_empty) and not b.page_break_before and im.height < 2000 and c.pitch_px() == 57) else y
         arr_u8 = np.array(im, dtype=np.uint8)
-        self.canvas[y_draw:y_draw + im.height, x:x + im.width] = arr_u8.astype(np.float32)
         self.cur_ir_page.commands.append(ImageCommand(
             x=x, y=y_draw, width=im.width, height=im.height, pixels=arr_u8, role="block"
         ))
@@ -1238,7 +1165,6 @@ class Pager:
         top_gap = (c.pre_hr_top_gap_px if (self.prev_kind == 'pre' and is_col) else max(self.prev_mb, gap))
         self.y += top_gap
         if self.y + 3 < c.page_bottom:
-            self.canvas[self.y:self.y + 3, c.x0:c.right] = 136
             self.cur_ir_page.commands.append(RuleCommand(
                 x0=c.x0, y0=self.y, x1=c.right, y1=self.y + 3, color=(136, 136, 136), role="hr"
             ))
@@ -1255,13 +1181,9 @@ class Pager:
         self.current_chapter = chapter_id or "unknown"
         self._mark_page_non_empty()
         bx0, by0, bx1, by1 = c.x0, c.top, c.right, min(c.page_bottom, c.top + 400)
-        self.canvas[by0:by0 + 4, bx0:bx1] = 0
         self.cur_ir_page.commands.append(RectCommand(x0=bx0, y0=by0, x1=bx1, y1=by0 + 4, color=(0, 0, 0), role="error_box"))
-        self.canvas[by1 - 4:by1, bx0:bx1] = 0
         self.cur_ir_page.commands.append(RectCommand(x0=bx0, y0=by1 - 4, x1=bx1, y1=by1, color=(0, 0, 0), role="error_box"))
-        self.canvas[by0:by1, bx0:bx0 + 4] = 0
         self.cur_ir_page.commands.append(RectCommand(x0=bx0, y0=by0, x1=bx0 + 4, y1=by1, color=(0, 0, 0), role="error_box"))
-        self.canvas[by0:by1, bx1 - 4:bx1] = 0
         self.cur_ir_page.commands.append(RectCommand(x0=bx1 - 4, y0=by0, x1=bx1, y1=by1, color=(0, 0, 0), role="error_box"))
         face = self.fam.special_face("mono", c.size26)
         pitch = self.pitch_for(c.size26)
@@ -1290,21 +1212,24 @@ class Pager:
         })
         self.new_page()
 
-    def finish(self):
-        if self.page_empty and self.images:
-            if self.ir_rasterizer is not None:
-                self.ir_rasterizer.close()
-            self.cache.close()
-            return self.images
-        self._finalize_current_page()
-        if self.ir_rasterizer is not None:
-            self.ir_rasterizer.close()
-        self.cache.close()
-        return self.images
+    def finish_ir(self) -> PositionedDocument:
+        if not (self.page_empty and self.ir_pages):
+            self._finalize_current_page()
+        from . import __version__
+        return PositionedDocument(
+            pages=list(self.ir_pages),
+            chapter_errors=list(self.chapter_errors),
+            screen_w=self.cfg.screen_w,
+            screen_h=self.cfg.screen_h,
+            bg=tuple(self.cfg.bg),
+            fg=tuple(self.cfg.fg),
+            engine_version=__version__,
+        )
 
-def render_blocks(blocks, cfg, family, max_pages=None, return_meta=False):
+
+def layout_blocks_to_ir(blocks, cfg, family, max_pages: Optional[int] = None) -> PositionedDocument:
     import traceback as _tb
-    pg = Pager(cfg, family, verify_ir=True)
+    pg = Pager(cfg, family)
     ch_groups = []
     for b in blocks:
         ch_id = getattr(b, "chapter", "") or ""
@@ -1314,13 +1239,13 @@ def render_blocks(blocks, cfg, family, max_pages=None, return_meta=False):
             ch_groups[-1][1].append(b)
 
     for ch_id, ch_blocks in ch_groups:
-        if max_pages and len(pg.images) >= max_pages:
+        if max_pages and len(pg.ir_pages) >= max_pages:
             break
         if ch_id:
             pg.current_chapter = ch_id
         try:
             for b in ch_blocks:
-                if max_pages and len(pg.images) >= max_pages:
+                if max_pages and len(pg.ir_pages) >= max_pages:
                     break
                 if b.kind == "text":
                     pg.add_text_block(b)
@@ -1334,21 +1259,15 @@ def render_blocks(blocks, cfg, family, max_pages=None, return_meta=False):
                     pg.add_hr(b)
         except Exception as exc:
             pg.add_error_placeholder_page(ch_id or pg.current_chapter, exc, _tb.format_exc())
-    imgs = pg.finish()
-    out_imgs = imgs[:max_pages] if max_pages else imgs
-    out_ir_pages = pg.ir_pages[:len(out_imgs)]
-    if return_meta:
-        meta = {
-            "page_chapters": pg.page_chapters[:len(out_imgs)],
-            "chapter_errors": pg.chapter_errors,
-            "layout_hashes": [p.layout_sha256() for p in out_ir_pages],
-            "ir_pages": out_ir_pages,
-        }
-        return out_imgs, meta
-    return out_imgs
 
-def render_lines(lines, cfg, family, bold=False, italic=False):
-    pg = Pager(cfg, family, verify_ir=True)
+    ir_doc = pg.finish_ir()
+    if max_pages:
+        ir_doc.pages = ir_doc.pages[:max_pages]
+    return ir_doc
+
+
+def layout_lines_to_ir(lines, cfg, family, bold=False, italic=False) -> PositionedPage:
+    pg = Pager(cfg, family)
     face = family.face(bold, italic, cfg.size26)
     pitch = pg.pitch_for(cfg.size26)
     for l_i, s in enumerate(lines):
@@ -1366,4 +1285,34 @@ def render_lines(lines, cfg, family, bold=False, italic=False):
         else:
             pg.y += pitch
         pg._mark_page_non_empty()
-    return pg.finish()[0]
+    return pg.finish_ir().pages[0]
+
+
+def render_blocks(blocks, cfg, family, max_pages=None, return_meta=False):
+    from .raster import Rasterizer
+    ir_doc = layout_blocks_to_ir(blocks, cfg, family, max_pages=max_pages)
+    rast = Rasterizer(cfg)
+    try:
+        out_imgs = rast.rasterize_document(ir_doc)
+    finally:
+        rast.close()
+    if return_meta:
+        meta = {
+            "page_chapters": [p.chapter for p in ir_doc.pages],
+            "chapter_errors": ir_doc.chapter_errors,
+            "layout_hashes": [p.layout_sha256() for p in ir_doc.pages],
+            "ir_pages": ir_doc.pages,
+            "ir_doc": ir_doc,
+        }
+        return out_imgs, meta
+    return out_imgs
+
+
+def render_lines(lines, cfg, family, bold=False, italic=False):
+    from .raster import Rasterizer
+    ir_page = layout_lines_to_ir(lines, cfg, family, bold=bold, italic=italic)
+    rast = Rasterizer(cfg)
+    try:
+        return rast.rasterize_page(ir_page)
+    finally:
+        rast.close()

@@ -75,3 +75,20 @@ python3 tools/corpus.py --out-dir tools/reports
   python3 tools/corpus.py --only synthetic
   ```
 - **Previous Git Commit**: `c0e3727`
+
+
+## Phase 2.2 Completed (Switch Drawing to Read Only IR)
+- **What is done**:
+  - Removed the old direct canvas drawing path (`self.canvas`, `self.images`, `draw_glyph`, `_to_image`) from `Pager` in `kindle_render/page.py`.
+  - Added `layout_blocks_to_ir` and `layout_lines_to_ir` returning `PositionedDocument` and `PositionedPage`, and delegated all bitmap rendering in `render_blocks` and `render_lines` exclusively to `Rasterizer.rasterize_document` / `Rasterizer.rasterize_page`.
+  - Verified G1, G2, G3, and G5 pass across `probe`, `exam1`, `exam2`, and `synthetic`.
+- **What is next**:
+  - Phase 2.3: Add `tools/check_imports.py` to enforce the import-graph gate (G4) and ensure layout modules (`epub.py`, `fonts.py`, `hyphen.py`, `layout.py`, `ir.py`, and layout functions in `page.py`) have zero FreeType or raster dependencies.
+- **Exact commands to resume**:
+  ```bash
+  python3 tools/corpus.py --only probe
+  python3 tools/corpus.py --only exam1
+  python3 tools/corpus.py --only exam2
+  python3 tools/corpus.py --only synthetic
+  ```
+- **Previous Git Commit**: `1c5cc55`
