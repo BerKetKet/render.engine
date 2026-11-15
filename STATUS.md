@@ -107,3 +107,17 @@ python3 tools/corpus.py --out-dir tools/reports
   python3 tools/corpus.py --only synthetic
   ```
 - **Previous Git Commit**: `c1ffb06`
+
+
+## Phase 2.4 Completed (Instance-Owned Raster State & Concurrency Verification)
+- **What is done**:
+  - Verified `Rasterizer` and `GlyphCache` own their `FT_Library` handle (`self._ft_lib`), face map, and glyph bitmap cache per instance with zero process-global FreeType state.
+  - Added `tools/test_parallel_raster.py` and verified across `exam2` (65 pages), `exam1` (70 pages), and `probe` (98 pages) that two concurrent threads (`ThreadPoolExecutor`) and two concurrent processes (`ProcessPoolExecutor`) produce 100% identical SHA-256 hashes matching `tools/golden/*.json`.
+- **What is next**:
+  - Phase 2.5: Add `docs/text_layer_schema.md`, `kindle_render/text_layer.py`, CLI `kindle_render text` + `epub --text-layer`, and `tools/test_text_layer.py` verifying tests (a)–(d) across all three corpora.
+- **Exact commands to resume**:
+  ```bash
+  python3 tools/test_parallel_raster.py
+  python3 tools/corpus.py --only synthetic
+  ```
+- **Previous Git Commit**: `aafa698`
