@@ -13,6 +13,11 @@
   - **A4 (Rhythm Harness Unaligned Filter & Coverage)**: Updated `tools/rhythm.py` to label boundaries with `|delta| > pitch` as `"unaligned"` and exclude them from statistics and coverage counts. Generated `tools/reports/rhythm/gaps_<corpus>.json`, `base.json`, `coverage.json`, and `coverage.md` across all 5 corpora.
   - **A5 (Complete Calibration Inventory)**: Audited `config.py`, `epub.py`, `layout.py`, and `page.py` via regex grep and documented every geometry-keyed branch, table, and constant in `tools/reports/rhythm/inventory.md`.
 
+- **Stage B [P] — Hypothesis Registry (`tools/hypotheses/evaluate.py`)**:
+  - Copied `kindle_formulae.md` read-only (`0444`) to `docs/hypotheses/kindle_formulae_v0.md` (`SHA-256: 5e24606c502f14c3de8d77536cdb74f5eb00eaa0d6bc4e87d78807b34a692c81`).
+  - Wrote `tools/reports/hypotheses/reconcile.md` mapping every numbered formula in Sections 1–10 against `kindle_render/*.py` (`file:line` and `match`/`mismatch`/`not found`).
+  - Implemented pure evaluators in `tools/hypotheses/evaluate.py` and generated `tools/reports/hypotheses/registry.json` with per-geometry counts and verdicts (`SUPPORTED` / `REFUTED` / `UNTESTABLE`), leaving all engine files and pixel goldens untouched.
+
 ## Baseline Metrics Across All 5 Corpora (at `1.8.0-rc1`)
 - `probe` (`42px, pitch 57`): `37/86` exact pages | `2,703/2,863` pos lines | `2,705/2,863` PI lines | `2` displaced lines | `476,566` diff px
 - `exam1` (`45px, pitch 68`): `42/70` exact pages | `1,402/1,568` pos lines | `1,411/1,568` PI lines | `9` displaced lines | `1,593,164` diff px
@@ -21,9 +26,8 @@
 - `exam3_small` (`34px, pitch 51`): `10/54` exact pages | `991/1,651` pos lines | `1,416/1,651` PI lines | `425` displaced lines | `5,539,021` diff px
 
 ## NEXT
-- **Stage B [P] — Hypothesis Registry (no engine change)**:
-  1. Write `tools/reports/hypotheses/reconcile.md` reconciling every numbered formula in `docs/hypotheses/kindle_formulae_v0.md` against the codebase (`file:line`, `match`/`mismatch`/`not found`).
-  2. Implement pure functions in `tools/hypotheses/evaluate.py` and write `tools/reports/hypotheses/registry.json` (`SUPPORTED` / `REFUTED` / `UNTESTABLE` per geometry).
+- **Stage C [F] — Vertical Rhythm**:
+  1. Evaluate M0 vs alternatives (`C1`), run leave-one-geometry-out cross-validation (`C2`) and 30..50px smoothness check (`C3`), inspect `exam3_small` p.3 heading wrap and p.43 page-top offset (`C4`), and remove `std_body_pitch == 57` branches.
 - **Exact Commands to Resume**:
   ```bash
   python3 tools/check_imports.py
