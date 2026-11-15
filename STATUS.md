@@ -25,6 +25,10 @@
 - `exam3_normal` (`45px, pitch 68`): `38/82` exact pages | `1,740/2,027` pos lines | `1,788/2,027` PI lines | `48` displaced lines | `2,893,060` diff px
 - `exam3_small` (`34px, pitch 51`): `10/54` exact pages | `991/1,651` pos lines | `1,416/1,651` PI lines | `425` displaced lines | `5,539,021` diff px
 
+## Stage C [F] In-Progress Measurements (`tools/reports/rhythm/stage_c_notes.md`)
+- Completed full cross-geometry measurements for `C1`–`C4` across `(34, 51)`, `(42, 57)`, and `(45, 68)` and saved verified formulas in `tools/reports/rhythm/stage_c_notes.md` (verified `22/22` exact bands on `exam3_small` p.23 and `17/17` exact bands on `exam3_normal` p.36 in sandbox test).
+- Stopped cleanly at session tool-call budget boundary with all Stage A (`1.8.0-rc1`) and Stage B (`[P]`) commits and gates green.
+
 ## NEXT
 - **Stage C [F] — Vertical Rhythm**:
   1. Evaluate M0 vs alternatives (`C1`), run leave-one-geometry-out cross-validation (`C2`) and 30..50px smoothness check (`C3`), inspect `exam3_small` p.3 heading wrap and p.43 page-top offset (`C4`), and remove `std_body_pitch == 57` branches.
