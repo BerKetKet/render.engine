@@ -269,51 +269,6 @@ def _shape_token_with_fallbacks(tok: str, face, family, run: Run, size26: int, d
     return out
 
 
-def _reverse_rtl_subruns(text: str) -> str:
-    """Reverses word order only within contiguous RTL (Hebrew/Arabic) word sequences."""
-    tokens = re.split(r'(\s+)', text)
-    out = []
-    rtl_buf = []
-
-    def is_rtl_word(w: str) -> bool:
-        return any(0x0590 <= ord(c) <= 0x06FF for c in w)
-
-    def flush_rtl():
-        nonlocal rtl_buf
-        if not rtl_buf:
-            return
-        words = [x for x in rtl_buf if not x.isspace()]
-        spaces = [x for x in rtl_buf if x.isspace()]
-        if words and words[-1].endswith("."):
-            words[-1] = words[-1][:-1]
-            words[0] = words[0] + "."
-        words.reverse()
-        res = []
-        for idx, w in enumerate(words):
-            res.append(w)
-            if idx < len(spaces):
-                res.append(spaces[idx])
-        out.extend(res)
-        rtl_buf = []
-
-    i = 0
-    while i < len(tokens):
-        t = tokens[i]
-        if not t:
-            i += 1
-            continue
-        if is_rtl_word(t):
-            rtl_buf.append(t)
-        elif t.isspace() and rtl_buf and i + 1 < len(tokens) and is_rtl_word(tokens[i + 1]):
-            rtl_buf.append(t)
-        else:
-            flush_rtl()
-            out.append(t)
-        i += 1
-    flush_rtl()
-    return "".join(out)
-
-
 def build_items(runs, family, cfg, size26, display=False, hyphenator=None, allow_hyphenation=True, lang="en", allow_sc_hyph=False):
     items = []
     word_counter = 0

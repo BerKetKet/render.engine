@@ -155,3 +155,25 @@ python3 tools/corpus.py --out-dir tools/reports
   python3 tools/corpus.py --report-json tools/reports/after_refactor.json --report-md tools/reports/after_refactor.md
   ```
 - **Previous Git Commit**: `83871d5`
+
+
+## Phase 2.7 Completed (Tidy, Update `ARCHITECTURE_NOTES.md`, Final Reports & Tag `refactor-1.7.0`)
+- **What is done**:
+  - Removed unused `_reverse_rtl_subruns` helper from `kindle_render/layout.py`.
+  - Updated `ARCHITECTURE_NOTES.md` to v1.7.0 with the new module map, `IR_VERSION = "1.0"` specification, the 20-entry pixel-snapping ownership table (`owned by layout` vs. `owned by raster`), and the refreshed calibration inventory (`measured` / `fitted`).
+  - Ran `tools/corpus.py` across `probe`, `exam1`, `exam2`, and `synthetic` and saved `tools/reports/after_refactor.json` and `tools/reports/after_refactor.md`.
+  - Added and ran `tools/compare_reports.py`, confirming `identical: yes` across all 221 compared pages and all 233 rendered pages.
+  - Tagged `refactor-1.7.0` and packaged `kindle_render_v1.7.0.zip`.
+- **What is next**:
+  - All Phase 0, Phase 1, and Phase 2 (2.1–2.7) tasks are complete. Future sessions can begin fidelity work from `BACKLOG.md`.
+- **Exact commands to resume / verify**:
+  ```bash
+  python3 tools/check_imports.py
+  python3 tools/corpus.py
+  python3 tools/compare_reports.py
+  python3 tools/test_parallel_raster.py
+  python3 tools/test_text_layer.py
+  ```
+- **Previous Git Commit**: `158c705`
+
+- **Final Tagged Git Commit (`refactor-1.7.0`)**: `158c705` -> `HEAD`
