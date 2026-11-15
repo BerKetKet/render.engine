@@ -259,7 +259,7 @@ class PositionedDocument:
     screen_h: int = 2340
     bg: Tuple[int, int, int] = (255, 255, 255)
     fg: Tuple[int, int, int] = (0, 0, 0)
-    engine_version: str = "1.6.1"
+    engine_version: str = "1.8.0"
     ir_version: str = IR_VERSION
 
     def to_dict(self) -> Dict[str, Any]:

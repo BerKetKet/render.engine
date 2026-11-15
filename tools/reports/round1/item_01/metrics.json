@@ -1,0 +1,46 @@
+{
+  "item": 1,
+  "title": "Table column solver, min-content word floor, scaling, and alignment",
+  "pages": {
+    "exam2_p8": {
+      "exact_page": false,
+      "diff_pixels": 48360,
+      "capture_lines": 31,
+      "render_lines": 31,
+      "pos_exact_lines": 10,
+      "pos_indep_lines": 10
+    },
+    "exam2_p13": {
+      "exact_page": false,
+      "diff_pixels": 28473,
+      "capture_lines": 16,
+      "render_lines": 16,
+      "pos_exact_lines": 1,
+      "pos_indep_lines": 1
+    },
+    "exam2_p36": {
+      "exact_page": false,
+      "diff_pixels": 474956,
+      "capture_lines": 24,
+      "render_lines": 24,
+      "pos_exact_lines": 1,
+      "pos_indep_lines": 10
+    },
+    "exam1_p47": {
+      "exact_page": false,
+      "diff_pixels": 143039,
+      "capture_lines": 19,
+      "render_lines": 19,
+      "pos_exact_lines": 1,
+      "pos_indep_lines": 5
+    },
+    "probe_p88": {
+      "exact_page": false,
+      "diff_pixels": 105804,
+      "capture_lines": 15,
+      "render_lines": 15,
+      "pos_exact_lines": 1,
+      "pos_indep_lines": 3
+    }
+  }
+}

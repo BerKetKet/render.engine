@@ -177,3 +177,24 @@ python3 tools/corpus.py --out-dir tools/reports
 - **Previous Git Commit**: `158c705`
 
 - **Final Tagged Git Commit (`refactor-1.7.0`)**: `158c705` -> `HEAD`
+
+## Round 1 — Item 1 Completed (v1.8.0-rc1)
+- **Done**:
+  - Built `tools/reports/round1/synthetic_round1.epub` (5 table shapes, `<mark>` variants, inline monospace, mixed LTR/RTL, drop caps, heading ladder, list markers) and rendered baseline before-pages to `tools/reports/round1/synthetic_before/`.
+  - Completed **Item 1 (Table column solver, min-content word floor, scaling, caption wrapping, subpixel rule & expand icon)** across all 3 corpora (`exam2` p.8, 13, 36; `exam1` p.47; `probe` p.88) and 5 synthetic tables (`tools/reports/round1/item_01/`).
+  - Reduced table-page diff pixels by **68,690 px** across the 5 corpus table pages (`exam2` p.8: `57,561 -> 48,360`, pos lines `7/31 -> 10/31`; `exam2` p.13: `43,184 -> 28,473`, all 8 table cells `0` diff px; `exam2` p.36: `274,572 -> 253,551`; `exam1` p.47: `156,847 -> 143,039`; `probe` p.88: `115,753 -> 105,804`, all 6 table cells `0` diff px) with zero regressions on any exact page (`exam2` 35/65, `probe` 37/86, `exam1` 42/70).
+- **Next**:
+  - Execute **Item 2** (`<mark>` highlight & inline `background-color` in `epub.py:_collapse` and `page.py:draw_line` for `exam2` X13 p.40–41).
+  - Execute **Item 3** (Inline monospace word spacing & scale on `exam2` X13 p.40).
+  - Execute **Item 4** (UAX #9 bidirectional ordering & X14 scripts on `exam2` p.42–43).
+  - Execute **Item 5** (Hyphenation apostrophe handling & KP parameters on `exam2` X09/X11/X16).
+  - Execute **Item 6** (Drop cap & chapter opening on `exam2` X15 p.44–45).
+  - Execute **Item 7** (X12 structure: `dl/dt/dd`, list markers, `blockquote`/`cite`, `pre`, `hr`, images on `exam2` p.35–39).
+  - Execute **Item 8** (Remaining pages: `cover` p.1, `nav` p.2, `X03` p.7/9, `X04` p.10–11, `X05` p.12, `X07` p.16–17).
+- **Exact Commands to Resume**:
+  ```bash
+  python3 tools/check_imports.py
+  python3 tools/test_text_layer.py
+  python3 tools/test_parallel_raster.py
+  python3 tools/corpus.py --only exam2 --pages 40-41
+  ```

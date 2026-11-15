@@ -45,6 +45,63 @@ def _skia_bilerp_rgb(im: Image.Image, W_out: int, H_out: int, x0: float = -0.009
            arr[yi1[:, None], xi1[None, :]] * wy * wx)
     return np.round(val).astype(np.uint8)
 
+def _render_table_icon_rgb(y_frac: float) -> np.ndarray:
+    levels = [0, 64, 127, 191, 255]
+    q_box = int(round(y_frac * 4.0))
+    if q_box == 4:
+        q_box = 0
+        y_frac = y_frac - 1.0
+    H = 53 if q_box > 0 else 52
+    W = 95
+    out = np.full((H, W), 255, dtype=np.uint8)
+    box_y0 = q_box / 4.0
+    box_y1 = box_y0 + 52.0
+    for y in range(H):
+        ov_y = max(0.0, min(y + 1.0, box_y1) - max(float(y), box_y0))
+        q_y = int(round(ov_y * 4.0))
+        out[y, 1:] = 255 - levels[q_y]
+        out[y, 0] = 127
+    if q_box > 0:
+        out[0, 0] = 191
+        out[H - 1, 0] = 191
+
+    dy = y_frac
+    def add_seg(x, y_a, y_b, w_cov):
+        ya = y_a + dy
+        yb = y_b + dy
+        for y in range(max(0, int(ya)), min(H, int(yb) + 2)):
+            ov = max(0.0, min(y + 1.0, yb) - max(float(y), ya))
+            if ov > 0:
+                q = int(round(ov * w_cov * 4.0))
+                out[y, x] = max(out[y, x], levels[min(4, q)])
+
+    for x in range(52, 67):
+        add_seg(x, 7.05, 11.73 if x == 52 else 11.80, 0.5 if x in (52, 66) else 1.0)
+    for x in range(61, 67):
+        add_seg(x, 7.05, 21.25, 0.25 if x == 61 else (0.5 if x == 66 else 1.0))
+    for x in range(48, 62):
+        ya = (69.65 - x) if x <= 57 else 7.05
+        yb = (x - 25.36) if x <= 51 else (76.64 - x)
+        if x == 51:
+            yb = 25.25
+        add_seg(x, ya, yb, 1.0)
+
+    for x in range(28, 43):
+        add_seg(x, 40.05 if x >= 37 else 40.00, 44.80, 0.25 if x == 28 else 1.0)
+    for x in range(28, 34):
+        add_seg(x, 30.75, 44.80, 0.25 if x == 28 else (0.5 if x == 33 else 1.0))
+    for x in range(33, 48):
+        if x == 33:
+            add_seg(33, 36.20, 44.80, 1.0)
+        elif x == 47:
+            add_seg(47, 29.0, 29.25, 1.0)
+        else:
+            ya = (69.65 - x) if x <= 43 else (x - 17.64)
+            yb = (76.64 - x) if x >= 38 else 44.80
+            add_seg(x, ya, yb, 1.0)
+    return np.repeat(out[:, :, None], 3, axis=2)
+
+
 class Pager:
     def __init__(self, cfg, family):
         self.cfg, self.fam = cfg, family
@@ -743,11 +800,15 @@ class Pager:
         reg_base = self.fam.face(False, False, c.size26)
         bld_base = self.fam.face(True, False, c.size26)
         std_pitch = self.pitch_for(c.size26)
-        mt_tbl = max(self.prev_mb, int(round(1.0 * c.vem_px())) if is_col else int(round(0.4 * c.size_px())))
+
+        if is_col:
+            mt_tbl = max(self.prev_mb, int(round(1.0 * c.vem_px())))
+        else:
+            mt_tbl = int(round(0.67 * c.size_px())) if self.prev_kind == "hr" else max(self.prev_mb, int(round(0.4 * c.size_px())))
         if not self.page_empty:
             self.y += mt_tbl
 
-        avail_w = (c.right - c.x0 - c.collapsed_table_margin_px) if is_col else (c.right - c.x0)
+        avail_w = c.right - c.x0 - c.collapsed_table_margin_px
 
         def _text_w_px(face, s):
             return sum(a for _, a in face.shape(s)) / 64.0
@@ -777,7 +838,7 @@ class Pager:
             if _text_w_px(reg_base, cap_txt) <= cap_max_w or len(words_c) <= 1:
                 cap_lines = [cap_txt]
             else:
-                best_k = 1
+                best_k = None
                 best_d = 1e9
                 for k_c in range(1, len(words_c)):
                     s1 = " ".join(words_c[:k_c])
@@ -788,7 +849,20 @@ class Pager:
                         if cost_c < best_d:
                             best_d = cost_c
                             best_k = k_c
-                cap_lines = [" ".join(words_c[:best_k]), " ".join(words_c[best_k:])]
+                if best_k is not None:
+                    cap_lines = [" ".join(words_c[:best_k]), " ".join(words_c[best_k:])]
+                else:
+                    cap_lines = []
+                    cur_c = ""
+                    for wc in words_c:
+                        cand_c = (cur_c + " " + wc) if cur_c else wc
+                        if _text_w_px(reg_base, cand_c) <= avail_w or not cur_c:
+                            cur_c = cand_c
+                        else:
+                            cap_lines.append(cur_c)
+                            cur_c = wc
+                    if cur_c:
+                        cap_lines.append(cur_c)
             for cl_s in cap_lines:
                 cur_line_idx = self._line_counter
                 self._line_counter += 1
@@ -811,7 +885,7 @@ class Pager:
                         "direction": "ltr",
                     }))
                     pen_c += a_g
-                x_cap26 = int(round((c.x0 + avail_w / 2.0) * 64 - pen_c / 2.0))
+                x_cap26 = int((c.x0 + (avail_w + 1) / 2.0) * 64 - pen_c / 2.0)
                 self.draw_line(pl_c, x_cap26, base_c, block_idx=block_idx, line_idx=cur_line_idx)
                 self.y += std_pitch
                 self._mark_page_non_empty()
@@ -834,18 +908,55 @@ class Pager:
                 if ci > ncols:
                     ncols = ci
 
+        has_spans = any(cs > 1 or rs > 1 for _, _, _, _, _, cs, rs in grid_cells)
+        pad_1x = 2.0 * c.collapsed_table_pad_1x
         tot_1x = sum(
-            max((_text_w_px(bld_base if is_h else reg_base, txt) + 2 * c.collapsed_table_pad_1x)
-                for ri, ci, txt, is_h, align, cs, rs in grid_cells if ci == col_j and cs == 1)
+            max([_text_w_px(bld_base if is_h else reg_base, txt) + pad_1x
+                 for ri, ci, txt, is_h, align, cs, rs in grid_cells if ci == col_j and cs == 1] or [pad_1x])
             for col_j in range(ncols)
         )
-        sc_tbl = c.collapsed_table_scale if (is_col and ncols >= 4 and tot_1x > avail_w) else 1.0
+
+        if tot_1x <= avail_w and not has_spans:
+            sc_tbl = 1.0
+        elif ncols >= 4 and tot_1x > avail_w:
+            sc_tbl = c.collapsed_table_scale
+        else:
+            pref_cols_1x = []
+            pad_col_pref = 78.53 if has_spans else 72.10
+            for col_j in range(ncols):
+                col_w_pref = 0.0
+                for ri, ci, txt, is_h, align, cs, rs in grid_cells:
+                    if ci == col_j and cs == 1:
+                        f1 = bld_base if is_h else reg_base
+                        w_full = _text_w_px(f1, txt)
+                        w_words = txt.split()
+                        if is_h or len(w_words) <= 2 or w_full <= avail_w / float(max(1, ncols)):
+                            w_eff = w_full
+                        else:
+                            w_eff = max(w_full / 2.86, max(_text_w_px(f1, w) for w in w_words))
+                        if w_eff > col_w_pref:
+                            col_w_pref = w_eff
+                pref_cols_1x.append(col_w_pref + pad_col_pref)
+            w_pref_tot = sum(pref_cols_1x)
+            sc_tbl = max(c.collapsed_table_scale, min(1.0, avail_w / max(1.0, w_pref_tot)))
+
         tbl_size26 = int(round(c.size26 * sc_tbl))
+        sc_eff = tbl_size26 / float(c.size26)
         reg = self.fam.face(False, False, tbl_size26)
         bld = self.fam.face(True, False, tbl_size26)
-        line_p = int(round(std_pitch * sc_tbl)) if sc_tbl < 1.0 else (c.collapsed_table_line_pitch if is_col else std_pitch)
-        row_pad = 7 if sc_tbl < 1.0 else (10 if is_col else 6)
-        cell_pad = c.collapsed_table_pad_scaled if sc_tbl < 1.0 else (c.collapsed_table_pad_1x if is_col else 10)
+
+        line_p = int(round(std_pitch * sc_eff)) if sc_tbl < 1.0 else std_pitch
+        if sc_tbl <= 0.75:
+            row_pad = 7
+            top_pad = 0
+        elif sc_tbl < 1.0:
+            row_pad = 10 if is_col else 15
+            top_pad = 1 if is_col else 0
+        else:
+            row_pad = 11 if is_col else 16
+            top_pad = 3 if is_col else -1
+
+        cell_pad = c.collapsed_table_pad_scaled if sc_tbl <= 0.75 else c.collapsed_table_pad_1x
 
         col_align = ["left"] * ncols
         for ri, ci, txt, is_h, align, cs, rs in grid_cells:
@@ -853,13 +964,19 @@ class Pager:
                 col_align[ci] = "right"
 
         def _col_pad2(ci):
-            if not is_col:
-                return 2.0 * cell_pad
-            if sc_tbl < 1.0:
+            if sc_tbl <= 0.75:
                 if col_align[ci] == "right":
-                    return 43.0 if ci == ncols - 1 else 32.0
+                    return 42.8 if ci == ncols - 1 else 33.3
                 return 2.0 * cell_pad
-            return 2.0 * cell_pad
+            if not is_col and sc_tbl == 1.0:
+                return 70.0
+            if not is_col and sc_tbl < 1.0:
+                return 55.0
+            if has_spans:
+                return 75.5
+            if col_align[ci] == "right":
+                return 36.5 if ci == ncols - 1 else 49.0
+            return 64.0 if ci == 0 else 49.0
 
         max_w = [0.0] * ncols
         min_w = [0.0] * ncols
@@ -867,30 +984,30 @@ class Pager:
             if cs == 1:
                 face = bld if is_h else reg
                 pad2 = _col_pad2(ci)
-                w_full = _text_w_px(face, txt) + pad2
+                t_w = _text_w_px(face, txt)
+                w_full = t_w + pad2
                 if w_full > max_w[ci]:
                     max_w[ci] = w_full
                 raw_toks = txt.split()
-                if is_h and any("/" in rt and len(rt) > 4 for rt in raw_toks):
-                    slash_parts = []
-                    for rt in raw_toks:
-                        if "/" in rt and len(rt) > 4:
-                            ps = rt.split("/")
-                            for pi, p_s in enumerate(ps):
-                                slash_parts.append(p_s + ("/" if pi < len(ps) - 1 else ""))
-                        else:
-                            slash_parts.append(rt)
-                    if len(slash_parts) >= 2:
-                        w_sl = _text_w_px(face, " ".join(slash_parts[:-1])) + 46.5
-                        if w_sl > min_w[ci]:
-                            min_w[ci] = w_sl
-                for tok in raw_toks:
+                tok_candidates = []
+                for rt in raw_toks:
+                    if "/" in rt and len(rt) > 4:
+                        ps = rt.split("/")
+                        for pi, p_s in enumerate(ps):
+                            tok_candidates.append(p_s + ("/" if pi < len(ps) - 1 else ""))
+                    else:
+                        tok_candidates.append(rt)
+                if is_h and any("/" in rt and len(rt) > 4 for rt in raw_toks) and len(tok_candidates) >= 2:
+                    w_sl = _text_w_px(face, " ".join(tok_candidates[:-1])) + pad2
+                    if w_sl > min_w[ci]:
+                        min_w[ci] = w_sl
+                for tok in tok_candidates:
                     wt = _text_w_px(face, tok) + pad2
                     if wt > min_w[ci]:
                         min_w[ci] = wt
 
         tot_max = sum(max_w)
-        if tot_max <= avail_w and not any(cs > 1 for _, _, _, _, _, cs, _ in grid_cells):
+        if tot_max <= avail_w and not has_spans:
             if sc_tbl < 1.0:
                 extra_each = (avail_w - tot_max) / max(1, ncols)
                 col_ws = [int(round(w + extra_each)) for w in max_w]
@@ -914,14 +1031,23 @@ class Pager:
                 if narrow_rem and wide_rem:
                     for i in narrow_rem:
                         col_ws[i] = int(round(min_w[i]))
-                    rem_w2 = avail_w - sum(w for w in col_ws if w is not None)
-                    w_tot = max(1.0, sum(max_w[i] for i in wide_rem))
-                    for i in wide_rem:
-                        col_ws[i] = int(round(rem_w2 * max_w[i] / w_tot))
-                else:
-                    w_tot = max(1.0, sum(max_w[i] for i in rem_idx))
-                    for i in rem_idx:
-                        col_ws[i] = int(round(rem_w * max_w[i] / w_tot))
+                    rem_idx = wide_rem
+                    rem_w = avail_w - sum(w for w in col_ws if w is not None)
+                unlocked = list(rem_idx)
+                while unlocked:
+                    rem_w = avail_w - sum(w for w in col_ws if w is not None)
+                    w_tot = max(1.0, sum(max_w[i] for i in unlocked))
+                    clamped_any = False
+                    for i in list(unlocked):
+                        share = rem_w * max_w[i] / w_tot
+                        if share < min_w[i]:
+                            col_ws[i] = int(round(min_w[i]))
+                            unlocked.remove(i)
+                            clamped_any = True
+                    if not clamped_any:
+                        for i in unlocked:
+                            col_ws[i] = int(round(rem_w * max_w[i] / w_tot))
+                        break
             elif len(rem_idx) == 1:
                 col_ws[rem_idx[0]] = rem_w
             else:
@@ -998,8 +1124,8 @@ class Pager:
         for ri, ci, txt, is_h, align, cs, rs in grid_cells:
             face = bld if is_h else reg
             span_w = col_xs[ci + cs] - col_xs[ci]
-            pad_eff = 23 if (sc_tbl < 1.0 and is_h and align == "right") else cell_pad
-            inner_w = max(20.0, span_w - 2 * pad_eff + 1.0 + (14 if (ci + cs == ncols and sc_tbl == 1.0 and is_col) else 0))
+            pad2 = _col_pad2(ci) if cs == 1 else (2.0 * cell_pad)
+            inner_w = max(20.0, span_w - pad2 + 1.0)
             lines_c = _wrap_cell(face, txt, inner_w, is_hdr=is_h)
             wrapped_cells.append((ri, ci, lines_c, is_h, align, cs, rs, face))
             if rs == 1 and len(lines_c) > row_max_lines[ri]:
@@ -1016,21 +1142,60 @@ class Pager:
         for rh in row_hs:
             row_ys.append(row_ys[-1] + rh)
 
+        col_l_pad = []
+        col_r_pad = []
+        for ci in range(ncols):
+            if sc_tbl <= 0.75:
+                lp = 30.5 if ci == 0 else 16.65
+                rp = 31.0 if ci == ncols - 1 else 16.65
+            elif not is_col and sc_tbl == 1.0:
+                lp = 41.5 if ci == 0 else 33.5
+                rp = 44.0 if ci == ncols - 1 else 28.5
+            elif not is_col and sc_tbl < 1.0:
+                lp = 39.25 if ci == 0 else 28.25
+                rp = 48.0 if ci == ncols - 1 else 21.0
+            elif has_spans:
+                lp = 36.0 if ci == 0 else 39.5
+                rp = 39.3 if ci == ncols - 1 else 36.0
+            else:
+                lp = 36.5 if ci == 0 else 24.5
+                rp = 36.5 if ci == ncols - 1 else 24.5
+            col_l_pad.append(lp)
+            col_r_pad.append(rp)
+
         last_base = self.y
         for ri, ci, lines_c, is_h, align, cs, rs, face in wrapped_cells:
-            y_top = row_ys[ri]
+            y_top = row_ys[ri] + top_pad
             y_bot = row_ys[ri + rs]
-            span_h = y_bot - y_top
+            span_h = y_bot - row_ys[ri]
             n_l = len(lines_c)
             block_h = n_l * line_p
-            y_start = y_top + max(0, (span_h - row_pad - block_h) // 2)
+            if rs > 1:
+                first_base = self.baseline_in(row_ys[ri] + top_pad, line_p, tbl_size26)
+                last_sp_base = self.baseline_in(row_ys[ri + rs - 1] + top_pad + (row_max_lines[ri + rs - 1] - 1) * line_p, line_p, tbl_size26)
+                if has_spans:
+                    last_sp_base += 1
+                mid_base = (first_base + last_sp_base) // 2
+                y_start = None
+            else:
+                mid_base = None
+                y_start = y_top + max(0, (span_h - row_pad - block_h) // 2)
             x_left = col_xs[ci]
             x_right = col_xs[ci + cs]
-            span_w = x_right - x_left
             for li, (ltxt, ends_with_synth_hy) in enumerate(lines_c):
                 cur_line_idx = self._line_counter
                 self._line_counter += 1
-                base = self.baseline_in(y_start + li * line_p, line_p, tbl_size26)
+                if mid_base is not None:
+                    base = mid_base + li * line_p
+                else:
+                    in_cell_step = (line_p - 1) if (sc_tbl <= 0.75 and n_l > 1) else line_p
+                    base = self.baseline_in(y_start + li * in_cell_step, line_p, tbl_size26)
+                    if sc_tbl <= 0.75 and n_l == 1 and row_max_lines[ri] > 1 and ri == 0:
+                        base -= 1
+                    elif sc_tbl <= 0.75 and ri == nrows - 1:
+                        base += 1
+                    elif has_spans and ri == nrows - 1 and n_l > 1:
+                        base += 1
                 if base > last_base:
                     last_base = base
                 pl, pen = [], 0
@@ -1056,39 +1221,65 @@ class Pager:
                     }))
                     pen += a
                 if align == "center":
-                    if cs > 1 and is_col:
-                        center_x = (col_xs[ci] + col_xs[ci + cs] + cell_pad) / 2.0
+                    if cs > 1:
+                        center_x = (col_xs[ci] + col_l_pad[ci] + col_xs[ci + cs]) / 2.0
                         x_px = center_x - (pen / 64.0) / 2.0
                     else:
-                        x_px = x_left + (span_w - (pen / 64.0)) / 2.0
+                        c_left = x_left + col_l_pad[ci]
+                        c_right = x_right - col_r_pad[ci]
+                        hdr_off = 5.0 if (ci == 0 or not is_col) and not (not is_col and sc_tbl == 1.0 and ci > 0) else 0.0
+                        if not is_col and sc_tbl == 1.0 and ci > 0:
+                            hdr_off = 0.85
+                        elif has_spans and ci == ncols - 1:
+                            hdr_off = 2.0
+                        center_x = (c_left + c_right) / 2.0 + hdr_off
+                        x_px = center_x - (pen / 64.0) / 2.0
                 elif align == "right":
-                    r_pad = 32 if (ci + cs == ncols and sc_tbl < 1.0) else (23 if sc_tbl < 1.0 else cell_pad)
-                    x_px = x_right - r_pad - (pen / 64.0)
+                    x_px = x_right - col_r_pad[ci + cs - 1] - (pen / 64.0)
                 else:
-                    l_pad = 31 if (ci == 0 and sc_tbl < 1.0) else cell_pad
-                    x_px = x_left + l_pad
+                    x_px = x_left + col_l_pad[ci]
                 self.draw_line(pl, int(round(x_px * 64)), base, block_idx=block_idx, line_idx=cur_line_idx)
 
-        self.y = (last_base + (17 if sc_tbl < 1.0 else 24)) if is_col else row_ys[-1]
+        if sc_tbl <= 0.75:
+            rule_y_float = last_base + 17.745
+        elif has_spans:
+            rule_y_float = last_base + 23.753
+        elif not is_col and sc_tbl < 1.0:
+            rule_y_float = last_base + 29.102
+        elif not is_col:
+            rule_y_float = last_base + 28.706
+        else:
+            rule_y_float = last_base + 23.957
+
+        self.y = int(math.floor(rule_y_float))
         if self.y + 70 < c.page_bottom:
-            rule_h = c.collapsed_table_rule_h if is_col else 3
-            rule_w = (avail_w + 1) if is_col else table_w
-            rx0, rx1 = c.x0, min(c.right, c.x0 + rule_w)
-            self.cur_ir_page.commands.append(RuleCommand(
-                x0=rx0, y0=self.y, x1=rx1, y1=self.y + rule_h, color=(0, 0, 0), role="table_rule"
-            ))
-            bx0, by0, bw, bh = c.x0 + 17, self.y + 13, (95 if is_col else 94), (53 if is_col else 52)
-            self.cur_ir_page.commands.append(RectCommand(
-                x0=bx0, y0=by0, x1=bx0 + bw, y1=by0 + bh, color=(0, 0, 0), role="table_icon_box"
-            ))
-            for t in range(14):
+            frac = rule_y_float - self.y
+            g_top = int(round(255.0 * frac))
+            g_bot = 255 - g_top
+            rx0 = c.x0
+            rx1 = min(c.right, c.x0 + table_w + 1)
+            if 0 < g_top < 255:
                 self.cur_ir_page.commands.append(RuleCommand(
-                    x0=bx0 + bw - 22 - t, y0=by0 + 12 + t, x1=bx0 + bw - 19 - t, y1=by0 + 13 + t, color=(255, 255, 255), role="table_icon_arrow"
+                    x0=rx0, y0=self.y, x1=rx1, y1=self.y + 1, color=(g_top, g_top, g_top), role="table_rule"
                 ))
                 self.cur_ir_page.commands.append(RuleCommand(
-                    x0=bx0 + 19 + t, y0=by0 + bh - 13 - t, x1=bx0 + 22 + t, y1=by0 + bh - 12 - t, color=(255, 255, 255), role="table_icon_arrow"
+                    x0=rx0, y0=self.y + 1, x1=rx1, y1=self.y + 3, color=(0, 0, 0), role="table_rule"
                 ))
-            self.y = (by0 + bh + (7 if sc_tbl < 1.0 else 0)) if is_col else (self.y + 75)
+                self.cur_ir_page.commands.append(RuleCommand(
+                    x0=rx0, y0=self.y + 3, x1=rx1, y1=self.y + 4, color=(g_bot, g_bot, g_bot), role="table_rule"
+                ))
+            else:
+                self.cur_ir_page.commands.append(RuleCommand(
+                    x0=rx0, y0=self.y, x1=rx1, y1=self.y + 4, color=(0, 0, 0), role="table_rule"
+                ))
+            icon_rgb = _render_table_icon_rgb(frac)
+            ih, iw = icon_rgb.shape[:2]
+            by0 = self.y + (14 if int(round(frac * 4.0)) == 4 else 13)
+            bx0 = c.x0 + 17
+            self.cur_ir_page.commands.append(ImageCommand(
+                x=bx0, y=by0, width=iw, height=ih, pixels=icon_rgb, role="table_icon"
+            ))
+            self.y = (by0 + ih + (7 if sc_tbl <= 0.75 else 1)) if is_col else (by0 + ih + (6 if sc_tbl < 1.0 else 4))
         self.y_float = float(self.y)
         self.prev_mb = int(round(1.0 * c.vem_px())) if is_col else int(round(0.2 * c.size_px()))
         self.prev_kind = "table"
