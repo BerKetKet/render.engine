@@ -42,6 +42,7 @@ from kindle_render.epub import load_epub
 from kindle_render.fonts import Family
 from kindle_render.page import render_blocks
 from kindle_render.raster import get_freetype_version
+from tools.check_imports import check_imports
 
 
 def sha256_file(path: Path) -> str:
@@ -497,6 +498,13 @@ def main():
     ap.add_argument("--report-json", type=str, default=None, help="Path to write combined JSON report")
     ap.add_argument("--report-md", type=str, default=None, help="Path to write compact Markdown report")
     args = ap.parse_args()
+
+    imp_ok, imp_errs, _ = check_imports()
+    if not imp_ok:
+        for e in imp_errs:
+            print(f"[G4 ERROR] {e}")
+        sys.exit(1)
+    print("[G4 import-graph] passed=True")
 
     profiles_path = REPO_ROOT / "tools" / "profiles.json"
     with open(profiles_path, "r") as pf:

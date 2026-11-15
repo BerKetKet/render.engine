@@ -92,3 +92,18 @@ python3 tools/corpus.py --out-dir tools/reports
   python3 tools/corpus.py --only synthetic
   ```
 - **Previous Git Commit**: `1c5cc55`
+
+
+## Phase 2.3 Completed (Isolate FreeType Behind Raster & Add Import-Graph Gate G4)
+- **What is done**:
+  - Verified that all layout modules (`config.py`, `epub.py`, `fonts.py`, `hyphen.py`, `layout.py`, `ir.py`, and `Pager` / `layout_blocks_to_ir` / `layout_lines_to_ir` in `page.py`) have zero imports of `raster` or `freetype` and zero references to `libfreetype`.
+  - Added `tools/check_imports.py` and wired it directly into `tools/corpus.py` so Gate G4 runs automatically on every invocation.
+  - Verified G1–G5 pass.
+- **What is next**:
+  - Phase 2.4: Add `tools/test_parallel_raster.py` testing concurrent rasterization of the same IR pages across both multiple threads (`ThreadPoolExecutor`) and multiple processes (`ProcessPoolExecutor`), comparing pixel SHA-256 hashes against the golden hashes.
+- **Exact commands to resume**:
+  ```bash
+  python3 tools/check_imports.py
+  python3 tools/corpus.py --only synthetic
+  ```
+- **Previous Git Commit**: `c1ffb06`
