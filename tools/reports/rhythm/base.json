@@ -1,37 +1,52 @@
 {
-  "corpora": {
-    "probe": {
-      "compared_pages": 86,
-      "exact_pages": 37,
-      "diff_pixels": 476566,
-      "capture_lines": 2863,
-      "pos_exact_lines": 2703,
-      "pos_indep_lines": 2705,
-      "displaced_lines": 2,
-      "golden_passed": true,
-      "layout_golden_passed": true
-    },
-    "exam1": {
-      "compared_pages": 70,
-      "exact_pages": 42,
-      "diff_pixels": 1593164,
-      "capture_lines": 1568,
-      "pos_exact_lines": 1402,
-      "pos_indep_lines": 1411,
-      "displaced_lines": 9,
-      "golden_passed": true,
-      "layout_golden_passed": true
-    },
-    "exam2": {
-      "compared_pages": 65,
-      "exact_pages": 35,
-      "diff_pixels": 1140913,
-      "capture_lines": 1529,
-      "pos_exact_lines": 1322,
-      "pos_indep_lines": 1343,
-      "displaced_lines": 21,
-      "golden_passed": true,
-      "layout_golden_passed": true
-    }
+  "exam1": {
+    "geometry": "45px_pitch68",
+    "boundary_count": 350,
+    "aligned_boundary_count": 310,
+    "unaligned_boundary_count": 40,
+    "exact_boundary_count": 310,
+    "within_1px_boundary_count": 310,
+    "mean_delta_ink": 0.0,
+    "page_top_count": 63
+  },
+  "exam2": {
+    "geometry": "42px_pitch57",
+    "boundary_count": 302,
+    "aligned_boundary_count": 259,
+    "unaligned_boundary_count": 43,
+    "exact_boundary_count": 258,
+    "within_1px_boundary_count": 258,
+    "mean_delta_ink": 0.0927,
+    "page_top_count": 54
+  },
+  "exam3_normal": {
+    "geometry": "45px_pitch68",
+    "boundary_count": 584,
+    "aligned_boundary_count": 584,
+    "unaligned_boundary_count": 0,
+    "exact_boundary_count": 581,
+    "within_1px_boundary_count": 584,
+    "mean_delta_ink": -0.0017,
+    "page_top_count": 71
+  },
+  "exam3_small": {
+    "geometry": "34px_pitch51",
+    "boundary_count": 570,
+    "aligned_boundary_count": 570,
+    "unaligned_boundary_count": 0,
+    "exact_boundary_count": 544,
+    "within_1px_boundary_count": 559,
+    "mean_delta_ink": -0.0544,
+    "page_top_count": 45
+  },
+  "probe": {
+    "geometry": "42px_pitch57",
+    "boundary_count": 1145,
+    "aligned_boundary_count": 1009,
+    "unaligned_boundary_count": 136,
+    "exact_boundary_count": 967,
+    "within_1px_boundary_count": 967,
+    "mean_delta_ink": -2.33,
+    "page_top_count": 84
   }
 }

@@ -1,0 +1,16 @@
+{
+  "exam3_normal": {
+    "pages_checked": "2..82",
+    "max_device_ink_y_page": 62,
+    "max_device_ink_y": 2202,
+    "profile_page_bottom": 2203,
+    "note": "Checked max text/content ink y in window y=168..2220 across all device captures; 2203 and 2205 give identical line counts."
+  },
+  "exam3_small": {
+    "pages_checked": "2..54",
+    "max_device_ink_y_page": 39,
+    "max_device_ink_y": 2202,
+    "profile_page_bottom": 2203,
+    "note": "Checked max text/content ink y in window y=168..2220 across all device captures; 2203 and 2205 give identical line counts."
+  }
+}

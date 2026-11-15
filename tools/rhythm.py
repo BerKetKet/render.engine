@@ -166,6 +166,9 @@ def measure_corpus_rhythm(cname: str, cprof: dict, search_paths: List[str]) -> O
             eng_gap_ink = nxt_b["ren_y0"] - cur_b["ren_y1"]
             eng_gap_base = nxt_b["baseline"] - cur_b["baseline"]
             dev_gap_base = eng_gap_base + (dev_gap_ink - eng_gap_ink)
+            delta_ink = int(eng_gap_ink - dev_gap_ink)
+            delta_base = int(eng_gap_base - dev_gap_base)
+            is_unaligned = (abs(delta_ink) > cfg.pitch) or (abs(delta_base) > cfg.pitch) or (d_nxt_y0 <= d_cur_y0)
             records.append({
                 "corpus": cname,
                 "geometry": geom_label,
@@ -179,16 +182,24 @@ def measure_corpus_rhythm(cname: str, cprof: dict, search_paths: List[str]) -> O
                 "heading_size_px": cur_b["size_px"] if cur_b["block_kind"].startswith("h") else (nxt_b["size_px"] if nxt_b["block_kind"].startswith("h") else None),
                 "device_gap_ink": int(dev_gap_ink),
                 "engine_gap_ink": int(eng_gap_ink),
-                "delta_ink": int(eng_gap_ink - dev_gap_ink),
+                "delta_ink": delta_ink,
                 "device_gap_base": int(dev_gap_base),
                 "engine_gap_base": int(eng_gap_base),
-                "delta_base": int(eng_gap_base - dev_gap_base),
+                "delta_base": delta_base,
+                "status": "unaligned" if is_unaligned else "aligned",
             })
 
+    aligned_recs = [r for r in records if r["status"] == "aligned"]
+    unaligned_recs = [r for r in records if r["status"] == "unaligned"]
     return {
         "corpus": cname,
         "geometry": geom_label,
         "boundary_count": len(records),
+        "aligned_boundary_count": len(aligned_recs),
+        "unaligned_boundary_count": len(unaligned_recs),
+        "mean_delta_ink": round(float(np.mean([r["delta_ink"] for r in aligned_recs])), 4) if aligned_recs else 0.0,
+        "exact_boundary_count": sum(1 for r in aligned_recs if r["delta_ink"] == 0),
+        "within_1px_boundary_count": sum(1 for r in aligned_recs if abs(r["delta_ink"]) <= 1),
         "page_top_count": len(page_top_records),
         "page_tops": page_top_records,
         "boundaries": records,
@@ -220,19 +231,62 @@ def main():
             json.dump(res, f, indent=2)
         geom = res["geometry"]
         for rec in res["boundaries"]:
+            if rec.get("status") != "aligned":
+                continue
             pair_k = f"{rec['prev_kind']} -> {rec['next_kind']}" + (" (same)" if rec["same_block"] else "")
             coverage.setdefault(pair_k, {})
             coverage[pair_k][geom] = coverage[pair_k].get(geom, 0) + 1
-        print(f"[rhythm:{cname}] geometry={geom} measured_boundaries={res['boundary_count']} page_tops={res['page_top_count']}")
+        print(f"[rhythm:{cname}] geometry={geom} aligned={res['aligned_boundary_count']} unaligned={res['unaligned_boundary_count']} exact={res['exact_boundary_count']}/{res['aligned_boundary_count']} page_tops={res['page_top_count']}")
+
+    # Aggregate coverage across all existing gaps_<corpus>.json files
+    all_geoms = ["34px_pitch51", "42px_pitch57", "45px_pitch68"]
+    coverage = {}
+    base_summary = {}
+    for gfile in sorted(out_dir.glob("gaps_*.json")):
+        with open(gfile) as gf:
+            gdata = json.load(gf)
+        cn = gdata["corpus"]
+        gm = gdata["geometry"]
+        base_summary[cn] = {
+            "geometry": gm,
+            "boundary_count": gdata["boundary_count"],
+            "aligned_boundary_count": gdata["aligned_boundary_count"],
+            "unaligned_boundary_count": gdata["unaligned_boundary_count"],
+            "exact_boundary_count": gdata["exact_boundary_count"],
+            "within_1px_boundary_count": gdata["within_1px_boundary_count"],
+            "mean_delta_ink": gdata["mean_delta_ink"],
+            "page_top_count": gdata["page_top_count"],
+        }
+        for rec in gdata["boundaries"]:
+            if rec.get("status") != "aligned":
+                continue
+            pair_k = f"{rec['prev_kind']} -> {rec['next_kind']}" + (" (same)" if rec["same_block"] else "")
+            coverage.setdefault(pair_k, {g: 0 for g in all_geoms})
+            coverage[pair_k][gm] = coverage[pair_k].get(gm, 0) + 1
 
     cov_report = {}
+    md_lines = [
+        "# Vertical Rhythm Boundary Coverage Across Geometries",
+        "",
+        "| Boundary Pair | 34px_pitch51 | 42px_pitch57 | 45px_pitch68 |",
+        "|---|---|---|---|",
+    ]
     for pair_k, gmap in sorted(coverage.items()):
-        cov_report[pair_k] = {
-            g: {"count": cnt, "status": "ok" if cnt >= 3 else "insufficient"}
-            for g, cnt in sorted(gmap.items())
-        }
+        cov_report[pair_k] = {}
+        row_cells = [pair_k]
+        for g in all_geoms:
+            cnt = gmap.get(g, 0)
+            st = "ok" if cnt >= 3 else "insufficient"
+            cov_report[pair_k][g] = {"count": cnt, "status": st}
+            row_cells.append(f"{cnt} ({st})")
+        md_lines.append("| " + " | ".join(row_cells) + " |")
+
     with open(out_dir / "coverage.json", "w") as f:
         json.dump(cov_report, f, indent=2)
+    with open(out_dir / "coverage.md", "w") as f:
+        f.write("\n".join(md_lines) + "\n")
+    with open(out_dir / "base.json", "w") as f:
+        json.dump(base_summary, f, indent=2)
 
 
 if __name__ == "__main__":

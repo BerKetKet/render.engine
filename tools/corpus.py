@@ -82,7 +82,7 @@ def resolve_corpus_file(filename: str, search_paths: List[str]) -> Path:
     raise FileNotFoundError(f"Could not locate corpus file '{filename}' in {search_paths}")
 
 
-def build_manifest(profiles_data: dict, selected_corpora: List[str], epub_overrides: Dict[str, str]) -> dict:
+def build_manifest(profiles_data: dict, selected_corpora: List[str], epub_overrides: Dict[str, str], allow_unshaped: bool = False) -> dict:
     pkg_dir = REPO_ROOT / "kindle_render"
     fonts_dir = pkg_dir / "fonts"
     font_hashes = {}
@@ -145,6 +145,7 @@ def build_manifest(profiles_data: dict, selected_corpora: List[str], epub_overri
         "numpy_version": np.__version__,
         "freetype_version": ft_ver,
         "harfbuzz": hb_info,
+        "allow_unshaped": bool(allow_unshaped),
         "environment_fingerprint": env_fp,
         "fonts_sha256": font_hashes,
         "hyphen_sha256": hyph_hashes,
@@ -405,10 +406,18 @@ def run_single_corpus(
         golden_path.parent.mkdir(parents=True, exist_ok=True)
         with open(golden_path, "w") as gf:
             json.dump(golden_payload, gf, indent=2)
+    golden_status = "PASS"
+    layout_golden_status = "PASS"
+    if not update_golden and not check_golden:
+        golden_status = "NO-GOLDEN"
+        layout_golden_status = "NO-GOLDEN"
     elif check_golden:
         if not golden_path.is_file():
-            # No golden file stored: nothing to compare against, so not a failure.
-            golden_ok = True
+            golden_ok = False
+            layout_golden_ok = False
+            golden_status = "NO-GOLDEN"
+            layout_golden_status = "NO-GOLDEN"
+            golden_mismatches.append("NO-GOLDEN")
         else:
             with open(golden_path, "r") as gf:
                 gdata = json.load(gf)
@@ -444,9 +453,9 @@ def run_single_corpus(
         "rendered_pages": len(imgs),
         "compared_pages": len(cmp_all),
         "deterministic": deterministic,
-        "golden_passed": golden_ok,
+        "golden_passed": (golden_status if golden_status == "NO-GOLDEN" else golden_ok),
         "golden_mismatches": golden_mismatches,
-        "layout_golden_passed": layout_golden_ok,
+        "layout_golden_passed": (layout_golden_status if layout_golden_status == "NO-GOLDEN" else layout_golden_ok),
         "layout_golden_mismatches": layout_golden_mismatches,
         "chapter_errors": meta.get("chapter_errors", []),
         "totals": totals,
@@ -567,7 +576,7 @@ def main():
     selected = [args.only] if args.only else ["probe", "exam1", "exam2"]
     epub_overrides = {args.only: args.epub} if (args.only and args.epub) else {}
 
-    manifest = build_manifest(profiles_data, selected, epub_overrides)
+    manifest = build_manifest(profiles_data, selected, epub_overrides, allow_unshaped=getattr(args, "allow_unshaped", False))
     reports_dir = REPO_ROOT / "tools" / "reports"
     reports_dir.mkdir(parents=True, exist_ok=True)
     with open(reports_dir / "manifest.json", "w") as mf:

@@ -8,21 +8,52 @@ import ctypes
 
 import ctypes.util
 
+def _read_locked_harfbuzz_version() -> str:
+    lock_p = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "requirements.lock")
+    if os.path.isfile(lock_p):
+        with open(lock_p, "r", encoding="utf-8") as lf:
+            for line in lf:
+                m = re.search(r"#\s*HarfBuzz runtime:\s*([0-9]+\.[0-9]+\.[0-9]+)", line)
+                if m:
+                    return m.group(1)
+    return "6.0.0"
+
+
+LOCKED_HARFBUZZ_VERSION = _read_locked_harfbuzz_version()
 _hb_lib_path = ctypes.util.find_library("harfbuzz") or "/usr/lib/x86_64-linux-gnu/libharfbuzz.so.0"
+_hb_load_error = None
 try:
     _hb_cdll = ctypes.CDLL(_hb_lib_path)
     _hb_cdll.hb_version_string.argtypes = []
     _hb_cdll.hb_version_string.restype = ctypes.c_char_p
     _HB_VERSION = _hb_cdll.hb_version_string().decode("utf-8")
-except Exception:
+except Exception as exc:
     _hb_cdll = None
     _HB_VERSION = "missing"
+    _hb_load_error = str(exc)
+
+
+def verify_harfbuzz(allow_unshaped: bool = False) -> None:
+    if allow_unshaped:
+        return
+    if _hb_cdll is None:
+        raise RuntimeError(
+            f"HarfBuzz shared library could not be loaded (path={_hb_lib_path!r}, error={_hb_load_error!r}). "
+            f"Pass --allow-unshaped only for debugging."
+        )
+    if _HB_VERSION != LOCKED_HARFBUZZ_VERSION:
+        raise RuntimeError(
+            f"HarfBuzz version mismatch: runtime loaded {_HB_VERSION!r} from {_hb_lib_path!r}, "
+            f"expected {LOCKED_HARFBUZZ_VERSION!r} per requirements.lock. "
+            f"Pass --allow-unshaped only for debugging."
+        )
 
 
 def get_harfbuzz_info() -> dict:
     return {
         "loaded": _hb_cdll is not None,
         "version": _HB_VERSION,
+        "locked_version": LOCKED_HARFBUZZ_VERSION,
         "path": _hb_lib_path if _hb_cdll is not None else None,
     }
 

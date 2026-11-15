@@ -1,3 +1,9 @@
+## v1.8.0-rc1 — Stage A Hygiene, Environment Lock, Exam 3 Goldens, and Rhythm Harness
+
+- **HarfBuzz Lock & Loud Failure (`A1`)**: Enforced dynamic library resolution (`ctypes.util.find_library("harfbuzz")`) and version verification against `requirements.lock` (`6.0.0`), raising `RuntimeError` when missing or mismatched unless `--allow-unshaped` is explicitly enabled (`tools/test_harfbuzz_lock.py`).
+- **Environment Fingerprinting & Exam 3 Goldens (`A2`)**: Added `requirements.lock`, `constraints.txt`, `Dockerfile`, and `environment_fingerprint` across `manifest.json` and `tools/golden/*.json`; added `NO-GOLDEN` reporting and generated baseline goldens for `exam3_normal` (82 pages) and `exam3_small` (54 pages).
+- **Vertical Rhythm Harness & Calibration Inventory (`A4`, `A5`)**: Built `tools/rhythm.py` with unaligned boundary filtering (`|delta| > pitch`) across all five corpora (`probe`, `exam1`, `exam2`, `exam3_normal`, `exam3_small`) and documented all geometry-keyed branches and constants in `tools/reports/rhythm/inventory.md`.
+
 # Changelog
 
 ## 1.7.0
