@@ -141,3 +141,17 @@ python3 tools/corpus.py --out-dir tools/reports
   python3 tools/corpus.py --only synthetic
   ```
 - **Previous Git Commit**: `f43ebbc`
+
+
+## Phase 2.6 Completed (Public API `render_to_ir` & `rasterize`, Version 1.7.0, README & CHANGELOG)
+- **What is done**:
+  - Exposed `render_to_ir(book, cfg, max_pages=None)` and `rasterize(ir_page_or_doc, cfg=None)` in `kindle_render/__init__.py`.
+  - Bumped `__version__ = "1.7.0"` in `kindle_render/__init__.py`, and updated `README.md` (with public API and CLI examples) and `CHANGELOG.md`.
+  - Verified `render_to_ir` and `rasterize` produce identical layout and pixel SHA-256 hashes matching `tools/golden/exam2.json`.
+- **What is next**:
+  - Phase 2.7: Tidy dead code, update `ARCHITECTURE_NOTES.md` for v1.7.0 (new module map, IR spec, final rounding map with layout/raster ownership, and fresh calibration inventory), run full gates to generate `tools/reports/after_refactor.json` and `.md`, tag `refactor-1.7.0`, and package `kindle_render_v1.7.0.zip`.
+- **Exact commands to resume**:
+  ```bash
+  python3 tools/corpus.py --report-json tools/reports/after_refactor.json --report-md tools/reports/after_refactor.md
+  ```
+- **Previous Git Commit**: `83871d5`

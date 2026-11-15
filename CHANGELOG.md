@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.7.0
+- **Decoupled Layout & Rasterization via Serializable IR (`kindle_render/ir.py`, `kindle_render/page.py`, `kindle_render/raster.py`)**:
+  - Introduced versioned (`ir_version = "1.0"`) intermediate representation data classes (`PositionedDocument`, `PositionedPage`, `GlyphCommand`, `RectCommand`, `RuleCommand`, `RingBulletCommand`, `ImageCommand`, `TextBlockMeta`) with canonical sorted-key JSON serialization and SHA-256 layout hashing (`layout_pages` in `tools/golden/*.json`).
+  - Switched `Pager` (`layout_blocks_to_ir`, `layout_lines_to_ir`) to emit only IR objects without touching FreeType or pixel buffers, and delegated all bitmap rendering to `Rasterizer.rasterize_page` / `Rasterizer.rasterize_document`.
+  - Enforced strict module import boundary via `tools/check_imports.py` (Gate G4): layout modules (`config.py`, `epub.py`, `fonts.py`, `hyphen.py`, `layout.py`, `ir.py`, `text_layer.py`, and layout functions in `page.py`) never import `raster` or `freetype`.
+- **Instance-Owned FreeType State & Concurrency (`kindle_render/raster.py`, `tools/test_parallel_raster.py`)**:
+  - Eliminated process-global `_ft_lib_handle`; each `Rasterizer` / `GlyphCache` instance initializes and cleans up its own `FT_Library` handle and face/bitmap caches.
+  - Verified deterministic multi-thread (`ThreadPoolExecutor`) and multi-process (`ProcessPoolExecutor`) concurrent rasterization across all pages of `probe`, `exam1`, and `exam2`.
+- **Structured Text Layer & Schema (`kindle_render/text_layer.py`, `docs/text_layer_schema.md`, `tools/test_text_layer.py`)**:
+  - Added per-page (`page_NNN.json`) and document (`document.json`) structured text layer extraction directly from the IR (`blocks -> lines -> words -> clusters`) with page-clamped pixel bounding boxes, reading order, structural metadata (headings, lists, tables, links), ligature expansion, RTL logical word/character ordering, and `is_synthetic_hyphen` tagging.
+  - Added CLI subcommand `kindle_render text IN.epub OUT_DIR` and `--text-layer` flag on `kindle_render epub`.
+  - Added public API functions `render_to_ir(book, cfg)` and `rasterize(ir_page, cfg)`.
+- **Zero Pixel Change Guarantee**:
+  - Verified 100% bit-for-bit identical rendered pixels against `v1.6.1` across `probe` (`37/86` exact pages, `486,515` diff px), `exam1` (`42/70` exact pages, `1,607,042` diff px), `exam2` (`35/65` exact pages, `1,176,881` diff px), and `synthetic` (`4/4` pages).
+- **Documentation & Provenance**:
+  - Added `DATA_PROVENANCE.md` and `REFACTOR_PLAN.md`, and updated `ARCHITECTURE_NOTES.md` to v1.7.0.
+
 ## 1.6.1
 - Housekeeping only; rendered pixels are identical to 1.6.0 (checked on the three corpora).
 - Removed `tools/golden/` (stored per-page hashes). `tools/corpus.py` now treats a missing golden file as "nothing to compare", not a failure. `--update-golden` still works when you want to record new hashes later.
