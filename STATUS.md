@@ -42,3 +42,19 @@ python3 tools/corpus.py --out-dir tools/reports
   python3 tools/corpus.py --only synthetic
   ```
 - **Previous Git Commit**: `91c97164c179d6d6c740a2574849d74694c866c1`
+
+
+## Phase 1 Completed (Design Before Code — `REFACTOR_PLAN.md`)
+- **What is done**:
+  - Reviewed `ARCHITECTURE_NOTES.md` sections 1, 2, and 5 and inspected all modules (`config.py`, `epub.py`, `fonts.py`, `hyphen.py`, `layout.py`, `page.py`, `raster.py`, `cli.py`).
+  - Wrote and committed `REFACTOR_PLAN.md` defining: (1) the versioned `PositionedDocument` / `PositionedPage` / `RenderCommand` IR boundary, (2) the layout vs. raster dependency rule and why HarfBuzz lives in `fonts.py`, (3) the complete pixel-snapping ownership table, (4) the structured text layer design and `docs/text_layer_schema.md` contract, (5) instance-owned FreeType / `GlyphCache` state for thread/process parallelism, (6) staged commits 2.1–2.7 with risk estimates, and (7) out-of-scope items.
+- **What is next**:
+  - Phase 2.1: Introduce `kindle_render/ir.py`, build IR alongside the old drawing path in `page.py`, assert bitwise equality on every page between old path and IR rasterization, and record `layout_pages` hashes in `tools/golden/*.json`.
+- **Exact commands to resume**:
+  ```bash
+  python3 tools/corpus.py --only probe
+  python3 tools/corpus.py --only exam1
+  python3 tools/corpus.py --only exam2
+  python3 tools/corpus.py --only synthetic
+  ```
+- **Previous Git Commit**: `cc4c309`
