@@ -58,3 +58,20 @@ python3 tools/corpus.py --out-dir tools/reports
   python3 tools/corpus.py --only synthetic
   ```
 - **Previous Git Commit**: `cc4c309`
+
+
+## Phase 2.1 Completed (IR Data Classes, Dual-Path Verification & Layout Goldens)
+- **What is done**:
+  - Added `kindle_render/ir.py` (`PositionedDocument`, `PositionedPage`, `GlyphCommand`, `RectCommand`, `RuleCommand`, `RingBulletCommand`, `ImageCommand`, `TextBlockMeta`, `ir_version = "1.0"`, and canonical sorted-key JSON serialization with 6-decimal float formatting).
+  - Updated `fonts.py`, `epub.py`, `layout.py`, `page.py`, and `raster.py` so `Pager` builds `PositionedPage` IR alongside the old canvas path and asserts `np.array_equal(old_im, ir_im)` on every rendered page.
+  - Populated `layout_pages` SHA-256 hashes in `tools/golden/probe.json` (98 pages), `tools/golden/exam1.json` (70 pages), `tools/golden/exam2.json` (65 pages), and `tools/golden/synthetic.json` (4 pages), and verified G1, G2, G3, G5 pass with 100% identical pixel hashes.
+- **What is next**:
+  - Phase 2.2: Switch drawing to read only the IR (`Rasterizer.rasterize_page`) and delete the old direct canvas drawing path from `page.py`.
+- **Exact commands to resume**:
+  ```bash
+  python3 tools/corpus.py --only probe
+  python3 tools/corpus.py --only exam1
+  python3 tools/corpus.py --only exam2
+  python3 tools/corpus.py --only synthetic
+  ```
+- **Previous Git Commit**: `c0e3727`

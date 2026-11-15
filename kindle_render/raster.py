@@ -1,15 +1,29 @@
-"""Glyph bitmaps via FreeType FT_LOAD_TARGET_LIGHT (256-level grayscale).
+import os
+"""Glyph bitmaps and IR page rasterization via FreeType FT_LOAD_TARGET_LIGHT (256-level grayscale).
 Includes:
 1. Checked ctypes FreeType return codes and FT_Library_Version introspection
 2. Separate-component light autohinting for lowercase tilde composites (atilde, ntilde, otilde, itilde, utilde)
 3. Anisotropic vector outline dilation (y_strength = 0.80 * x_strength)
+4. Instance-owned Rasterizer and GlyphCache reading only PositionedPage / RenderCommand IR
 """
 import ctypes
 import ctypes.util
 import math
+from typing import Dict, Optional, Tuple
 import numpy as np
 from PIL import Image, ImageDraw, ImageChops
+from fontTools.ttLib import TTFont
 from fontTools.pens.basePen import BasePen
+from .config import Config, BOLDNESS_FUNITS_RAMP
+from .ir import (
+    PositionedDocument,
+    PositionedPage,
+    GlyphCommand,
+    RectCommand,
+    RuleCommand,
+    RingBulletCommand,
+    ImageCommand,
+)
 
 try:
     import freetype
@@ -121,15 +135,18 @@ if USE_CTYPES_FT:
             ('glyph', ctypes.POINTER(_FT_GlyphSlotRec)),
         ]
 
-    _ft_lib_handle = ctypes.c_void_p()
-    _check_ft(_ft_cdll.FT_Init_FreeType(ctypes.byref(_ft_lib_handle)), "FT_Init_FreeType")
-
 
 def get_freetype_version() -> str:
     if USE_CTYPES_FT and _ft_cdll is not None:
-        maj, min_, pat = ctypes.c_int(), ctypes.c_int(), ctypes.c_int()
-        _ft_cdll.FT_Library_Version(_ft_lib_handle, ctypes.byref(maj), ctypes.byref(min_), ctypes.byref(pat))
-        return f"{maj.value}.{min_.value}.{pat.value}"
+        lib = ctypes.c_void_p()
+        _check_ft(_ft_cdll.FT_Init_FreeType(ctypes.byref(lib)), "FT_Init_FreeType")
+        try:
+            maj, min_, pat = ctypes.c_int(), ctypes.c_int(), ctypes.c_int()
+            _ft_cdll.FT_Library_Version(lib, ctypes.byref(maj), ctypes.byref(min_), ctypes.byref(pat))
+            return f"{maj.value}.{min_.value}.{pat.value}"
+        finally:
+            if hasattr(_ft_cdll, "FT_Done_FreeType"):
+                _ft_cdll.FT_Done_FreeType(lib)
     if HAVE_FT and freetype is not None:
         v = freetype.version()
         return f"{v[0]}.{v[1]}.{v[2]}"
@@ -165,11 +182,51 @@ class Glyph:
         self.cov, self.left, self.top = cov, left, top
 
 
+class _RasterFontMeta:
+    """Per-instance font table metadata used by GlyphCache when rasterizing IR commands."""
+    def __init__(self, path: str):
+        self.path = path
+        self.tt = TTFont(path)
+        self.upem = self.tt['head'].unitsPerEm
+        self.glyf = self.tt['glyf'] if 'glyf' in self.tt else None
+        self.order = self.tt.getGlyphOrder()
+        self.gid = {n: i for i, n in enumerate(self.order)}
+
+
 class GlyphCache:
+    """Instance-owned FreeType handle and glyph bitmap cache (zero shared module state)."""
     def __init__(self, exact=True):
         self.exact = exact and HAVE_FT
         self.warned = False
         self._ft, self._gs, self._c = {}, {}, {}
+        self._font_meta: Dict[str, _RasterFontMeta] = {}
+        self._ft_lib = None
+        if self.exact and USE_CTYPES_FT and _ft_cdll is not None:
+            self._ft_lib = ctypes.c_void_p()
+            _check_ft(_ft_cdll.FT_Init_FreeType(ctypes.byref(self._ft_lib)), "FT_Init_FreeType")
+
+    def close(self):
+        if USE_CTYPES_FT and _ft_cdll is not None and self._ft_lib:
+            if hasattr(_ft_cdll, "FT_Done_Face"):
+                for f in self._ft.values():
+                    if f:
+                        _ft_cdll.FT_Done_Face(f)
+            self._ft.clear()
+            if hasattr(_ft_cdll, "FT_Done_FreeType"):
+                _ft_cdll.FT_Done_FreeType(self._ft_lib)
+            self._ft_lib = None
+
+    def __del__(self):
+        try:
+            self.close()
+        except Exception:
+            pass
+
+    def _get_font_meta(self, path: str) -> _RasterFontMeta:
+        m = self._font_meta.get(path)
+        if m is None:
+            m = self._font_meta[path] = _RasterFontMeta(path)
+        return m
 
     def get(self, face, name):
         bold_lvl = getattr(face, 'boldness_level', 0)
@@ -177,6 +234,14 @@ class GlyphCache:
         if key in self._c:
             return self._c[key]
         g = self._ft_glyph(face, name) if self.exact else self._own_glyph(face, name)
+        self._c[key] = g
+        return g
+
+    def get_by_params(self, font_path: str, size26: int, boldness_level: int, glyph_name: str, glyph_id: int) -> Optional[Glyph]:
+        key = (font_path, size26, boldness_level, glyph_name)
+        if key in self._c:
+            return self._c[key]
+        g = self._ft_glyph_params(font_path, size26, boldness_level, glyph_name, glyph_id) if self.exact else self._own_glyph_params(font_path, size26, glyph_name)
         self._c[key] = g
         return g
 
@@ -227,34 +292,36 @@ class GlyphCache:
         a = np.array(bm.buffer, dtype=np.uint8).reshape(bm.rows, bm.pitch)[:, :bm.width].copy()
         return Glyph(a, f.glyph.bitmap_left, f.glyph.bitmap_top)
 
-    def _ft_glyph(self, face, name):
-        bold_lvl = getattr(face, 'boldness_level', 0)
-        dil_funits = face.dilation_funits() if hasattr(face, 'dilation_funits') else 0
-        x_strength26 = int(round(dil_funits * face.S)) if bold_lvl > 0 else 0
+    def _ft_glyph_params(self, font_path: str, size26: int, bold_lvl: int, name: str, gid: int) -> Optional[Glyph]:
+        meta = self._get_font_meta(font_path)
+        S = (size26 / float(meta.upem)) - 1e-9
+        dil_funits = 0
+        if bold_lvl > 0:
+            dil_funits = BOLDNESS_FUNITS_RAMP[min(bold_lvl, len(BOLDNESS_FUNITS_RAMP) - 1)]
+        x_strength26 = int(round(dil_funits * S)) if bold_lvl > 0 else 0
         y_strength26 = int(round(0.80 * x_strength26)) if bold_lvl > 0 else 0
 
         if USE_CTYPES_FT:
-            f = self._ft.get(face.path)
+            f = self._ft.get(font_path)
             if f is None:
                 f = ctypes.POINTER(_FT_FaceRec)()
-                _check_ft(_ft_cdll.FT_New_Face(_ft_lib_handle, face.path.encode('utf-8'), 0, ctypes.byref(f)), "FT_New_Face")
-                self._ft[face.path] = f
-            _check_ft(_ft_cdll.FT_Set_Char_Size(f, face.size26, 0, 72, 72), "FT_Set_Char_Size")
+                _check_ft(_ft_cdll.FT_New_Face(self._ft_lib, font_path.encode('utf-8'), 0, ctypes.byref(f)), "FT_New_Face")
+                self._ft[font_path] = f
+            _check_ft(_ft_cdll.FT_Set_Char_Size(f, size26, 0, 72, 72), "FT_Set_Char_Size")
         else:
-            f = self._ft.get(face.path)
+            f = self._ft.get(font_path)
             if f is None:
-                f = self._ft[face.path] = freetype.Face(face.path)
-            f.set_char_size(face.size26, 0, 72, 72)
+                f = self._ft[font_path] = freetype.Face(font_path)
+            f.set_char_size(size26, 0, 72, 72)
 
-        # Decompose lowercase tilde composites (atilde, ntilde, otilde, itilde, utilde) so tildecomb is autohinted independently
-        if face.glyf is not None and name in face.glyf:
-            gl = face.glyf[name]
+        if meta.glyf is not None and name in meta.glyf:
+            gl = meta.glyf[name]
             if gl.isComposite() and len(gl.components) == 2:
                 c0, c1 = gl.components[0], gl.components[1]
                 if c1.glyphName == 'tildecomb' and getattr(c1, 'y', 0) == 0:
-                    g0 = self._load_single_ft(f, face.gid[c0.glyphName], x_strength26, y_strength26, 0, 0)
-                    dx26 = int(round(getattr(c1, 'x', 0) * face.S))
-                    g1 = self._load_single_ft(f, face.gid[c1.glyphName], x_strength26, y_strength26, dx26, 0)
+                    g0 = self._load_single_ft(f, meta.gid[c0.glyphName], x_strength26, y_strength26, 0, 0)
+                    dx26 = int(round(getattr(c1, 'x', 0) * S))
+                    g1 = self._load_single_ft(f, meta.gid[c1.glyphName], x_strength26, y_strength26, dx26, 0)
                     if g0 is not None and g1 is not None:
                         x_min = min(g0.left, g1.left)
                         x_max = max(g0.left + g0.cov.shape[1], g1.left + g1.cov.shape[1])
@@ -269,20 +336,26 @@ class GlyphCache:
                         cov[r1:r1 + g1.cov.shape[0], col1:col1 + g1.cov.shape[1]] = np.maximum(sub, g1.cov)
                         return Glyph(cov, x_min, y_top)
 
-        return self._load_single_ft(f, face.gid[name], x_strength26, y_strength26, 0, 0)
+        use_gid = gid if gid >= 0 else meta.gid.get(name, 0)
+        return self._load_single_ft(f, use_gid, x_strength26, y_strength26, 0, 0)
 
-    def _own_glyph(self, face, name):
+    def _ft_glyph(self, face, name):
+        bold_lvl = getattr(face, 'boldness_level', 0)
+        return self._ft_glyph_params(face.path, face.size26, bold_lvl, name, face.gid[name])
+
+    def _own_glyph_params(self, font_path: str, size26: int, name: str) -> Optional[Glyph]:
         if not self.warned and not HAVE_FT:
             print("NOTE: FreeType not available; using fallback outline rasteriser.")
             self.warned = True
-        gs = self._gs.get(face.path)
+        meta = self._get_font_meta(font_path)
+        gs = self._gs.get(font_path)
         if gs is None:
-            gs = self._gs[face.path] = face.tt.getGlyphSet()
+            gs = self._gs[font_path] = meta.tt.getGlyphSet()
         pen = _Pen(gs)
         gs[name].draw(pen)
         if not pen.contours:
             return None
-        sp = face.size26 / 64.0 / face.upem
+        sp = size26 / 64.0 / meta.upem
         xs = [p[0]*sp for c in pen.contours for p in c]
         ys = [p[1]*sp for c in pen.contours for p in c]
         left, right = math.floor(min(xs)), math.ceil(max(xs))
@@ -296,3 +369,90 @@ class GlyphCache:
             mask = ImageChops.logical_xor(mask, im)
         a = np.array(mask, dtype=np.float32).reshape(h, SS, w, SS).mean(axis=(1, 3))
         return Glyph((a*255+0.5).astype(np.uint8), left, top)
+
+    def _own_glyph(self, face, name):
+        return self._own_glyph_params(face.path, face.size26, name)
+
+
+class Rasterizer:
+    """Instance-owned page rasterizer consuming PositionedPage / PositionedDocument IR."""
+    def __init__(self, cfg: Optional[Config] = None):
+        self.cfg = cfg or Config()
+        self.cache = GlyphCache(self.cfg.exact_raster)
+
+    def close(self):
+        self.cache.close()
+
+    @staticmethod
+    def _draw_glyph_on_canvas(canvas: np.ndarray, g: Glyph, x: int, baseline: int, fg_rgb: Tuple[int, int, int]):
+        cov = g.cov.astype(np.float32) / 255.0
+        h, w = cov.shape
+        x0, y0 = x + g.left, baseline - g.top
+        H, W = canvas.shape[:2]
+        sx0, sy0 = max(0, -x0), max(0, -y0)
+        ex, ey = min(w, W - x0), min(h, H - y0)
+        if ex <= sx0 or ey <= sy0:
+            return
+        reg = canvas[y0 + sy0:y0 + ey, x0 + sx0:x0 + ex]
+        a = cov[sy0:ey, sx0:ex][..., None]
+        fg = np.array(fg_rgb, dtype=np.float32)
+        reg[:] = reg * (1.0 - a) + fg * a
+
+    def rasterize_page(self, ir_page: PositionedPage) -> Image.Image:
+        H, W = int(ir_page.height), int(ir_page.width)
+        canvas = np.empty((H, W, 3), dtype=np.float32)
+        canvas[:] = np.array(ir_page.bg, dtype=np.float32)
+
+        for cmd in ir_page.commands:
+            k = getattr(cmd, "kind", None)
+            if k == "glyph":
+                font_path = cmd.font_path
+                if not os.path.isfile(font_path):
+                    font_path = self.cfg.resolve_font_path(cmd.font_id)
+                if cmd.colr_layers:
+                    for l_gname, l_gid, l_rgb in cmd.colr_layers:
+                        lg = self.cache.get_by_params(font_path, cmd.size26, cmd.boldness_level, l_gname, l_gid)
+                        if lg is not None:
+                            self._draw_glyph_on_canvas(canvas, lg, cmd.x, cmd.baseline, l_rgb)
+                else:
+                    g = self.cache.get_by_params(font_path, cmd.size26, cmd.boldness_level, cmd.glyph_name, cmd.glyph_id)
+                    if g is not None:
+                        self._draw_glyph_on_canvas(canvas, g, cmd.x, cmd.baseline, cmd.color)
+            elif k in ("rect", "rule"):
+                x0 = max(0, int(cmd.x0))
+                y0 = max(0, int(cmd.y0))
+                x1 = min(W, int(cmd.x1))
+                y1 = min(H, int(cmd.y1))
+                if y1 > y0 and x1 > x0:
+                    canvas[y0:y1, x0:x1] = np.array(cmd.color, dtype=np.float32)
+            elif k == "ring_bullet":
+                cx, cy, r = int(cmd.cx), int(cmd.cy), int(cmd.r)
+                col_arr = np.array(cmd.color, dtype=np.float32)
+                for dy in range(-r - 1, r + 2):
+                    for dx in range(-r - 1, r + 2):
+                        dist = math.hypot(dx, dy)
+                        if r - 0.8 <= dist <= r + 0.8:
+                            py, px = cy + dy, cx + dx
+                            if 0 <= py < H and 0 <= px < W:
+                                canvas[py, px] = col_arr
+            elif k == "image":
+                x, y, w, h = int(cmd.x), int(cmd.y), int(cmd.width), int(cmd.height)
+                if cmd.pixels is not None and 0 <= y and y + h <= H and 0 <= x and x + w <= W:
+                    canvas[y:y + h, x:x + w] = np.asarray(cmd.pixels, dtype=np.float32)
+
+        return Image.fromarray(np.clip(canvas + 0.5, 0, 255).astype(np.uint8), "RGB")
+
+    def rasterize_document(self, ir_doc: PositionedDocument, max_pages: Optional[int] = None) -> list:
+        pages = ir_doc.pages[:max_pages] if max_pages else ir_doc.pages
+        return [self.rasterize_page(p) for p in pages]
+
+
+def rasterize(ir_page_or_doc, cfg: Optional[Config] = None):
+    """Public helper to rasterize a PositionedPage (returns PIL.Image) or PositionedDocument (returns List[PIL.Image])."""
+    r = Rasterizer(cfg)
+    try:
+        if isinstance(ir_page_or_doc, PositionedDocument):
+            return r.rasterize_document(ir_page_or_doc)
+        return r.rasterize_page(ir_page_or_doc)
+    finally:
+        r.close()

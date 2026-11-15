@@ -291,7 +291,7 @@ def _doc_blocks(z, href, html, cfg):
                 scale=1.0, baseline_shift_em=0.0, small_caps=False,
                 underline=False, strike=False, code=False,
                 letter_spacing_em=0.0, word_spacing_em=0.0, fg=None, bg=None,
-                text_transform=None, nowrap=False
+                text_transform=None, nowrap=False, link_href=None
             )
         try:
             ol_counter = int(el.get("start", 1)) if (el and el.name and el.name.lower() == "ol") else 1
@@ -321,7 +321,7 @@ def _doc_blocks(z, href, html, cfg):
                     fg=inline_state["fg"],
                     bg=inline_state.get("bg"),
                     nowrap=inline_state["nowrap"],
-                    from_text_transform=(tt == "uppercase" and (parent_kw or {}).get("align") != "left")
+                    from_text_transform=(tt == "uppercase" and (parent_kw or {}).get("align") != "left"), link_href=inline_state.get("link_href")
                 ))
                 continue
             if not isinstance(ch, Tag):
@@ -355,6 +355,8 @@ def _doc_blocks(z, href, html, cfg):
                 i2 = False
 
             new_inline = dict(inline_state)
+            if nm == "a" and ch.get("href"):
+                new_inline["link_href"] = ch.get("href")
             fs_em = _em(props.get("font-size"), cfg)
             if fs_em is not None and nm not in BLOCK_TAGS:
                 new_inline["scale"] = inline_state["scale"] * fs_em
@@ -664,7 +666,8 @@ def _collapse(runs):
                 letter_spacing_em=r.letter_spacing_em,
                 word_spacing_em=r.word_spacing_em, fg=r.fg,
                 nowrap=getattr(r, 'nowrap', False),
-                from_text_transform=getattr(r, 'from_text_transform', False)
+                from_text_transform=getattr(r, 'from_text_transform', False),
+                link_href=getattr(r, 'link_href', None)
             )
             res.append(r_copy)
     while res and getattr(res[-1], 'image', None) is None and res[-1].text.strip(" \t\r\n") == "" and res[-1].text != "\n":

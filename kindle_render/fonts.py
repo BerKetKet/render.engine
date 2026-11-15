@@ -1,6 +1,7 @@
 import math, os, re
 from fractions import Fraction
 from fontTools.ttLib import TTFont
+from fontTools.pens.boundsPen import BoundsPen
 from .config import BOLDNESS_FUNITS_RAMP
 
 import ctypes
@@ -72,6 +73,8 @@ class Face:
         self._load_tables()
         self._adv = {}
         self._kern = {}
+        self._bbox_cache = {}
+        self._glyph_set = None
 
     def dilation_funits(self) -> int:
         if self.boldness_level <= 0:
@@ -164,7 +167,8 @@ class Face:
                             self.cpsp_xadv = getattr(st.Value, 'XAdvance', 0) or 0
                             self.cpsp_xplace = getattr(st.Value, 'XPlacement', 0) or 0
 
-    def names(self, text):
+    def names_with_clusters(self, text: str):
+        """Maps input text to a list of (glyph_name, cluster_text) tuples."""
         for k, v in PRECOMPOSED_LIGATURES.items():
             if k in text:
                 text = text.replace(k, v)
@@ -180,30 +184,52 @@ class Face:
                         num_s, den_s = m.group(1), m.group(2)
                         for ch in num_s:
                             g_base = self.cmap.get(ord(ch), '.notdef')
-                            out.append(self.numr_map.get(g_base, g_base))
-                        out.append(self.cmap.get(0x2044, 'fraction'))
+                            out.append((self.numr_map.get(g_base, g_base), ch))
+                        out.append((self.cmap.get(0x2044, 'fraction'), "\u2044"))
                         for ch in den_s:
                             g_base = self.cmap.get(ord(ch), '.notdef')
-                            out.append(self.dnom_map.get(g_base, g_base))
+                            out.append((self.dnom_map.get(g_base, g_base), ch))
                         i += len(m.group(0))
                         continue
-                    cp = ord(text[i])
-                    if cp == 0xA0:
-                        cp = 0x20
-                    out.append(self.cmap.get(cp, '.notdef'))
+                    ch = text[i]
+                    cp = 0x20 if ord(ch) == 0xA0 else ord(ch)
+                    out.append((self.cmap.get(cp, '.notdef'), ch))
                     i += 1
                 if self.use_liga and self.liga_tabs:
-                    out = self._ligate(out)
+                    out = self._ligate_clusters(out, self.liga_tabs)
                 return out
 
         out = []
         for c in text:
-            cp = ord(c)
-            if cp == 0xA0:
-                cp = 0x20
-            out.append(self.cmap.get(cp, '.notdef'))
+            cp = 0x20 if ord(c) == 0xA0 else ord(c)
+            out.append((self.cmap.get(cp, '.notdef'), c))
         if self.use_liga and self.liga_tabs:
-            out = self._ligate(out)
+            out = self._ligate_clusters(out, self.liga_tabs)
+        return out
+
+    def names(self, text):
+        return [gn for gn, _ in self.names_with_clusters(text)]
+
+    def _ligate_clusters(self, g_pairs, tabs):
+        out, i = [], 0
+        g_names = [p[0] for p in g_pairs]
+        while i < len(g_pairs):
+            done = False
+            for lig in tabs:
+                if g_names[i] in lig:
+                    for L in lig[g_names[i]]:
+                        n = len(L.Component)
+                        if g_names[i + 1:i + 1 + n] == list(L.Component):
+                            comb_txt = "".join(p[1] for p in g_pairs[i:i + 1 + n])
+                            out.append((L.LigGlyph, comb_txt))
+                            i += 1 + n
+                            done = True
+                            break
+                if done:
+                    break
+            if not done:
+                out.append(g_pairs[i])
+                i += 1
         return out
 
     def _ligate_with_tabs(self, g, tabs):
@@ -229,15 +255,13 @@ class Face:
     def _ligate(self, g):
         return self._ligate_with_tabs(g, self.liga_tabs)
 
-    def shape_arabic_word(self, logical_word: str):
-        """Shapes a single Arabic word in logical order and returns visual RTL glyph names."""
+    def shape_arabic_word_with_clusters(self, logical_word: str):
+        """Shapes a single Arabic word in logical order and returns visual RTL (glyph_name, cluster_text, logical_char_idx) tuples."""
         cps = [ord(c) for c in logical_word]
         n = len(cps)
         forms = []
         for idx, cp in enumerate(cps):
-            # Check if previous logical char joins left
             prev_joins_left = (idx > 0) and (cps[idx - 1] in ARABIC_DUAL_JOIN)
-            # Check if current char can join right and next char can join right
             cur_joins_right = (cp in ARABIC_DUAL_JOIN or cp in ARABIC_RIGHT_ONLY)
             cur_joins_left = (cp in ARABIC_DUAL_JOIN)
             next_joins_right = (idx + 1 < n) and (cps[idx + 1] in ARABIC_DUAL_JOIN or cps[idx + 1] in ARABIC_RIGHT_ONLY)
@@ -253,22 +277,25 @@ class Face:
             else:
                 forms.append('isol')
 
-        glyphs = []
-        for cp, form in zip(cps, forms):
+        g_pairs = []
+        for idx, (cp, form) in enumerate(zip(cps, forms)):
             g = self.cmap.get(cp, '.notdef')
             sub_map = self.single_subs.get(form, {})
-            glyphs.append(sub_map.get(g, g))
+            g_pairs.append((sub_map.get(g, g), logical_word[idx]))
 
-        # Apply rlig / liga in logical order (e.g. lam.init + alef.fina -> lam_alef)
         for tag in ('rlig', 'liga'):
             if tag in self.multi_ligs:
-                glyphs = self._ligate_with_tabs(glyphs, self.multi_ligs[tag])
+                g_pairs = self._ligate_clusters(g_pairs, self.multi_ligs[tag])
 
-        # Reverse into visual left-to-right display order
-        return glyphs[::-1]
+        indexed = [(gn, ctxt, l_idx) for l_idx, (gn, ctxt) in enumerate(g_pairs)]
+        return indexed[::-1]
 
-    def shape_devanagari_word(self, word: str):
-        """Shapes a Devanagari word using native HarfBuzz (hb_shape) when available, with GSUB fallback."""
+    def shape_arabic_word(self, logical_word: str):
+        """Shapes a single Arabic word in logical order and returns visual RTL glyph names."""
+        return [gn for gn, _, _ in self.shape_arabic_word_with_clusters(logical_word)]
+
+    def shape_devanagari_word_with_clusters(self, word: str):
+        """Shapes a complex-script word using HarfBuzz when available, returning (gname, x_adv26, x_off_px, y_off_px, cluster_text) tuples."""
         if _hb_cdll is not None:
             if not hasattr(self, "_hb_font"):
                 blob = _hb_cdll.hb_blob_create_from_file(self.path.encode("utf-8"))
@@ -283,14 +310,25 @@ class Face:
             length = ctypes.c_uint(0)
             infos = _hb_cdll.hb_buffer_get_glyph_infos(buf, ctypes.byref(length))
             poss = _hb_cdll.hb_buffer_get_glyph_positions(buf, ctypes.byref(length))
+            n_g = length.value
+            clusters = [int(infos[i].cluster) for i in range(n_g)]
+            unique_starts = sorted(set(clusters))
+            span_map = {}
+            for ui, b_start in enumerate(unique_starts):
+                b_end = unique_starts[ui + 1] if ui + 1 < len(unique_starts) else len(b_utf8)
+                span_map[b_start] = b_utf8[b_start:b_end].decode("utf-8", "replace")
+            seen_clusters = set()
             out = []
-            for i in range(length.value):
+            for i in range(n_g):
                 gid = infos[i].codepoint
+                cl_b = clusters[i]
+                ctxt = span_map.get(cl_b, "") if cl_b not in seen_clusters else ""
+                seen_clusters.add(cl_b)
                 gname = self.order[gid] if gid < len(self.order) else ".notdef"
                 x_adv26 = int(math.floor(poss[i].x_advance * self.S))
                 x_off_px = int(round((poss[i].x_offset * self.S) / 64.0))
                 y_off_px = int(round((poss[i].y_offset * self.S) / 64.0))
-                out.append((gname, x_adv26, x_off_px, y_off_px))
+                out.append((gname, x_adv26, x_off_px, y_off_px, ctxt))
             _hb_cdll.hb_buffer_destroy(buf)
             return out
 
@@ -304,11 +342,15 @@ class Face:
                 matra = chars.pop(i)
                 chars.insert(j, matra)
             i += 1
-        glyphs = [self.cmap.get(ord(c), '.notdef') for c in chars]
+        g_pairs = [(self.cmap.get(ord(c), '.notdef'), c) for c in chars]
         for tag in ('akhn', 'half', 'cjct', 'pres', 'blwf', 'pstf', 'vatu'):
             if tag in self.multi_ligs:
-                glyphs = self._ligate_with_tabs(glyphs, self.multi_ligs[tag])
-        return [(gn, self.adv26(gn), 0, 0) for gn in glyphs]
+                g_pairs = self._ligate_clusters(g_pairs, self.multi_ligs[tag])
+        return [(gn, self.adv26(gn), 0, 0, ctxt) for gn, ctxt in g_pairs]
+
+    def shape_devanagari_word(self, word: str):
+        """Shapes a Devanagari word using native HarfBuzz (hb_shape) when available, with GSUB fallback."""
+        return [(gn, x_adv, x_off, y_off) for gn, x_adv, x_off, y_off, _ in self.shape_devanagari_word_with_clusters(word)]
 
     def get_colr_layers(self, gname: str):
         """Extracts (layer_glyph_name, (R, G, B)) list from COLR v1/v0 + CPAL tables for color emoji."""
@@ -366,6 +408,55 @@ class Face:
         self._colr_cache[gname] = layers if layers else None
         return self._colr_cache[gname]
 
+    def glyph_bbox_px(self, name: str, x: int, baseline: int, adv26: int, screen_w: int = 1080, screen_h: int = 2340):
+        """Computes clamped integer pixel bounding box (x0, y0, x1, y1) using fontTools metrics without FreeType."""
+        raw = self._bbox_cache.get(name)
+        if raw is None:
+            if self.glyf is not None and name in self.glyf:
+                gl = self.glyf[name]
+                if getattr(gl, "numberOfContours", 0) != 0 and hasattr(gl, "xMin"):
+                    raw = (gl.xMin, gl.yMin, gl.xMax, gl.yMax)
+            if raw is None:
+                colr = self.get_colr_layers(name)
+                if colr and self.glyf is not None:
+                    xs0, ys0, xs1, ys1 = [], [], [], []
+                    for l_gn, _ in colr:
+                        if l_gn in self.glyf:
+                            lgl = self.glyf[l_gn]
+                            if getattr(lgl, "numberOfContours", 0) != 0 and hasattr(lgl, "xMin"):
+                                xs0.append(lgl.xMin)
+                                ys0.append(lgl.yMin)
+                                xs1.append(lgl.xMax)
+                                ys1.append(lgl.yMax)
+                    if xs0:
+                        raw = (min(xs0), min(ys0), max(xs1), max(ys1))
+            if raw is None:
+                try:
+                    if self._glyph_set is None:
+                        self._glyph_set = self.tt.getGlyphSet()
+                    if name in self._glyph_set:
+                        bp = BoundsPen(self._glyph_set)
+                        self._glyph_set[name].draw(bp)
+                        if bp.bounds is not None:
+                            raw = bp.bounds
+                except Exception:
+                    pass
+            if raw is None:
+                raw_adv = self.hmtx[name][0] if name in self.hmtx.metrics else 500
+                raw = (0, int(-0.20 * self.upem), max(1, raw_adv), int(0.80 * self.upem))
+            self._bbox_cache[name] = raw
+
+        sp = self.size26 / 64.0 / float(self.upem)
+        gx0 = x + int(math.floor(raw[0] * sp))
+        gx1 = max(gx0 + 1, x + int(math.ceil(raw[2] * sp)), x + max(1, int(round(adv26 / 64.0))))
+        gy0 = baseline - int(math.ceil(raw[3] * sp))
+        gy1 = max(gy0 + 1, baseline - int(math.floor(raw[1] * sp)))
+        cx0 = max(0, min(screen_w - 1, gx0))
+        cy0 = max(0, min(screen_h - 1, gy0))
+        cx1 = max(cx0 + 1, min(screen_w, gx1))
+        cy1 = max(cy0 + 1, min(screen_h, gy1))
+        return (cx0, cy0, cx1, cy1)
+
     def adv26(self, name):
         a = self._adv.get(name)
         if a is None:
@@ -403,14 +494,15 @@ class Face:
         self._kern[key] = val
         return val
 
-    def shape(self, text, extra_track26=0):
-        """-> list of (glyph_name, advance26 including kerning, cpsp, and extra tracking)."""
-        g = self.names(text)
+    def shape_with_clusters(self, text: str, extra_track26: int = 0):
+        """-> list of (glyph_name, advance26, cluster_text)."""
+        g_pairs = self.names_with_clusters(text)
+        g = [gn for gn, _ in g_pairs]
         out = []
         is_all_caps = (text.isupper() and len(text) > 1) if self.use_cpsp else False
         cpsp_add26 = math.floor(self.cpsp_xadv * self.S) if (is_all_caps and self.cpsp_xadv) else 0
 
-        for i, n in enumerate(g):
+        for i, (n, ctxt) in enumerate(g_pairs):
             adv = self.adv26(n)
             if self.use_kern and i + 1 < len(g):
                 adv += math.floor(self.kern_units(n, g[i + 1]) * self.S)
@@ -418,8 +510,12 @@ class Face:
                 adv += cpsp_add26
             if extra_track26:
                 adv += extra_track26
-            out.append((n, adv))
+            out.append((n, adv, ctxt))
         return out
+
+    def shape(self, text, extra_track26=0):
+        """-> list of (glyph_name, advance26 including kerning, cpsp, and extra tracking)."""
+        return [(n, adv) for n, adv, _ in self.shape_with_clusters(text, extra_track26=extra_track26)]
 
     def lsb26(self, name):
         if self.glyf is None or name not in self.glyf:

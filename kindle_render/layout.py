@@ -27,6 +27,8 @@ class Box:
     glyphs: list
     width: int
     inline_image: object = None
+    word_idx: int = -1
+    direction: str = "ltr"
 
 @dataclass
 class Glue:
@@ -62,6 +64,28 @@ class Run:
     bg: Optional[Tuple[int, int, int]] = None
     nowrap: bool = False
     from_text_transform: bool = False
+    link_href: Optional[str] = None
+
+
+def _make_g_meta(base_meta, ctxt: str, direction: str = "ltr", l_char_idx: int = 0, is_lig: bool = False, is_synth_hy: bool = False, dx_px: int = 0, dy_px_override: Optional[int] = None):
+    m = dict(base_meta) if base_meta else {
+        "dy_px": 0,
+        "underline": False,
+        "strike": False,
+        "fg": None,
+        "bg": None,
+        "link_href": None,
+    }
+    if dx_px != 0:
+        m["dx_px"] = m.get("dx_px", 0) + dx_px
+    if dy_px_override is not None:
+        m["dy_px"] = dy_px_override
+    m["cluster_text"] = ctxt
+    m["direction"] = direction
+    m["logical_char_idx"] = l_char_idx
+    m["is_ligature"] = is_lig
+    m["is_synthetic_hyphen"] = is_synth_hy
+    return m
 
 
 def _shape_token_with_fallbacks(tok: str, face, family, run: Run, size26: int, display: bool, extra_track26: int = 0):
@@ -70,20 +94,20 @@ def _shape_token_with_fallbacks(tok: str, face, family, run: Run, size26: int, d
         if k in tok:
             tok = tok.replace(k, v)
 
-    style_meta = None
-    if (run.baseline_shift_em != 0.0 or run.underline or run.strike or run.fg is not None or getattr(run, "bg", None) is not None):
-        style_meta = dict(
-            dy_px=int(round(run.baseline_shift_em * (size26 / 64.0))),
-            underline=run.underline,
-            strike=run.strike,
-            fg=run.fg,
-            bg=getattr(run, "bg", None)
-        )
+    style_meta = dict(
+        dy_px=int(round(run.baseline_shift_em * (size26 / 64.0))),
+        underline=run.underline,
+        strike=run.strike,
+        fg=run.fg,
+        bg=getattr(run, "bg", None),
+        link_href=getattr(run, "link_href", None),
+    )
 
     if run.small_caps:
         out = []
         sc_face = family.face(run.bold, run.italic, int(round(size26 * 0.70)), display)
         i, n_len = 0, len(tok)
+        c_idx = 0
         while i < n_len:
             is_low = tok[i].islower()
             j = i + 1
@@ -91,16 +115,27 @@ def _shape_token_with_fallbacks(tok: str, face, family, run: Run, size26: int, d
                 j += 1
             sub = tok[i:j]
             use_f = sc_face if is_low else face
-            sh = use_f.shape(sub.upper() if is_low else sub, extra_track26=extra_track26)
-            for n, a in sh:
-                out.append((use_f, n, a, style_meta) if style_meta else (use_f, n, a))
+            sh = use_f.shape_with_clusters(sub.upper() if is_low else sub, extra_track26=extra_track26)
+            pos_sub = 0
+            for n, a, ctxt_up in sh:
+                orig_ctxt = sub[pos_sub:pos_sub + len(ctxt_up)] if is_low else ctxt_up
+                pos_sub += len(ctxt_up)
+                is_lig = (len(orig_ctxt) > 1 or n in ("uniFB00", "uniFB01", "uniFB02", "uniFB03", "uniFB04", "uniFB05", "uniFB06"))
+                gm = _make_g_meta(style_meta, orig_ctxt, "ltr", c_idx, is_lig=is_lig)
+                out.append((use_f, n, a, gm))
+                c_idx += 1
             i = j
         return out
 
     needs_fallback = any(ord(c) > 0x024F and ord(c) not in face.cmap for c in tok)
     if not needs_fallback:
-        sh = face.shape(tok, extra_track26=extra_track26)
-        return [(face, n, a, style_meta) if style_meta else (face, n, a) for n, a in sh]
+        sh = face.shape_with_clusters(tok, extra_track26=extra_track26)
+        out = []
+        for c_idx, (n, a, ctxt) in enumerate(sh):
+            is_lig = (len(ctxt) > 1 or n in ("uniFB00", "uniFB01", "uniFB02", "uniFB03", "uniFB04", "uniFB05", "uniFB06"))
+            gm = _make_g_meta(style_meta, ctxt, "ltr", c_idx, is_lig=is_lig)
+            out.append((face, n, a, gm))
+        return out
 
     # Arabic shaping (U+0600..U+06FF)
     if any(0x0600 <= ord(c) <= 0x06FF for c in tok):
@@ -110,19 +145,22 @@ def _shape_token_with_fallbacks(tok: str, face, family, run: Run, size26: int, d
         if core and core[-1] in ",!?:;\u061f\u060c\u061b":
             trail = core[-1]
             core = core[:-1]
-        g_names = ar_face.shape_arabic_word(core)
+        g_tuples = ar_face.shape_arabic_word_with_clusters(core)
+        g_names = [gt[0] for gt in g_tuples]
         out = []
         if trail:
             use_tf = face if ord(trail) in face.cmap else ar_face
             tn = use_tf.cmap.get(ord(trail), '.notdef')
             ta = use_tf.adv26(tn) + extra_track26
-            out.append((use_tf, tn, ta, style_meta) if style_meta else (use_tf, tn, ta))
-        for i_g, gn in enumerate(g_names):
+            gm = _make_g_meta(style_meta, trail, "rtl", len(core))
+            out.append((use_tf, tn, ta, gm))
+        for i_g, (gn, ctxt, l_idx) in enumerate(g_tuples):
             adv = ar_face.adv26(gn)
             if ar_face.use_kern and i_g + 1 < len(g_names):
                 adv += math.floor(ar_face.kern_units(gn, g_names[i_g + 1]) * ar_face.S)
             adv += extra_track26
-            out.append((ar_face, gn, adv, style_meta) if style_meta else (ar_face, gn, adv))
+            gm = _make_g_meta(style_meta, ctxt, "rtl", l_idx, is_lig=(len(ctxt) > 1))
+            out.append((ar_face, gn, adv, gm))
         return out
 
     # Hebrew shaping (U+0590..U+05FF)
@@ -133,110 +171,101 @@ def _shape_token_with_fallbacks(tok: str, face, family, run: Run, size26: int, d
         if core and core[-1] in ",!?:;":
             trail = core[-1]
             core = core[:-1]
-        rev_tok = trail + core[::-1]
         out = []
-        for ch in rev_tok:
+        if trail:
+            cp = ord(trail)
+            use_f = hb_face if cp in hb_face.cmap else face
+            n = use_f.cmap.get(cp, '.notdef')
+            a = use_f.adv26(n) + extra_track26
+            gm = _make_g_meta(style_meta, trail, "rtl", len(core))
+            out.append((use_f, n, a, gm))
+        for rev_i, ch in enumerate(core[::-1]):
+            l_idx = len(core) - 1 - rev_i
             cp = ord(ch)
             use_f = hb_face if cp in hb_face.cmap else face
             n = use_f.cmap.get(cp, '.notdef')
             a = use_f.adv26(n) + extra_track26
-            out.append((use_f, n, a, style_meta) if style_meta else (use_f, n, a))
+            gm = _make_g_meta(style_meta, ch, "rtl", l_idx)
+            out.append((use_f, n, a, gm))
         return out
 
     # Thai shaping (U+0E00..U+0E7F) via native HarfBuzz
     if any(0x0E00 <= ord(c) <= 0x0E7F for c in tok):
         th_face = family.special_face('thai', size26)
-        hb_items = th_face.shape_devanagari_word(tok)
+        hb_items = th_face.shape_devanagari_word_with_clusters(tok)
         out = []
-        for item in hb_items:
-            if isinstance(item, tuple) and len(item) == 4:
-                gn, x_adv26, x_off_px, y_off_px = item
-                a = x_adv26 + extra_track26
-                if x_off_px != 0 or y_off_px != 0 or style_meta:
-                    sm = dict(style_meta) if style_meta else {"dy_px": 0, "underline": False, "strike": False, "fg": None}
-                    sm["dx_px"] = sm.get("dx_px", 0) + x_off_px
-                    sm["dy_px"] = sm.get("dy_px", 0) - y_off_px
-                    out.append((th_face, gn, a, sm))
-                else:
-                    out.append((th_face, gn, a))
-            else:
-                gn = item
-                a = th_face.adv26(gn) + extra_track26
-                out.append((th_face, gn, a, style_meta) if style_meta else (th_face, gn, a))
+        for c_idx, (gn, x_adv26, x_off_px, y_off_px, ctxt) in enumerate(hb_items):
+            a = x_adv26 + extra_track26
+            dy_ov = style_meta["dy_px"] - y_off_px if (x_off_px != 0 or y_off_px != 0) else None
+            gm = _make_g_meta(style_meta, ctxt, "ltr", c_idx, is_lig=(len(ctxt) > 1), dx_px=x_off_px, dy_px_override=dy_ov)
+            out.append((th_face, gn, a, gm))
         return out
 
     # Devanagari shaping (U+0900..U+097F) via native HarfBuzz
     if any(0x0900 <= ord(c) <= 0x097F for c in tok):
         dv_face = family.special_face('devanagari', size26)
-        hb_items = dv_face.shape_devanagari_word(tok)
+        hb_items = dv_face.shape_devanagari_word_with_clusters(tok)
         out = []
-        for item in hb_items:
-            if isinstance(item, tuple) and len(item) == 4:
-                gn, x_adv26, x_off_px, y_off_px = item
-                a = x_adv26 + extra_track26
-                if x_off_px != 0 or y_off_px != 0 or style_meta:
-                    sm = dict(style_meta) if style_meta else {"dy_px": 0, "underline": False, "strike": False, "fg": None}
-                    sm["dx_px"] = sm.get("dx_px", 0) + x_off_px
-                    sm["dy_px"] = sm.get("dy_px", 0) - y_off_px
-                    out.append((dv_face, gn, a, sm))
-                else:
-                    out.append((dv_face, gn, a))
-            else:
-                gn = item
-                a = dv_face.adv26(gn) + extra_track26
-                out.append((dv_face, gn, a, style_meta) if style_meta else (dv_face, gn, a))
+        for c_idx, (gn, x_adv26, x_off_px, y_off_px, ctxt) in enumerate(hb_items):
+            a = x_adv26 + extra_track26
+            dy_ov = style_meta["dy_px"] - y_off_px if (x_off_px != 0 or y_off_px != 0) else None
+            gm = _make_g_meta(style_meta, ctxt, "ltr", c_idx, is_lig=(len(ctxt) > 1), dx_px=x_off_px, dy_px_override=dy_ov)
+            out.append((dv_face, gn, a, gm))
         return out
 
     # Ethiopic shaping (U+1200..U+137F)
     if any(0x1200 <= ord(c) <= 0x137F for c in tok):
         et_face = family.special_face('ethiopic', size26)
-        sh = et_face.shape(tok, extra_track26=extra_track26)
-        return [(et_face, n, a, style_meta) if style_meta else (et_face, n, a) for n, a in sh]
+        sh = et_face.shape_with_clusters(tok, extra_track26=extra_track26)
+        return [(et_face, n, a, _make_g_meta(style_meta, ctxt, "ltr", c_idx)) for c_idx, (n, a, ctxt) in enumerate(sh)]
 
     # CJK & Hangul shaping (U+3000..U+9FFF, U+AC00..U+D7AF, U+FF00..U+FFEF) via native HarfBuzz (GPOS halt/kern/chws)
     if any(0x3000 <= ord(c) <= 0x9FFF or 0xAC00 <= ord(c) <= 0xD7AF or 0xFF00 <= ord(c) <= 0xFFEF for c in tok):
         cjk_face = family.special_face('cjk', size26)
-        hb_items = cjk_face.shape_devanagari_word(tok)
+        hb_items = cjk_face.shape_devanagari_word_with_clusters(tok)
         out = []
-        for item in hb_items:
-            if isinstance(item, tuple) and len(item) == 4:
-                gn, x_adv26, x_off_px, y_off_px = item
-                a = x_adv26 + extra_track26
-                sm = dict(style_meta) if style_meta else {"dy_px": 0, "underline": False, "strike": False, "fg": None}
-                sm["dx_px"] = sm.get("dx_px", 0) + x_off_px
-                sm["dy_px"] = sm.get("dy_px", 0) + 1 - y_off_px
-                out.append((cjk_face, gn, a, sm))
-            else:
-                gn = item
-                a = cjk_face.adv26(gn) + extra_track26
-                out.append((cjk_face, gn, a, style_meta) if style_meta else (cjk_face, gn, a))
+        for c_idx, (gn, x_adv26, x_off_px, y_off_px, ctxt) in enumerate(hb_items):
+            a = x_adv26 + extra_track26
+            dy_ov = style_meta["dy_px"] + 1 - y_off_px
+            gm = _make_g_meta(style_meta, ctxt, "ltr", c_idx, dx_px=x_off_px, dy_px_override=dy_ov)
+            out.append((cjk_face, gn, a, gm))
         return out
 
     if len(tok) > 1 and any(ord(c) == 0x200D or (0x1F3FB <= ord(c) <= 0x1F3FF) for c in tok):
         ef = family.special_face('emoji', size26)
         if ef is not None:
-            hb_em = ef.shape_devanagari_word(tok)
-            if hb_em and all((it[0] if isinstance(it, tuple) else it) != '.notdef' for it in hb_em):
+            hb_em = ef.shape_devanagari_word_with_clusters(tok)
+            if hb_em and all(it[0] != '.notdef' for it in hb_em):
                 out = []
-                for it in hb_em:
-                    if isinstance(it, tuple) and len(it) == 4:
-                        gn, x_adv26, _, _ = it
-                        a = x_adv26 + extra_track26
-                    else:
-                        gn = it
-                        a = ef.adv26(gn) + extra_track26
-                    out.append((ef, gn, a, style_meta) if style_meta else (ef, gn, a))
+                for c_idx, (gn, x_adv26, _, _, ctxt) in enumerate(hb_em):
+                    a = x_adv26 + extra_track26
+                    use_txt = tok if (len(hb_em) == 1 and c_idx == 0) else ctxt
+                    gm = _make_g_meta(style_meta, use_txt, "ltr", c_idx, is_lig=(len(use_txt) > 1))
+                    out.append((ef, gn, a, gm))
                 return out
 
     out = []
-    for ch in tok:
+    i_ch = 0
+    c_idx = 0
+    while i_ch < len(tok):
+        ch = tok[i_ch]
         cp = ord(ch)
         if cp in (0xFE0E, 0xFE0F, 0x200D):
+            if out:
+                out[-1][3]["cluster_text"] = out[-1][3].get("cluster_text", "") + ch
+            i_ch += 1
             continue
+        cluster_s = ch
+        while i_ch + 1 < len(tok) and ord(tok[i_ch + 1]) in (0xFE0E, 0xFE0F):
+            cluster_s += tok[i_ch + 1]
+            i_ch += 1
         use_f = face if cp in face.cmap else family.fallback_face_for_char(ch, size26)
         n = use_f.cmap.get(cp, '.notdef')
         a = use_f.adv26(n) + extra_track26
-        out.append((use_f, n, a, style_meta) if style_meta else (use_f, n, a))
+        gm = _make_g_meta(style_meta, cluster_s, "ltr", c_idx)
+        out.append((use_f, n, a, gm))
+        c_idx += 1
+        i_ch += 1
     return out
 
 
@@ -287,6 +316,7 @@ def _reverse_rtl_subruns(text: str) -> str:
 
 def build_items(runs, family, cfg, size26, display=False, hyphenator=None, allow_hyphenation=True, lang="en", allow_sc_hyph=False):
     items = []
+    word_counter = 0
 
     if hyphenator is None and cfg.hyphenate and allow_hyphenation:
         from .hyphen import LiangHyphenator
@@ -311,7 +341,8 @@ def build_items(runs, family, cfg, size26, display=False, hyphenator=None, allow
             from PIL import Image as PILImage
             im_scaled = im.resize((w_sc, h_sc), PILImage.BILINEAR) if sc != 1.0 else im
             w26 = int(round(im_scaled.width * 64))
-            items.append(Box([], w26, inline_image=im_scaled))
+            items.append(Box([], w26, inline_image=im_scaled, word_idx=word_counter))
+            word_counter += 1
             continue
 
         r_size26 = int(round(size26 * getattr(run, 'scale', 1.0)))
@@ -326,7 +357,6 @@ def build_items(runs, family, cfg, size26, display=False, hyphenator=None, allow
 
         extra_track26 = int(round(getattr(run, 'letter_spacing_em', 0.0) * r_size26))
         extra_word26 = int(round(getattr(run, 'word_spacing_em', 0.0) * r_size26))
-        # If entering a word-spacing span right after a Glue space, include extra_word26 on that Glue
         if extra_word26 > 0 and items and isinstance(items[-1], Glue):
             items[-1].width += extra_word26
         is_nowrap = getattr(run, 'nowrap', False)
@@ -349,19 +379,16 @@ def build_items(runs, family, cfg, size26, display=False, hyphenator=None, allow
                 if split_idx is not None:
                     text = text[:split_idx] + "\u200b" + text[split_idx:]
 
-
-
         run_style_meta = None
-        if (run.baseline_shift_em != 0.0 or run.underline or run.strike or run.fg is not None or getattr(run, "bg", None) is not None):
+        if (run.baseline_shift_em != 0.0 or run.underline or run.strike or run.fg is not None or getattr(run, "bg", None) is not None or getattr(run, "link_href", None) is not None):
             run_style_meta = dict(
                 dy_px=int(round(run.baseline_shift_em * (r_size26 / 64.0))),
                 underline=run.underline,
                 strike=run.strike,
                 fg=run.fg,
-                bg=getattr(run, "bg", None)
+                bg=getattr(run, "bg", None),
+                link_href=getattr(run, "link_href", None)
             )
-
-        
 
         tokens = token_re.findall(text)
         for t_idx, tok in enumerate(tokens):
@@ -371,10 +398,10 @@ def build_items(runs, family, cfg, size26, display=False, hyphenator=None, allow
             if tok == "\n":
                 items.append(Glue(0, 1e9, 0))
                 items.append(Penalty(0, -INF, False))
+                word_counter += 1
                 continue
 
             if tok[0] in " \t\r":
-                # Check if space is between two Ethiopic tokens
                 sp_base = family.face(run.bold, run.italic, int(round(r_size26 * 0.70)), display).space26() if getattr(run, "small_caps", False) else face.space26()
                 if t_idx > 0 and t_idx + 1 < len(tokens):
                     t_prev, t_next = tokens[t_idx - 1], tokens[t_idx + 1]
@@ -393,27 +420,28 @@ def build_items(runs, family, cfg, size26, display=False, hyphenator=None, allow
                 sp = sp_base + extra_word26 + extra_track26
                 sh_u = math.floor(sp * cfg.space_shrink)
                 items.append(Glue(sp, sp * cfg.space_stretch, sh_u, non_breaking=is_nowrap, style_meta=run_style_meta, is_mono=getattr(run, 'code', False)))
+                word_counter += 1
 
             elif tok[0] == "\u00a0":
                 sp = (face.space26() + extra_word26 + extra_track26) * len(tok)
                 sh_u = math.floor(sp * cfg.space_shrink)
                 items.append(Glue(sp, sp * cfg.space_stretch, sh_u, non_breaking=True, style_meta=run_style_meta))
+                word_counter += 1
 
             elif tok in ("-", "\u2010", "\u2013", "\u2014"):
                 prev_was_glue = bool(items and isinstance(items[-1], Glue))
                 shaped = _shape_token_with_fallbacks(tok, face, family, run, r_size26, display, extra_track26)
                 w = sum(g[2] for g in shaped)
-                items.append(Box(shaped, w))
+                items.append(Box(shaped, w, word_idx=word_counter))
                 if not prev_was_glue and not is_nowrap:
                     items.append(Penalty(0, 0, False))
 
             elif "/" in tok and len(tok) > 3 and not is_nowrap:
-                # Split URLs or slash-separated compounds after '/' with unflagged zero-width break opportunity
                 parts = re.split(r'(?<=/)(?=.)', tok)
                 for p_i, part in enumerate(parts):
                     shaped = _shape_token_with_fallbacks(part, face, family, run, r_size26, display, extra_track26)
                     w = sum(g[2] for g in shaped)
-                    items.append(Box(shaped, w))
+                    items.append(Box(shaped, w, word_idx=word_counter))
                     if p_i < len(parts) - 1:
                         items.append(Penalty(0, 0, False))
 
@@ -425,12 +453,11 @@ def build_items(runs, family, cfg, size26, display=False, hyphenator=None, allow
                     p0, p1 = core_tok.split("\u200b", 1)
                     for p_i, pt in enumerate((p0, p1)):
                         sh_p = _shape_token_with_fallbacks(pt, face, family, run, r_size26, display, extra_track26)
-                        items.append(Box(sh_p, sum(g[2] for g in sh_p)))
+                        items.append(Box(sh_p, sum(g[2] for g in sh_p), word_idx=word_counter))
                         if p_i == 0:
                             items.append(Penalty(0, 0, False))
                     continue
                 elif len(core_tok) > 1 and not is_nowrap and any(0x3040 <= ord(c) <= 0x9FFF or 0xAC00 <= ord(c) <= 0xD7AF for c in core_tok):
-                    # UAX #14 Ideographic line breaking: allow zero-width break between CJK characters except before closing punctuation
                     cjk_closing = set("。、．，」』）】！？!?,.:;)")
                     cjk_chunks = []
                     for ch_c in core_tok:
@@ -440,7 +467,7 @@ def build_items(runs, family, cfg, size26, display=False, hyphenator=None, allow
                             cjk_chunks.append(ch_c)
                     for c_i, ck in enumerate(cjk_chunks):
                         sh_c = _shape_token_with_fallbacks(ck, face, family, run, r_size26, display, extra_track26)
-                        items.append(Box(sh_c, sum(g[2] for g in sh_c)))
+                        items.append(Box(sh_c, sum(g[2] for g in sh_c), word_idx=word_counter))
                         if c_i < len(cjk_chunks) - 1:
                             items.append(Penalty(0, 0, False))
                     continue
@@ -455,7 +482,6 @@ def build_items(runs, family, cfg, size26, display=False, hyphenator=None, allow
                     alpha = no_lead.rstrip('.,!?:;\u201d\u2019"\')]\u00bb\u2026')
                     trail_punct = no_lead[len(alpha):] + (tok[-1] if has_trailing_hyphen else "")
 
-                    # Handle French elision apostrophes (e.g. l’échanger, d’un, qu’il)
                     for apos in ("\u2019", "'"):
                         if apos in alpha:
                             a_idx = alpha.index(apos)
@@ -480,15 +506,19 @@ def build_items(runs, family, cfg, size26, display=False, hyphenator=None, allow
                         syllables = [tok]
                     clean_tok = tok
 
+                is_rtl_tok = any(0x0590 <= ord(c) <= 0x06FF for c in clean_tok)
+                b_dir = "rtl" if is_rtl_tok else "ltr"
+
                 if len(syllables) <= 1:
                     shaped = _shape_token_with_fallbacks(clean_tok, face, family, run, r_size26, display, extra_track26)
                     w = sum(g[2] for g in shaped)
-                    items.append(Box(shaped, w))
+                    items.append(Box(shaped, w, word_idx=word_counter, direction=b_dir))
                 else:
                     hy_face = family.face(run.bold, run.italic, int(round(r_size26 * 0.70)), display) if getattr(run, 'small_caps', False) else face
                     hn = hy_face.names("-")
                     hw = 0 if (getattr(run, 'small_caps', False) and allow_sc_hyph) else sum(hy_face.adv26(n) for n in hn)
-                    hy_glyphs = [(hy_face, n, hy_face.adv26(n)) for n in hn]
+                    hy_meta = _make_g_meta(run_style_meta, "-", "ltr", 0, is_synth_hy=True)
+                    hy_glyphs = [(hy_face, n, hy_face.adv26(n), hy_meta) for n in hn]
                     shaped = _shape_token_with_fallbacks(clean_tok, face, family, run, r_size26, display, extra_track26)
                     if len(shaped) == len(clean_tok):
                         curr = 0
@@ -496,7 +526,7 @@ def build_items(runs, family, cfg, size26, display=False, hyphenator=None, allow
                             chunk = shaped[curr:curr + len(syll)]
                             curr += len(syll)
                             w = sum(g[2] for g in chunk)
-                            items.append(Box(chunk, w))
+                            items.append(Box(chunk, w, word_idx=word_counter, direction=b_dir))
                             if s_idx < len(syllables) - 1:
                                 items.append(Penalty(hw, cfg.hyphen_penalty, True, hy_glyphs))
                     else:
@@ -520,20 +550,19 @@ def build_items(runs, family, cfg, size26, display=False, hyphenator=None, allow
                             if curr_char == target_char or s_idx == len(syllables) - 1:
                                 if chunk:
                                     w = sum(g[2] for g in chunk)
-                                    items.append(Box(chunk, w))
+                                    items.append(Box(chunk, w, word_idx=word_counter, direction=b_dir))
                                     chunk = []
                                 if s_idx < len(syllables) - 1:
                                     items.append(Penalty(hw, cfg.hyphen_penalty, True, hy_glyphs))
 
-                # Allow UAX #14 break before ellipsis when preceded by sentence punctuation (e.g. "man.…")
                 if items and isinstance(items[-1], Box) and len(items[-1].glyphs) >= 2 and not is_nowrap:
                     if items[-1].glyphs[-1][1] == "ellipsis" and items[-1].glyphs[-2][1] in ("period", "comma", "question", "exclam", "colon", "semicolon"):
                         last_box = items.pop()
                         g_pre = last_box.glyphs[:-1]
                         g_ell = [last_box.glyphs[-1]]
-                        items.append(Box(g_pre, sum(g[2] for g in g_pre)))
+                        items.append(Box(g_pre, sum(g[2] for g in g_pre), word_idx=last_box.word_idx, direction=last_box.direction))
                         items.append(Penalty(0, 0, False))
-                        items.append(Box(g_ell, g_ell[0][2]))
+                        items.append(Box(g_ell, g_ell[0][2], word_idx=last_box.word_idx, direction=last_box.direction))
 
                 if has_trailing_hyphen and not is_nowrap:
                     items.append(Penalty(0, 0, False))
@@ -543,7 +572,6 @@ def build_items(runs, family, cfg, size26, display=False, hyphenator=None, allow
     while items and isinstance(items[-1], Glue):
         items.pop()
 
-    # Keep closing quotation mark ("”", "’", "»") tied to a trailing bracketed tag ("[C7.xx]") to prevent 1-token runt tags
     if len(items) >= 3 and isinstance(items[-1], Box) and isinstance(items[-2], Glue) and isinstance(items[-3], Box):
         if items[-1].glyphs and items[-1].glyphs[0][1] == "bracketleft" and items[-1].glyphs[-1][1] == "bracketright":
             if items[-3].glyphs and items[-3].glyphs[-1][1] in ("quotedblright", "quoteright", "guillemotright"):
@@ -749,12 +777,6 @@ TABLE_WINDOW = (0.0, 0.0, 0.0, 1.0, 3.0, 8.0, 9.0, 10.0, 10.0)
 def break_kp(items, line_w, tolerance, cfg, ragged):
     """
     Backward Dynamic Programming Paragraph Composer.
-    Implements backward dynamic programming with:
-    - Quadratic stretch cost: (2.0 * (slack / (G + 0.1)))^2
-    - Quadratic shrink cost:  (2.5 * (slack / (G + 0.1)))^2, max_shrink = 0.179*(G+0.1) justified / 0.099*(G+0.1) ragged
-    - Quadratic ragged cost:  (4.0 * (slack / L))^2
-    - Terminal-word hyphen split guard (w28) and runt penalty: s1 + (0.2 - fill) * 4.2 for fill < 0.2
-    - 7-line hyphen history bitmask indexing Fibonacci TABLE_CONSEC and TABLE_WINDOW scaled by 1.5
     """
     n_items = len(items)
     if n_items == 0:
@@ -766,7 +788,6 @@ def break_kp(items, line_w, tolerance, cfg, ragged):
     l1 = float(line_w(1))
     l2 = float(line_w(2))
     l3 = float(line_w(3))
-    # Multi-line or 1-line drop-cap intrusions where line width changes by more than standard first-line indent (>12%)
     varies_dropcap = (abs(l1 - l2) > 1.0 or abs(l2 - l3) > 1.0 or abs(l1 - l0) > 0.078 * l1)
 
     ref_size26 = float(cfg.size26)
@@ -1058,7 +1079,9 @@ def _split_overwide_boxes(items, line_w, cfg):
                 f0 = rem[0][0]
                 hn = f0.names("-") if f0 is not None else ["hyphen"]
                 hw = sum(f0.adv26(n) for n in hn) if f0 is not None else 0
-                hy_g = [(f0, n, f0.adv26(n)) for n in hn] if f0 is not None else []
+                base_m = rem[0][3] if len(rem[0]) > 3 else None
+                hy_m = _make_g_meta(base_m, "-", "ltr", 0, is_synth_hy=True)
+                hy_g = [(f0, n, f0.adv26(n), hy_m) for n in hn] if f0 is not None else []
                 acc = 0
                 cut = 1
                 for k, g in enumerate(rem[:-1], 1):
@@ -1068,11 +1091,11 @@ def _split_overwide_boxes(items, line_w, cfg):
                     else:
                         break
                 chunk = rem[:cut]
-                out.append(Box(chunk, sum(g[2] for g in chunk)))
+                out.append(Box(chunk, sum(g[2] for g in chunk), word_idx=it.word_idx, direction=it.direction))
                 out.append(Penalty(hw, cfg.hyphen_penalty, True, hy_g))
                 rem = rem[cut:]
             if rem:
-                out.append(Box(rem, sum(g[2] for g in rem)))
+                out.append(Box(rem, sum(g[2] for g in rem), word_idx=it.word_idx, direction=it.direction))
         else:
             out.append(it)
     return out
@@ -1140,7 +1163,6 @@ def make_lines(items, line_w, cfg, ragged, is_heading=False, align=None):
         if b < len(items) and isinstance(items[b], Penalty) and items[b].width > 0:
             hy = items[b]
         if seg:
-            # Reverse contiguous RTL (Arabic/Hebrew) Box-Glue-Box subruns on each line (UAX #9 L2)
             def _is_rtl_box(it):
                 return isinstance(it, Box) and it.glyphs and any(
                     g[0] is not None and any(k in getattr(g[0], "path", "") for k in ("Arabic", "Naskh", "Hebrew"))
@@ -1170,12 +1192,10 @@ def make_lines(items, line_w, cfg, ragged, is_heading=False, align=None):
                         else:
                             break
                     sub_rtl = list(reversed(seg[idx_s:idx_e]))
-                    # If the last logical word (now sub_rtl[0]) has a trailing period, move it to the visual end (right side of sub_rtl[-1]) if followed by nothing, OR if at end of RTL run, move period from start of sub_rtl[0].glyphs to start of sub_rtl[0].glyphs (which it already is when shaped in reverse)!
-                    # Wait: when "." is kept at the end of logical `core`:
-                    # - In Arabic: `shape_arabic_word(core)` reverses glyphs into visual order, so "." at the end of `core` is ALREADY at `glyphs[0]` (visual left of that word)!
-                    # - When `sub_rtl` is a single line with multiple RTL words (`w1 w2 ... wn.`), `wn.` is `sub_rtl[0]`, so its "." at `glyphs[0]` is at the visual left of the entire RTL run (`x=208` in probe_091)! Wait: in probe_091, the period WAS at the visual RIGHT of `w1` (`القاهرة.`, `ירושלים.`)!
                     if len(sub_rtl) > 1 and sub_rtl[0].glyphs and sub_rtl[0].glyphs[0][1] == "period":
                         per_g = sub_rtl[0].glyphs.pop(0)
+                        if len(per_g) > 3 and isinstance(per_g[3], dict):
+                            per_g = (per_g[0], per_g[1], per_g[2], dict(per_g[3], moved_rtl_period_word_idx=sub_rtl[0].word_idx))
                         sub_rtl[0].width -= per_g[2]
                         sub_rtl[-1].glyphs.append(per_g)
                         sub_rtl[-1].width += per_g[2]
@@ -1272,25 +1292,34 @@ def layout_line(seg, hy, width26, justify, last, cfg):
                     cum_gw = nxt_gw
                 elif getattr(cfg, "remainder", "bresenham") == "bresenham":
                     extra_glue[gi] = ((j + 1) * delta) // k - (j * delta) // k
-                    extra_glue[gi] = ((j + 1) * delta) // k - (j * delta) // k
                 else:
                     e = base + (1 if (cfg.remainder == "first" and j < rem) or (cfg.remainder == "last" and j >= k - rem) else 0)
                     extra_glue[gi] = e
 
     out = []
     pen = 0
+    vis_word_idx = 0
+    last_logical_w = None
 
     for i, it in enumerate(seg):
         if isinstance(it, Box):
             if getattr(it, 'inline_image', None) is not None:
                 out.append((None, '__inline_img__', (pen, it.inline_image)))
                 pen += it.width
+                vis_word_idx += 1
+                last_logical_w = None
                 continue
+            if last_logical_w is not None and it.word_idx != last_logical_w:
+                vis_word_idx += 1
+            last_logical_w = it.word_idx
             t_gap = track_per_box[i]
             for g_idx, g_tup in enumerate(it.glyphs):
                 face, name, adv = g_tup[0], g_tup[1], g_tup[2]
-                s_meta = g_tup[3] if len(g_tup) > 3 else None
-                out.append((face, name, pen, adv, s_meta) if s_meta else (face, name, pen))
+                s_meta = dict(g_tup[3]) if (len(g_tup) > 3 and g_tup[3] is not None) else {}
+                s_meta["word_idx"] = vis_word_idx
+                s_meta["logical_word_idx"] = s_meta.get("moved_rtl_period_word_idx", it.word_idx)
+                s_meta["direction"] = s_meta.get("direction", it.direction)
+                out.append((face, name, pen, adv, s_meta))
                 pen += adv
                 if g_idx < len(it.glyphs) - 1:
                     pen += t_gap
@@ -1307,10 +1336,17 @@ def layout_line(seg, hy, width26, justify, last, cfg):
             if s_meta and (s_meta.get('underline') or s_meta.get('strike') or s_meta.get('bg')):
                 out.append((None, '__space__', pen, sp_w, s_meta))
             pen += sp_w
+            vis_word_idx += 1
+            last_logical_w = None
 
     if hy:
-        for face, name, adv in hy.glyphs:
-            out.append((face, name, pen))
+        for h_tup in hy.glyphs:
+            face, name, adv = h_tup[0], h_tup[1], h_tup[2]
+            s_meta = dict(h_tup[3]) if (len(h_tup) > 3 and h_tup[3] is not None) else _make_g_meta(None, "-", "ltr", 0, is_synth_hy=True)
+            s_meta["word_idx"] = vis_word_idx
+            s_meta["logical_word_idx"] = last_logical_w if last_logical_w is not None else vis_word_idx
+            s_meta["is_synthetic_hyphen"] = True
+            out.append((face, name, pen, adv, s_meta))
             pen += adv
 
     return out, pen, hang_left

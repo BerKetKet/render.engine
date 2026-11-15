@@ -28,3 +28,6 @@ Per the prep handoff rules, no fidelity tuning was performed after freezing the 
    - Measure `<figure>/<figcaption>` vertical margins in `exam1` E11 (page 48).
 
 - Table solver: a column narrower than its longest header word makes the header break mid-word (seen on a 4-column table with "Recovery (min)"). Min-content width should not go below the longest unbreakable word.
+
+- **`epub.py:_collapse` Drops `run.bg` on `<mark>` Runs (`epub.py:668`)**:
+  - `_collapse(runs)` constructs `r_copy = Run(...)` without passing `bg=getattr(r, 'bg', None)`, causing `<mark>` background highlights parsed in `walk()` (`new_inline["bg"] = (255, 255, 0)`) to be silently dropped before `build_items`. Preserved in v1.7.0 per zero-pixel-change rule (`exam2` p.40 and `synthetic` p.3 depend on this).
