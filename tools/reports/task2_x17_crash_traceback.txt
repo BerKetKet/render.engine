@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "<string>", line 13, in <module>
+  File "/working_dir/c_67aa1dc148eace5f/work/repo/tools/corpus.py", line 231, in render_corpus_once
+    imgs, meta = render_blocks(blocks, cfg, fam, max_pages=max_pages, return_meta=True)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/working_dir/c_67aa1dc148eace5f/work/repo/kindle_render/page.py", line 927, in render_blocks
+    pg.add_text_block(b)
+  File "/working_dir/c_67aa1dc148eace5f/work/repo/kindle_render/page.py", line 298, in add_text_block
+    lines = make_lines(items, line_w, c, ragged, is_heading=(b.heading > 0), align=b.align)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/working_dir/c_67aa1dc148eace5f/work/repo/kindle_render/layout.py", line 1109, in make_lines
+    for k, b in enumerate(br):
+                ^^^^^^^^^^^^^
+TypeError: 'NoneType' object is not iterable

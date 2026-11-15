@@ -1,0 +1,27 @@
+{
+  "probe_pages_total": 98,
+  "probe_pages_identical_before_after": 98,
+  "exam1_pages_total": 70,
+  "exam1_pages_identical_before_after": 70,
+  "exam2_non_x17_pages_total": 64,
+  "exam2_non_x17_pages_identical_before_after": 64,
+  "exam2_x17_page_65_vs_device": {
+    "exact_page": true,
+    "diff_pixels": 0,
+    "capture_lines": 12,
+    "render_lines": 12,
+    "pos_exact_lines": 12,
+    "pos_indep_lines": 12
+  },
+  "exam2_x17_before_sha256": "bd2ad17c451c8b3420eb8aa3fb8fb3c9b2702557acaa24cc76ca3cd85783df3b",
+  "exam2_x17_after_sha256": "bffa5306e4160286d3f909d37c01577ebe48c5d652d62d9078e7d1b82f586957",
+  "containment_test": {
+    "pages_rendered": 2,
+    "page_chapters": [
+      "ch_broken",
+      "ch_ok"
+    ],
+    "recorded_error_chapter": "ch_broken",
+    "recorded_exception": "AttributeError(\"'NoneType' object has no attribute 'width'\")"
+  }
+}

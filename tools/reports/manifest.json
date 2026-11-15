@@ -1,0 +1,47 @@
+{
+  "engine_version": "1.6.0",
+  "git_commit": "e02b57d1b41edcf1921702f181a4c181796c1148",
+  "python_version": "3.11.2",
+  "freetype_version": "2.12.1",
+  "fonts_sha256": {
+    "kindle_render/fonts/Bookerly-Bold.ttf": "c151ccad313fbefe0e733510fbc1b8d937748a4f4d20b0eed5236192acb7547c",
+    "kindle_render/fonts/Bookerly-BoldItalic.ttf": "d9379d485cd9bf3f8c6ef453fe4c114a744e27c7c08190f172c1846734a741b5",
+    "kindle_render/fonts/Bookerly-Display.ttf": "9a6d2941bd2c722106b5fab1ee63430bdf1631a37aaae97d4665904358b3fbca",
+    "kindle_render/fonts/Bookerly-Regular.ttf": "262d5bc642d2fc710bfffe1aa2664983ed9c478108a0cfb7d57672090feffde7",
+    "kindle_render/fonts/Bookerly-RegularItalic.ttf": "bdff5401a92c061f731dda69fb214a7be3a756f7f0ffd8cfbc1a7bcdabf7a417",
+    "kindle_render/fonts/DroidSansMono.ttf": "db19a1fdaba41cc4a2fec0330e5c15e71c6dd68a3ef074f4f28268828b45c862",
+    "kindle_render/fonts/NotoColorEmoji.ttf": "83914c48dc1bb7ff27cd06a3728d2f997dbcdc15cdc81b7deb21079c6d36e108",
+    "kindle_render/fonts/NotoNaskhArabic-Regular.ttf": "4a23dc5dea7f846fb274f7ebb256d25063bc432e2cb810fc9eeb964a3d7ae217",
+    "kindle_render/fonts/NotoSansCJK-Regular.otf": "a57e8161e38bd46c4b77a151fc8c9508f94838b6288ee8460a1bf04fbcdacb61",
+    "kindle_render/fonts/NotoSansDevanagari-Regular.ttf": "3b52bdbb58647090b1493dc2412f7654e4a2f3c56dc219615fa6c8b536d9e77c",
+    "kindle_render/fonts/NotoSansHebrew-Regular.ttf": "ef877e0e136f7942900b7ec8c866c180562d45def425b8bfe2dc0a992e3c2fd7",
+    "kindle_render/fonts/NotoSansSymbols2-Regular.ttf": "876598db5f1e3bef2bc77c4d94c5b0d5d2c1620be4878a06f18fb5434e331688",
+    "kindle_render/fonts/NotoSansThai-Regular.ttf": "0dc4e81ac4fe236db1a1d8a9cdb28971b9c136de08f2e6328e365e11c76410de",
+    "kindle_render/fonts/NotoSerifEthiopic-Regular.ttf": "30bd9e21c81cd95a3004bbf75aba9b2ab5f861408a3fbb4f82b10fe82072952b"
+  },
+  "hyphen_sha256": {
+    "kindle_render/hyph_de.bin": "6ca1a9492da1380c4a43120b66b4553fb4b76362f4955d5de58e10f77982f678",
+    "kindle_render/hyph_de_DE.dic": "8f5017f08b9b943779b86a3afcdfb7c77f3a6f566525f90f60d4073e8b7dbced",
+    "kindle_render/hyph_deva.bin": "65534f81c408f0a0529384245516a2d7e1a9e9b7cba062b20f4ac01216723f87",
+    "kindle_render/hyph_en_YJ.bin": "c6b35e08fe6023de9f39be3360926db5cc56befefef22c9319424f2e1d9e727e",
+    "kindle_render/hyph_en_us.dic": "cb76034d0a48f4eeda6315e5991671e49ba874300864ebb2bf4b768c8bbfbb0c",
+    "kindle_render/hyph_es.bin": "39c7b3c2b3e7fee1a58e8aa64946189680ba9b1614a4ee9ef6e3d0d85b5b30b0",
+    "kindle_render/hyph_fr.bin": "cc9c6d53102df854ed60b13a1e841ad4eb6343067ef423403cc07eec2af54101",
+    "kindle_render/hyph_fr.dic": "fedf8813d594f0ea04a94a1d7e0ea2c6845a476f7296b6840cdf3b0ad3fe4605",
+    "kindle_render/hyph_gujr.bin": "46490fc8601d94931ede34b10ae9c0951dd1cc6acd2f9fb1681b8f81811b79b7",
+    "kindle_render/hyph_it.bin": "dd5d9ded50d36db3b579716f7fa15e81c859fb20edd65312eaed1220423e4592",
+    "kindle_render/hyph_mlym.bin": "1a34386778ab3ca93bc0d54aa181709c65f1f88afa0afa2db8ab9a3b341e4b47",
+    "kindle_render/hyph_nl.bin": "3e4a5a63b06b3b590cc7b83afa29faf984b57eb25a1b22edd678778755df0bb0",
+    "kindle_render/hyph_pt.bin": "d70bdcda457a64af44f759dce4f3a0452aea7e2c3f0efd086043f90490a041b4",
+    "kindle_render/hyph_ru.bin": "7d9fc756255abbcc3d6cd508eca76a3b9b18f31c2bb0d0a1a10b02072c4ec784",
+    "kindle_render/hyph_taml.bin": "d7e876b9f1e14bbd8f8872ea67ce77645e8adcddba6f0dc691ea4b52b156daee"
+  },
+  "corpus_files_sha256": {
+    "probe:epub:master_probe_v1.epub": "95d450c6d0f80d883b6498be86a6d73d497f7b2eb211c8b324bde5f43d9799e6",
+    "probe:captures:master_probe_captures.zip": "13a69bb73f2ca1e3033e96cab6c94fc16593ee0fed53afb2f9dae3980fa47c04",
+    "exam1:epub:kindle_exam_v1.epub": "dcb38806168f8cc721a282b4a036ea7a49417be993afebdb5bce8f5c7d87c319",
+    "exam1:captures:exam_screen.zip": "c13ffdac76fefa3810c32bfb8c685d4fd7d29de211c2394f467194e8fcf92e6b",
+    "exam2:epub:kindle_exam_v2.epub": "e13af963bbe0c91b88b1a51be1b95bc9604ba408b4de854003d3a70d64f9e325",
+    "exam2:captures:exam_v2.zip": "186e21c268e4640faa34e5efed5a5a18a600163abe238e06fa3f5e063952d530"
+  }
+}

@@ -1,0 +1,1102 @@
+import re
+"""Pagination and drawing engine.
+Implements:
+1. Subpixel 26.6 pen placement and float32/rounded-uint8 alpha blending
+2. Dynamic vertical CSS em unit (vem_px = std_pitch / 1.2) across all viewport presets
+3. Multi-line heading pagination, widow/orphan protection, and heading keep-with-next
+4. Native Bookerly-Display and Bookerly-Regular (.dc::first-letter) drop caps
+5. Solitary cover canvas with Skia 16.16 fixed-point bilinear resampling, <ol>/<ul> markers, <pre>, <table>, and <img>
+"""
+import math
+import numpy as np
+from PIL import Image
+from .layout import build_items, make_lines, layout_line, Run
+from .raster import GlyphCache
+
+def _skia_bilerp_rgb(im: Image.Image, W_out: int, H_out: int, x0: float = -0.009802, sx: float = 0.0, y0: float = -0.041117, sy: float = 0.0) -> np.ndarray:
+    arr = np.array(im.convert("RGB"), dtype=np.float64)
+    H_in, W_in = arr.shape[:2]
+    if sx <= 0.0:
+        sx = (60680 / 65536.0) if (W_in == 1000 and W_out == 1080) else (W_in / float(W_out))
+    if sy <= 0.0:
+        sy = (60680 / 65536.0) if (H_in == 1500 and H_out == 1620) else (H_in / float(H_out))
+    ys = np.clip(y0 + sy * np.arange(H_out), 0, H_in - 1)
+    xs = np.clip(x0 + sx * np.arange(W_out), 0, W_in - 1)
+    yi = np.floor(ys).astype(int)
+    xi = np.floor(xs).astype(int)
+    yi1 = np.minimum(yi + 1, H_in - 1)
+    xi1 = np.minimum(xi + 1, W_in - 1)
+    wy = (ys - yi)[:, None, None]
+    wx = (xs - xi)[None, :, None]
+    val = (arr[yi[:, None], xi[None, :]] * (1.0 - wy) * (1.0 - wx) +
+           arr[yi[:, None], xi1[None, :]] * (1.0 - wy) * wx +
+           arr[yi1[:, None], xi[None, :]] * wy * (1.0 - wx) +
+           arr[yi1[:, None], xi1[None, :]] * wy * wx)
+    return np.round(val).astype(np.uint8)
+
+class Pager:
+    def __init__(self, cfg, family):
+        self.cfg, self.fam = cfg, family
+        self.cache = GlyphCache(cfg.exact_raster)
+        self.images = []
+        self.page_chapters = []
+        self.chapter_errors = []
+        self.current_chapter = ""
+        self.cur_page_chapter = ""
+        self.canvas = None
+        self.new_page()
+        self.prev_mb = 0
+        self.prev_kind = None
+        self.prev_heading = 0
+
+    @property
+    def pages(self):
+        return self.images + [None]
+
+    def _to_image(self):
+        return Image.fromarray(np.clip(self.canvas + 0.5, 0, 255).astype(np.uint8), "RGB")
+
+    def _mark_page_non_empty(self):
+        if self.page_empty and not self.cur_page_chapter:
+            self.cur_page_chapter = self.current_chapter
+        self.page_empty = False
+
+    def new_page(self):
+        c = self.cfg
+        if self.canvas is not None:
+            self.images.append(self._to_image())
+            self.page_chapters.append(self.cur_page_chapter or self.current_chapter)
+        self.cur_page_chapter = ""
+        self.canvas = np.empty((c.screen_h, c.screen_w, 3), dtype=np.float32)
+        self.canvas[:] = np.array(c.bg, dtype=np.float32)
+        self.y_float = float(c.top)
+        self.y = c.top
+        self.page_empty = True
+        self.prev_kind = None
+        self.prev_heading = 0
+
+    def draw_glyph(self, g, x, baseline, fg_override=None):
+        cov = g.cov.astype(np.float32) / 255.0
+        h, w = cov.shape
+        x0, y0 = x + g.left, baseline - g.top
+        H, W = self.canvas.shape[:2]
+        sx0, sy0 = max(0, -x0), max(0, -y0)
+        ex, ey = min(w, W - x0), min(h, H - y0)
+        if ex <= sx0 or ey <= sy0:
+            return
+        reg = self.canvas[y0 + sy0:y0 + ey, x0 + sx0:x0 + ex]
+        a = cov[sy0:ey, sx0:ex][..., None]
+        fg = np.array(fg_override if fg_override is not None else self.cfg.fg, dtype=np.float32)
+        reg[:] = reg * (1.0 - a) + fg * a
+
+    def overhang(self, placements):
+        if not self.cfg.overhang_shift or not placements:
+            return 0
+        for pl_tup in placements:
+            face, name = pl_tup[0], pl_tup[1]
+            if face is not None:
+                return max(0, -face.lsb26(name))
+        return 0
+
+    def draw_line(self, placements, start26, baseline):
+        start26 += self.overhang(placements)
+        H, W = self.canvas.shape[:2]
+        for pl_tup in placements:
+            s_meta_bg = pl_tup[4] if len(pl_tup) > 4 else None
+            if s_meta_bg and s_meta_bg.get("bg"):
+                off_bg = pl_tup[2]
+                adv_bg = pl_tup[3] if len(pl_tup) > 3 else 0
+                x0_bg = math.floor((start26 + off_bg) / 64.0 + self.cfg.place_phase)
+                x1_bg = math.floor((start26 + off_bg + adv_bg) / 64.0 + self.cfg.place_phase) + 1
+                y0_bg = max(0, baseline - int(round(0.81 * self.cfg.size_px())))
+                y1_bg = min(H, baseline + int(round(0.33 * self.cfg.size_px())) + 1)
+                self.canvas[y0_bg:y1_bg, max(0, x0_bg):min(W, x1_bg)] = np.array(s_meta_bg["bg"], dtype=np.float32)
+        for pl_tup in placements:
+            face, name, off = pl_tup[0], pl_tup[1], pl_tup[2]
+            adv26 = pl_tup[3] if len(pl_tup) > 3 else 0
+            s_meta = pl_tup[4] if len(pl_tup) > 4 else None
+
+            if name == '__inline_img__':
+                pen_off, im = off
+                x = math.floor((start26 + pen_off) / 64.0 + self.cfg.place_phase)
+                y = baseline - im.height + 1
+                if 0 <= y and y + im.height <= H and 0 <= x and x + im.width <= W:
+                    self.canvas[y:y + im.height, x:x + im.width] = np.array(im, dtype=np.float32)
+                continue
+
+            dy_px = s_meta.get("dy_px", 0) if s_meta else 0
+            dx_px = s_meta.get("dx_px", 0) if s_meta else 0
+            fg_col = s_meta.get("fg") if s_meta else None
+            x = math.floor((start26 + off) / 64.0 + self.cfg.place_phase) + dx_px
+
+            if name != '__space__':
+                colr_layers = face.get_colr_layers(name) if (face is not None and hasattr(face, "get_colr_layers")) else None
+                if colr_layers:
+                    for l_gname, l_rgb in colr_layers:
+                        lg = self.cache.get(face, l_gname)
+                        if lg is not None:
+                            self.draw_glyph(lg, x, baseline + dy_px, fg_override=l_rgb)
+                else:
+                    g = self.cache.get(face, name)
+                    if g is not None:
+                        self.draw_glyph(g, x, baseline + dy_px, fg_override=fg_col)
+
+            if s_meta and (s_meta.get("underline") or s_meta.get("strike")):
+                x_end = math.floor((start26 + off + adv26) / 64.0 + self.cfg.place_phase)
+                col_arr = np.array(fg_col if fg_col is not None else self.cfg.fg, dtype=np.float32)
+                stroke_h = int(self.cfg.size_px() // 22.5) + 1
+                if s_meta.get("underline"):
+                    uy = baseline + dy_px + (7 - stroke_h)
+                    if 0 <= uy < H - stroke_h:
+                        self.canvas[uy:uy + stroke_h, max(0, x):min(W, x_end + 1)] = col_arr
+                if s_meta.get("strike"):
+                    sy = baseline + dy_px - int(0.21 * self.cfg.pitch_px())
+                    if 0 <= sy < H - stroke_h:
+                        self.canvas[sy:sy + stroke_h, max(0, x):min(W, x_end + 1)] = col_arr
+
+    def pitch_for(self, size26):
+        c = self.cfg
+        return int(round(c.pitch_px() * (size26 / float(c.size26))))
+
+    def baseline_in(self, line_top, pitch, size26):
+        px = size26 / 64.0
+        return line_top + int(round((pitch - px) / 2.0 + self.cfg.typo_ascender * px))
+
+    def _draw_list_marker(self, b, left_px, baseline, size26):
+        c = self.cfg
+        face = self.fam.face(False, False, size26)
+        text_x26 = int(round((c.x0 + left_px) * 64))
+        if getattr(b, "ol_number", None):
+            shaped = face.shape(b.ol_number)
+            num_w26 = sum(a for _, a in shaped)
+            is_alpha_rom = not b.ol_number[0].isdigit()
+            sp26 = int(round(face.space26() * (1.25 if is_alpha_rom else 1.0)))
+            start26 = text_x26 - num_w26 - sp26
+            pl, pen = [], 0
+            for n, a in shaped:
+                pl.append((face, n, pen))
+                pen += a
+            self.draw_line(pl, start26, baseline)
+        elif getattr(b, "bullet", None):
+            if b.bullet == "\u25e6":
+                cx = int(round(c.x0 + left_px - 17))
+                cy = baseline - 11
+                r = 4
+                for dy in range(-r - 1, r + 2):
+                    for dx in range(-r - 1, r + 2):
+                        dist = math.hypot(dx, dy)
+                        if r - 0.8 <= dist <= r + 0.8:
+                            py, px = cy + dy, cx + dx
+                            if 0 <= py < c.screen_h and 0 <= px < c.screen_w:
+                                self.canvas[py, px] = np.array(c.fg, dtype=np.float32)
+            elif b.bullet == "\u25aa":
+                cx = int(round(c.x0 + left_px - 17))
+                cy = baseline - 11
+                r = 4
+                self.canvas[max(0, cy - r):min(c.screen_h, cy + r + 1), max(0, cx - r):min(c.screen_w, cx + r + 1)] = np.array(c.fg, dtype=np.float32)
+            elif b.bullet == "\u25a0":
+                shaped = face.shape("\u25a0")
+                bul_w26 = sum(a for _, a in shaped)
+                sp26 = int(round(face.space26() * 2.50))
+                start26 = text_x26 - bul_w26 - sp26
+                pl = [(face, shaped[0][0], 0)]
+                self.draw_line(pl, start26, baseline)
+            else:
+                shaped = face.shape("\u2022")
+                bul_w26 = sum(a for _, a in shaped)
+                sp26 = int(round(face.space26() * (1.05 if getattr(b, 'border_collapse', False) else 1.15)))
+                start26 = text_x26 - bul_w26 - sp26
+                pl = [(face, shaped[0][0], 0)]
+                self.draw_line(pl, start26, baseline)
+
+    def add_text_block(self, b):
+        c = self.cfg
+        self.y_float = float(self.y)
+        size26 = int(c.size26 * b.scale + 1e-6)
+        size_px = size26 / 64.0
+        std_body_pitch = c.pitch_px()
+        vem_px = c.vem_px()
+
+        if getattr(b, "is_spacer", False):
+            if not self.page_empty:
+                extra_sp_lead = max(0.0, std_body_pitch - (19.0 / 14.0) * c.size_px())
+                self.y_float += (std_body_pitch - 4.04124 * extra_sp_lead)
+                self.y = int(round(self.y_float))
+            return
+
+        has_custom_lh = getattr(b, "line_height", None) is not None
+        if has_custom_lh:
+            pitch = int(b.line_height * vem_px * b.scale + 1e-6) if (1.5 < b.line_height < 2.0) else int(round(b.line_height * vem_px * b.scale))
+            pitch_fl = float(pitch)
+            std_pitch = int(round(std_body_pitch * b.scale))
+            lead_diff = pitch - std_pitch
+            lh_top_delta = (lead_diff // 2) if (lead_diff >= 0 or std_body_pitch != 57) else -((-lead_diff) // 2)
+            lh_bot_delta = lead_diff - lh_top_delta
+        else:
+            pitch = int(round(float(std_body_pitch) * b.scale))
+            pitch_fl = float(int(std_body_pitch * b.scale)) if (b.heading in (2, 3) and std_body_pitch == 57) else (float(pitch) if (std_body_pitch != 57 or b.heading == 0) else (float(std_body_pitch) * b.scale))
+            lh_top_delta = 0
+            lh_bot_delta = 0
+
+        if b.page_break_before and not self.page_empty:
+            self.new_page()
+            self.prev_mb = 0
+
+        if b.indent_em is not None:
+            indent_em = b.indent_em
+        elif c.first_para_no_indent and (b.first_in_doc or b.first_after_heading):
+            indent_em = 0.0
+        else:
+            indent_em = c.default_indent_em
+        left_px = b.left_em * c.size_px()
+        width26 = int(round((c.right - c.x0 - left_px - b.right_em * c.size_px()) * 64))
+
+        drop_letter = getattr(b, 'drop_cap_letter', None)
+        drop_lines = getattr(b, 'drop_cap_lines', 2) or 2
+        drop_use_disp = getattr(b, 'drop_cap_display', True)
+        drop_adv26 = 0
+        drop_gap26 = 0
+        drop_placements = []
+
+        if drop_letter:
+            body_cap_h = getattr(c, 'body_cap_height', 0.693)
+            disp_cap_h = getattr(c, 'display_cap_height', 0.762)
+            target_drop_h = (drop_lines - 1) * pitch_fl + body_cap_h * size_px
+            cap_denom = disp_cap_h if drop_use_disp else body_cap_h
+            drop_size_px = target_drop_h / cap_denom
+            drop_size26 = int(round(drop_size_px * 64))
+            drop_face = self.fam.face(
+                bold=getattr(b, 'drop_cap_bold', False),
+                italic=False,
+                size26=drop_size26,
+                display=drop_use_disp
+            )
+            drop_shaped = drop_face.shape(drop_letter)
+            drop_adv26 = sum(a for _, a in drop_shaped)
+            drop_gap26 = int(round((0.26 if (not drop_use_disp and drop_lines == 2) else (0.18 if not drop_use_disp else 0.15)) * size_px * 64))
+            drop_placements = [(drop_face, drop_shaped[0][0], 0)] if drop_shaped else []
+
+        runs = list(b.runs)
+        if b.heading and not b.display:
+            runs = [Run(
+                r.text, True, r.italic, getattr(r, 'image', None),
+                scale=r.scale, baseline_shift_em=r.baseline_shift_em,
+                small_caps=r.small_caps, underline=r.underline,
+                strike=r.strike, code=r.code,
+                letter_spacing_em=r.letter_spacing_em,
+                word_spacing_em=r.word_spacing_em, fg=r.fg,
+                nowrap=getattr(r, 'nowrap', False),
+                from_text_transform=getattr(r, 'from_text_transform', False)
+            ) for r in runs]
+
+        allow_hyph = (b.heading == 0) and (b.align != "center") and (getattr(b, "hyphenate", None) is not False)
+        ragged = (b.align in ("left", "right", "center")) or (not c.justify and b.align != "justify")
+        indent26 = int(indent_em * size_px * 64) if indent_em > 0 else (int(round(indent_em * size_px * 64)) if indent_em < 0 else 0)
+
+        def line_w(i):
+            w = width26
+            if drop_letter and i < drop_lines:
+                w -= (drop_adv26 + drop_gap26)
+            elif i == 0:
+                w -= indent26
+            return w
+
+        if getattr(b, "first_line_small_caps", False) and runs:
+            sc_runs = [Run(
+                r.text, r.bold, r.italic, getattr(r, 'image', None),
+                scale=r.scale, baseline_shift_em=r.baseline_shift_em,
+                small_caps=True, underline=r.underline,
+                strike=r.strike, code=r.code,
+                letter_spacing_em=r.letter_spacing_em,
+                word_spacing_em=r.word_spacing_em, fg=r.fg, bg=getattr(r, 'bg', None),
+                nowrap=getattr(r, 'nowrap', False),
+                from_text_transform=getattr(r, 'from_text_transform', False)
+            ) for r in runs]
+            sc_items = build_items(sc_runs, self.fam, c, size26, b.display, allow_hyphenation=allow_hyph, lang=getattr(b, "lang", "en"), allow_sc_hyph=True)
+            if not sc_items:
+                return
+            sc_lines = make_lines(sc_items, line_w, c, ragged, is_heading=(b.heading > 0), align=b.align)
+            if len(sc_lines) <= 1:
+                lines = sc_lines
+            else:
+                from .layout import Box
+                line0_seg, line0_hy = sc_lines[0]
+                n_glyphs_l0 = sum(len(it.glyphs) for it in line0_seg if isinstance(it, Box))
+                full_txt = "".join(r.text for r in runs)
+                pos_t = 0
+                g_cnt = 0
+                while pos_t < len(full_txt) and g_cnt < n_glyphs_l0:
+                    if not full_txt[pos_t].isspace():
+                        g_cnt += 1
+                    pos_t += 1
+                rem_txt = full_txt[pos_t:].lstrip(" ")
+                r0 = runs[0]
+                rem_runs = [Run(rem_txt, r0.bold, r0.italic, scale=r0.scale, fg=r0.fg, bg=getattr(r0, 'bg', None))] if rem_txt else []
+                rem_items = build_items(rem_runs, self.fam, c, size26, b.display, allow_hyphenation=allow_hyph, lang=getattr(b, "lang", "en"))
+                rem_lines = make_lines(rem_items, lambda idx: line_w(idx + 1), c, ragged, is_heading=(b.heading > 0), align=b.align) if rem_items else []
+                lines = [(line0_seg, line0_hy)] + rem_lines
+        else:
+            items = build_items(runs, self.fam, c, size26, b.display, allow_hyphenation=allow_hyph, lang=getattr(b, "lang", "en"))
+            if not items:
+                return
+            lines = make_lines(items, line_w, c, ragged, is_heading=(b.heading > 0), align=b.align)
+        justify = (b.align == "justify") or (b.align is None and c.justify and not ragged)
+        placed = []
+
+        for i, (seg, hy) in enumerate(lines):
+            last = (i == len(lines) - 1)
+            pl, nat, hang_left = layout_line(seg, hy, line_w(i), justify, last, c)
+            off26 = -hang_left
+            if drop_letter and i < drop_lines:
+                off26 += drop_adv26 + drop_gap26
+            elif i == 0:
+                off26 += indent26
+
+            if b.align == "center":
+                off26 += int((line_w(i) - nat) / 2)
+            elif b.align == "right":
+                off26 += int(line_w(i) - nat)
+            placed.append((pl, off26))
+
+        if b.heading:
+            extra_lead = max(0.0, std_body_pitch - (19.0 / 14.0) * c.size_px())
+            h_idx = b.heading - 1
+            mt_base_em = (0.6632, 0.8140, 0.9717, 1.3263, 1.6487, 2.2938)[h_idx]
+            mb_base_em = (0.6632, 0.8281, 0.9717, 1.3263, 1.6487, 2.2938)[h_idx]
+            mt_lead_k = (0.14 if h_idx in (0, 5) else (0.0 if h_idx == 3 else 0.25))
+            mb_lead_k = (0.35 if h_idx == 2 else (0.0 if h_idx in (0, 1, 3) else 0.28))
+            mt = int(round(mt_base_em * b.scale * vem_px + mt_lead_k * extra_lead))
+            mb_est = int(round(mb_base_em * b.scale * vem_px + mb_lead_k * extra_lead))
+        else:
+            mt = (int(round(b.mt_em * vem_px * b.scale)) if (getattr(b, 'list_level', 0) > 0 and getattr(b, 'border_collapse', False) and (getattr(b, 'bullet', None) == '\u2022' or (getattr(b, 'ol_number', None) and b.ol_number[0].isupper()))) else int(b.mt_em * vem_px * b.scale + 1e-6)) if b.mt_em else 0
+            mb_est = (int(b.mb_em * vem_px * b.scale + 1e-6) if (std_body_pitch == 57 and b.mb_em == 1.0) else int(round(b.mb_em * vem_px * b.scale))) if b.mb_em else 0
+        gap = max(self.prev_mb, mt)
+        if std_body_pitch == 57:
+            prev_h = getattr(self, "prev_heading", 0)
+            if b.heading == 2 and prev_h == 1:
+                gap -= 1
+            elif b.heading == 3 and prev_h == 1:
+                gap -= 2
+            elif b.heading == 2 and prev_h == 2:
+                gap = 58
+            elif b.heading == 1 and prev_h == 0 and not self.page_empty:
+                gap += 1
+            elif b.heading == 0 and prev_h == 1 and (b.scale > 1.0 or b.mt_em > 1.0):
+                gap -= 1
+            elif b.heading == 0 and prev_h == 3:
+                gap += (2 if getattr(b, "bullet", None) is not None else 1)
+            elif b.heading == 0 and prev_h == 6 and not getattr(b, 'border_collapse', False):
+                gap += 1
+            elif prev_h == 5 and getattr(self, "prev_heading_lines", 0) >= 2:
+                gap -= 1
+
+        # Keep heading with next block's first line if the entire heading fits on the current page
+        if b.heading and not self.page_empty and (not getattr(b, "next_is_heading", False) or len(lines) == 1):
+            if (self.y + gap + len(lines) * pitch_fl <= c.page_bottom
+                    and self.y + gap + len(lines) * pitch_fl + mb_est + std_body_pitch > c.page_bottom):
+                self.new_page()
+                self.prev_mb = 0
+                gap = mt
+
+        if not self.page_empty:
+            self.y_float += gap
+            self.y = int(round(self.y_float))
+        elif c.margin_at_page_top and b.heading:
+            top_mt = mt
+            extra_top = (c.heading_top_extra_px if (b.heading == 1 and std_body_pitch == 57) else (4 if (b.heading == 3 and std_body_pitch == 57 and len(lines) >= 3) else 0))
+            self.y_float += top_mt + extra_top
+            self.y = int(round(self.y_float))
+
+        n = len(lines)
+        i = 0
+        while i < n:
+            pl_cur, _ = placed[i]
+            cur_scale_i = max((pl_tup[0].size26 / float(size26) for pl_tup in pl_cur if pl_tup[0] is not None), default=1.0)
+            cur_scale_i = max(1.0, cur_scale_i)
+            inl_i = [pl_tup[2][1] for pl_tup in pl_cur if pl_tup[1] == "__inline_img__"]
+            if inl_i and max(im.height for im in inl_i) > pitch:
+                line_i_pitch = float(pitch + max(0, max(im.height for im in inl_i) - (self.baseline_in(0, pitch, size26) - 6)))
+            else:
+                line_i_pitch = pitch_fl * cur_scale_i if (cur_scale_i > 1.0 and not b.heading) else pitch_fl
+            if not self.page_empty and self.y + line_i_pitch > c.page_bottom:
+                self.new_page()
+                if i == 0 and c.margin_at_page_top and b.heading:
+                    top_mt = mt
+                    extra_top = (c.heading_top_extra_px if (b.heading == 1 and std_body_pitch == 57) else (4 if (b.heading == 3 and std_body_pitch == 57 and len(lines) >= 3) else 0))
+                    self.y_float += top_mt + extra_top
+                    self.y = int(round(self.y_float))
+                continue
+            room = int((c.page_bottom - self.y) // pitch_fl)
+            remaining = n - i
+            take = min(room, remaining)
+            if take < remaining:
+                if not b.heading and remaining - take < c.widow_orphan:
+                    take = remaining - c.widow_orphan
+                if ((not b.heading and take < c.widow_orphan and i == 0 and n >= c.widow_orphan)) or take <= 0:
+                    if not self.page_empty:
+                        self.new_page()
+                        if i == 0 and c.margin_at_page_top and b.heading:
+                            extra_top = (c.heading_top_extra_px if (b.heading == 1 and std_body_pitch == 57) else (4 if (b.heading == 3 and std_body_pitch == 57 and len(lines) >= 3) else 0))
+                            self.y_float += mt + extra_top
+                            self.y = int(round(self.y_float))
+                        continue
+                    take = max(1, min(room, remaining))
+
+            if drop_letter and i == 0 and take >= 1:
+                first_base = self.baseline_in(self.y, pitch, size26)
+                drop_baseline = first_base + int(round((min(drop_lines, take) - 1) * pitch_fl))
+                self.draw_line(drop_placements, c.x0 * 64 + int(round(left_px * 64)), drop_baseline)
+
+            for k in range(take):
+                pl, off26 = placed[i + k]
+                cur_scale = max((pl_tup[0].size26 / float(size26) for pl_tup in pl if pl_tup[0] is not None), default=1.0)
+                cur_scale = max(1.0, cur_scale)
+                std_p = int(round(std_body_pitch * b.scale))
+                inline_imgs = [pl_tup[2][1] for pl_tup in pl if pl_tup[1] == '__inline_img__']
+
+                if cur_scale > 1.0 and not b.heading:
+                    extra_asc = int((cur_scale - 1.0) * vem_px)
+                    cur_pitch = int(round(cur_scale * std_p)) if (std_body_pitch != 57 or cur_scale >= 2.0) else (std_p + extra_asc + int((cur_scale - 1.0) * (std_p - vem_px) + 0.49))
+                    cur_pitch_fl = float(cur_pitch)
+                    base = self.baseline_in(self.y, std_p, size26) + extra_asc + (lh_top_delta if has_custom_lh else 0)
+                elif inline_imgs and max(im.height for im in inline_imgs) > pitch:
+                    max_im_h = max(im.height for im in inline_imgs)
+                    asc_std = self.baseline_in(0, std_p, size26) + 2
+                    extra_im = max(0, max_im_h - asc_std)
+                    cur_pitch = std_p + extra_im
+                    cur_pitch_fl = float(cur_pitch)
+                    base = self.baseline_in(self.y, std_p, size26) + extra_im
+                else:
+                    cur_pitch_fl = pitch_fl
+                    cur_pitch = pitch
+                    if has_custom_lh:
+                        base = self.baseline_in(self.y, std_p, size26) + lh_top_delta
+                    else:
+                        base = self.baseline_in(self.y, cur_pitch, size26)
+
+                if i + k == 0 and (getattr(b, "ol_number", None) or getattr(b, "bullet", None)):
+                    self._draw_list_marker(b, left_px, base, size26)
+
+                self.draw_line(pl, c.x0 * 64 + int(round(left_px * 64)) + off26, base)
+
+                if c.fractional_pitch_snapping:
+                    self.y_float += cur_pitch_fl
+                    self.y = int(round(self.y_float))
+                else:
+                    self.y += cur_pitch
+                self._mark_page_non_empty()
+
+            i += take
+            if i < n:
+                self.new_page()
+                if b.heading:
+                    self.y_float += 1.0
+                    self.y = int(round(self.y_float))
+
+        if has_custom_lh:
+            std_p = int(round(std_body_pitch * b.scale))
+            self.y_float += (std_p - pitch) + lh_top_delta + lh_bot_delta
+            self.y = int(round(self.y_float))
+
+        self.prev_mb = mb_est if b.mb_em else int(round(c.para_gap_em * vem_px))
+        self.prev_kind = "text"
+        self.prev_heading = b.heading
+        self.prev_heading_lines = len(lines) if b.heading else 0
+
+    def add_pre(self, b):
+        c = self.cfg
+        face = self.fam.special_face('mono', c.size26)
+        pitch = self.pitch_for(c.size26)
+        mono_adv26 = face.space26()
+        max_cols = max(1, int((c.right - c.x0) * 64 // mono_adv26))
+        is_col_pre = getattr(b, 'border_collapse', False)
+        mt_pre = int(round(1.0 * c.vem_px())) if is_col_pre else int(round(0.5 * c.size_px()))
+        if not self.page_empty:
+            self.y += max(self.prev_mb, mt_pre)
+            self.y_float = float(self.y)
+        wrapped_lines = []
+        for raw_line in b.pre_lines:
+            if not raw_line:
+                wrapped_lines.append(("", False))
+                continue
+            if "\t" in raw_line:
+                exp = []
+                col_c = 0
+                for ch_t in raw_line:
+                    if ch_t == "\t":
+                        n_sp = 3 - (col_c % 3)
+                        exp.append(" " * n_sp)
+                        col_c += n_sp
+                    else:
+                        exp.append(ch_t)
+                        col_c += 1
+                line = "".join(exp)
+            else:
+                line = raw_line
+            if len(line) > max_cols and " " not in line and "_" in line:
+                parts = re.findall(r"[^_]+_?", line)
+                # Pack from end up to max_cols, balancing remaining two-line prefix
+                tail_lines = []
+                idx_end = len(parts)
+                while sum(len(p) for p in parts[:idx_end]) > 2 * max_cols:
+                    cur_s = ""
+                    k = idx_end - 1
+                    while k >= 0 and len(parts[k]) + len(cur_s) <= max_cols:
+                        cur_s = parts[k] + cur_s
+                        k -= 1
+                    if k == idx_end - 1:
+                        cur_s = parts[k][:max_cols]
+                        parts[k] = parts[k][max_cols:]
+                    else:
+                        idx_end = k + 1
+                    tail_lines.insert(0, (cur_s, False))
+                rem_parts = parts[:idx_end]
+                rem_tot = sum(len(p) for p in rem_parts)
+                if rem_tot <= max_cols:
+                    wrapped_lines.append(("".join(rem_parts), False))
+                else:
+                    best_i = 1
+                    best_diff = 10**9
+                    for i_sp in range(1, len(rem_parts)):
+                        l1 = sum(len(p) for p in rem_parts[:i_sp])
+                        l2 = rem_tot - l1
+                        if l1 <= max_cols and l2 <= max_cols and abs(l1 - l2) < best_diff:
+                            best_diff = abs(l1 - l2)
+                            best_i = i_sp
+                    wrapped_lines.append(("".join(rem_parts[:best_i]), False))
+                    wrapped_lines.append(("".join(rem_parts[best_i:]), False))
+                wrapped_lines.extend(tail_lines)
+                continue
+            rem = line
+            while len(rem) > max_cols:
+                cut = -1
+                for idx in range(max_cols, 0, -1):
+                    if rem[idx - 1] in (" ", "-") and idx <= max_cols:
+                        cut = idx if rem[idx - 1] == "-" else idx - 1
+                        break
+                if cut <= 0:
+                    cut = max_cols
+                wrapped_lines.append((rem[:cut].rstrip(), True))
+                rem = rem[cut:].lstrip(" ")
+                if not rem:
+                    break
+            if rem:
+                wrapped_lines.append((rem, False))
+        target_w26 = (c.right - c.x0) * 64
+        for line, is_wrapped in wrapped_lines:
+            if self.y + pitch > c.page_bottom and not self.page_empty:
+                self.new_page()
+                if is_col_pre:
+                    self.y += 1
+                    self.y_float = float(self.y)
+            pl = []
+            pen = 0
+            n_spaces = line.count(" ")
+            nat_w26 = len(line) * mono_adv26
+            delta26 = (target_w26 - nat_w26) if (is_wrapped and n_spaces > 0 and target_w26 > nat_w26) else 0
+            sp_idx = 0
+            for ch in line:
+                if ch != " ":
+                    gname = face.cmap.get(ord(ch), '.notdef')
+                    pl.append((face, gname, pen))
+                    pen += mono_adv26
+                else:
+                    extra_sp = ((sp_idx + 1) * delta26) // n_spaces - (sp_idx * delta26) // n_spaces if delta26 else 0
+                    pen += mono_adv26 + extra_sp
+                    sp_idx += 1
+            base = self.baseline_in(self.y, pitch, c.size26)
+            self.draw_line(pl, c.x0 * 64, base)
+            self.y += pitch
+            self.y_float = float(self.y)
+            self._mark_page_non_empty()
+        self.prev_mb = (mt_pre - 2 if is_col_pre else mt_pre)
+        self.prev_kind = "pre"
+
+    def add_table(self, b):
+        c = self.cfg
+        if not b.table_rows:
+            return
+        is_col = getattr(b, "border_collapse", False)
+        reg_base = self.fam.face(False, False, c.size26)
+        bld_base = self.fam.face(True, False, c.size26)
+        std_pitch = self.pitch_for(c.size26)
+        mt_tbl = max(self.prev_mb, int(round(1.0 * c.vem_px())) if is_col else int(round(0.4 * c.size_px())))
+        if not self.page_empty:
+            self.y += mt_tbl
+
+        avail_w = (c.right - c.x0 - c.collapsed_table_margin_px) if is_col else (c.right - c.x0)
+
+        def _text_w_px(face, s):
+            return sum(a for _, a in face.shape(s)) / 64.0
+
+        cap_txt = getattr(b, "table_caption", None)
+        if cap_txt:
+            cap_max_w = int(avail_w * 0.72)
+            words_c = cap_txt.split()
+            if _text_w_px(reg_base, cap_txt) <= cap_max_w or len(words_c) <= 1:
+                cap_lines = [cap_txt]
+            else:
+                best_k = 1
+                best_d = 1e9
+                for k_c in range(1, len(words_c)):
+                    s1 = " ".join(words_c[:k_c])
+                    s2 = " ".join(words_c[k_c:])
+                    w1, w2 = _text_w_px(reg_base, s1), _text_w_px(reg_base, s2)
+                    if w1 <= cap_max_w and w2 <= cap_max_w:
+                        cost_c = ((cap_max_w - w1) ** 2) + 0.25 * ((cap_max_w - w2) ** 2)
+                        if cost_c < best_d:
+                            best_d = cost_c
+                            best_k = k_c
+                cap_lines = [" ".join(words_c[:best_k]), " ".join(words_c[best_k:])]
+            for cl_s in cap_lines:
+                base_c = self.baseline_in(self.y, std_pitch, c.size26)
+                pl_c, pen_c = [], 0
+                for n_g, a_g in reg_base.shape(cl_s):
+                    pl_c.append((reg_base, n_g, pen_c))
+                    pen_c += a_g
+                x_cap26 = int(round((c.x0 + avail_w / 2.0) * 64 - pen_c / 2.0))
+                self.draw_line(pl_c, x_cap26, base_c)
+                self.y += std_pitch
+                self._mark_page_non_empty()
+            self.y += 1
+
+        norm_rows = []
+        for r_raw in b.table_rows:
+            nr = []
+            for item in r_raw:
+                if len(item) == 2:
+                    txt, is_h = item
+                    nr.append((txt, is_h, "center" if is_h else "left", 1, 1))
+                else:
+                    nr.append(item)
+            norm_rows.append(nr)
+
+        nrows = len(norm_rows)
+        occupied = {}
+        ncols = 0
+        grid_cells = []
+        for ri, nr in enumerate(norm_rows):
+            ci = 0
+            for txt, is_h, align, cs, rs in nr:
+                while (ri, ci) in occupied:
+                    ci += 1
+                for dr in range(rs):
+                    for dc in range(cs):
+                        occupied[(ri + dr, ci + dc)] = True
+                grid_cells.append((ri, ci, txt, is_h, align, cs, rs))
+                ci += cs
+                if ci > ncols:
+                    ncols = ci
+
+        tot_1x = sum(
+            max((_text_w_px(bld_base if is_h else reg_base, txt) + 2 * c.collapsed_table_pad_1x)
+                for ri, ci, txt, is_h, align, cs, rs in grid_cells if ci == col_j and cs == 1)
+            for col_j in range(ncols)
+        )
+        sc_tbl = c.collapsed_table_scale if (is_col and ncols >= 4 and tot_1x > avail_w) else 1.0
+        tbl_size26 = int(round(c.size26 * sc_tbl))
+        reg = self.fam.face(False, False, tbl_size26)
+        bld = self.fam.face(True, False, tbl_size26)
+        line_p = int(round(std_pitch * sc_tbl)) if sc_tbl < 1.0 else (c.collapsed_table_line_pitch if is_col else std_pitch)
+        row_pad = 7 if sc_tbl < 1.0 else (10 if is_col else 6)
+        cell_pad = c.collapsed_table_pad_scaled if sc_tbl < 1.0 else (c.collapsed_table_pad_1x if is_col else 10)
+
+        has_right_cols = any(align == "right" for _, _, _, _, align, _, _ in grid_cells)
+        col_align = ["left"] * ncols
+        for ri, ci, txt, is_h, align, cs, rs in grid_cells:
+            if cs == 1 and align == "right":
+                col_align[ci] = "right"
+
+        def _col_pad2(ci):
+            if not is_col:
+                return 2.0 * cell_pad
+            if sc_tbl < 1.0:
+                if col_align[ci] == "right":
+                    return 43.0 if ci == ncols - 1 else 32.0
+                return 2.0 * cell_pad
+            return 2.0 * cell_pad
+
+        max_w = [0.0] * ncols
+        min_w = [0.0] * ncols
+        for ri, ci, txt, is_h, align, cs, rs in grid_cells:
+            if cs == 1:
+                face = bld if is_h else reg
+                pad2 = _col_pad2(ci)
+                w_full = _text_w_px(face, txt) + pad2
+                if w_full > max_w[ci]:
+                    max_w[ci] = w_full
+                raw_toks = txt.split()
+                if is_h and any("/" in rt and len(rt) > 4 for rt in raw_toks):
+                    slash_parts = []
+                    for rt in raw_toks:
+                        if "/" in rt and len(rt) > 4:
+                            ps = rt.split("/")
+                            for pi, p_s in enumerate(ps):
+                                slash_parts.append(p_s + ("/" if pi < len(ps) - 1 else ""))
+                        else:
+                            slash_parts.append(rt)
+                    if len(slash_parts) >= 2:
+                        w_sl = _text_w_px(face, " ".join(slash_parts[:-1])) + 46.5
+                        if w_sl > min_w[ci]:
+                            min_w[ci] = w_sl
+                for tok in raw_toks:
+                    wt = _text_w_px(face, tok) + pad2
+                    if wt > min_w[ci]:
+                        min_w[ci] = wt
+
+        tot_max = sum(max_w)
+        if tot_max <= avail_w and not any(cs > 1 for _, _, _, _, _, cs, _ in grid_cells):
+            if sc_tbl < 1.0:
+                extra_each = (avail_w - tot_max) / max(1, ncols)
+                col_ws = [int(round(w + extra_each)) for w in max_w]
+                col_ws[-1] += avail_w - sum(col_ws)
+                table_w = avail_w
+            else:
+                col_ws = [int(round(w)) for w in max_w]
+                table_w = min(avail_w, sum(col_ws))
+        else:
+            thresh = avail_w / float(max(1, ncols))
+            col_ws = [None] * ncols
+            for i in range(ncols):
+                if max_w[i] <= thresh:
+                    col_ws[i] = int(round(max_w[i]))
+            rem_idx = [i for i in range(ncols) if col_ws[i] is None]
+            rem_w = avail_w - sum(w for w in col_ws if w is not None)
+            if len(rem_idx) >= 2:
+                sub_thresh = rem_w / float(len(rem_idx))
+                narrow_rem = [i for i in rem_idx if max_w[i] <= sub_thresh]
+                wide_rem = [i for i in rem_idx if max_w[i] > sub_thresh]
+                if narrow_rem and wide_rem:
+                    for i in narrow_rem:
+                        col_ws[i] = int(round(min_w[i]))
+                    rem_w2 = avail_w - sum(w for w in col_ws if w is not None)
+                    w_tot = max(1.0, sum(max_w[i] for i in wide_rem))
+                    for i in wide_rem:
+                        col_ws[i] = int(round(rem_w2 * max_w[i] / w_tot))
+                else:
+                    w_tot = max(1.0, sum(max_w[i] for i in rem_idx))
+                    for i in rem_idx:
+                        col_ws[i] = int(round(rem_w * max_w[i] / w_tot))
+            elif len(rem_idx) == 1:
+                col_ws[rem_idx[0]] = rem_w
+            else:
+                col_ws = [int(round(w)) for w in max_w]
+            col_ws[-1] += avail_w - sum(col_ws)
+            table_w = avail_w
+
+        col_xs = [c.x0]
+        for w in col_ws:
+            col_xs.append(col_xs[-1] + w)
+
+        from .hyphen import LiangHyphenator
+        dic_p = c.resolve_hyphen_dic("en")
+        hyph = LiangHyphenator.get_cached(dic_p, c.left_hyphen_min, c.right_hyphen_min, c.min_word_length) if (c.hyphenate and dic_p) else None
+
+        def _wrap_cell(face, txt, inner_w, is_hdr=False):
+            raw_words = txt.split()
+            words = []
+            for rw in raw_words:
+                if "/" in rw and len(rw) > 4:
+                    parts_sl = rw.split("/")
+                    for pi, ps in enumerate(parts_sl):
+                        words.append(ps + ("/" if pi < len(parts_sl) - 1 else ""))
+                else:
+                    words.append(rw)
+            if not words:
+                return [""]
+            lines_out = []
+            cur = ""
+            for w in words:
+                sep = "" if cur.endswith("/") else (" " if cur else "")
+                cand = cur + sep + w
+                if _text_w_px(face, cand) <= inner_w:
+                    cur = cand
+                    continue
+                if (not is_hdr) and hyph and c.hyphenate:
+                    m_core = w.rstrip(".,;:!?)")
+                    tail = w[len(m_core):]
+                    parts = hyph.hyphenate_word(m_core) if len(m_core) >= c.min_word_length else [m_core]
+                    if len(parts) > 1:
+                        best_k = 0
+                        for k in range(1, len(parts)):
+                            prefix = "".join(parts[:k]) + "-"
+                            test = cur + sep + prefix
+                            if _text_w_px(face, test) <= inner_w:
+                                best_k = k
+                        if best_k > 0:
+                            prefix = "".join(parts[:best_k]) + "-"
+                            lines_out.append(cur + sep + prefix)
+                            cur = "".join(parts[best_k:]) + tail
+                            continue
+                if cur:
+                    lines_out.append(cur)
+                if _text_w_px(face, w) > inner_w and len(w) > 1:
+                    rem_w = w
+                    while len(rem_w) > 1 and _text_w_px(face, rem_w) > inner_w:
+                        cut_k = 1
+                        for k_c in range(1, len(rem_w)):
+                            if _text_w_px(face, rem_w[:k_c] + "-") <= inner_w:
+                                cut_k = k_c
+                            else:
+                                break
+                        lines_out.append(rem_w[:cut_k] + "-")
+                        rem_w = rem_w[cut_k:]
+                    cur = rem_w
+                else:
+                    cur = w
+            if cur:
+                lines_out.append(cur)
+            return lines_out
+
+        wrapped_cells = []
+        row_max_lines = [1] * nrows
+        for ri, ci, txt, is_h, align, cs, rs in grid_cells:
+            face = bld if is_h else reg
+            span_w = col_xs[ci + cs] - col_xs[ci]
+            pad_eff = 23 if (sc_tbl < 1.0 and is_h and align == "right") else cell_pad
+            inner_w = max(20.0, span_w - 2 * pad_eff + 1.0 + (14 if (ci + cs == ncols and sc_tbl == 1.0 and is_col) else 0))
+            lines_c = _wrap_cell(face, txt, inner_w, is_hdr=is_h)
+            wrapped_cells.append((ri, ci, lines_c, is_h, align, cs, rs, face))
+            if rs == 1 and len(lines_c) > row_max_lines[ri]:
+                row_max_lines[ri] = len(lines_c)
+
+        row_hs = [n_l * line_p + row_pad for n_l in row_max_lines]
+        tot_tbl_h = sum(row_hs)
+        if self.y + tot_tbl_h > c.page_bottom and not self.page_empty:
+            self.new_page()
+
+        row_ys = [self.y]
+        for rh in row_hs:
+            row_ys.append(row_ys[-1] + rh)
+
+        last_base = self.y
+        for ri, ci, lines_c, is_h, align, cs, rs, face in wrapped_cells:
+            y_top = row_ys[ri]
+            y_bot = row_ys[ri + rs]
+            span_h = y_bot - y_top
+            n_l = len(lines_c)
+            block_h = n_l * line_p
+            y_start = y_top + max(0, (span_h - row_pad - block_h) // 2)
+            x_left = col_xs[ci]
+            x_right = col_xs[ci + cs]
+            span_w = x_right - x_left
+            for li, ltxt in enumerate(lines_c):
+                base = self.baseline_in(y_start + li * line_p, line_p, tbl_size26)
+                if base > last_base:
+                    last_base = base
+                pl, pen = [], 0
+                for n, a in face.shape(ltxt):
+                    pl.append((face, n, pen))
+                    pen += a
+                if align == "center":
+                    if cs > 1 and is_col:
+                        center_x = (col_xs[ci] + col_xs[ci + cs] + cell_pad) / 2.0
+                        x_px = center_x - (pen / 64.0) / 2.0
+                    else:
+                        x_px = x_left + (span_w - (pen / 64.0)) / 2.0
+                elif align == "right":
+                    r_pad = 32 if (ci + cs == ncols and sc_tbl < 1.0) else (23 if sc_tbl < 1.0 else cell_pad)
+                    x_px = x_right - r_pad - (pen / 64.0)
+                else:
+                    l_pad = 31 if (ci == 0 and sc_tbl < 1.0) else cell_pad
+                    x_px = x_left + l_pad
+                self.draw_line(pl, int(round(x_px * 64)), base)
+
+        self.y = (last_base + (17 if sc_tbl < 1.0 else 24)) if is_col else row_ys[-1]
+        if self.y + 70 < c.page_bottom:
+            rule_h = c.collapsed_table_rule_h if is_col else 3
+            rule_w = (avail_w + 1) if is_col else table_w
+            self.canvas[self.y:self.y + rule_h, c.x0:min(c.right, c.x0 + rule_w)] = 0
+            bx0, by0, bw, bh = c.x0 + 17, self.y + 13, (95 if is_col else 94), (53 if is_col else 52)
+            self.canvas[by0:by0 + bh, bx0:bx0 + bw] = 0
+            for t in range(14):
+                self.canvas[by0 + 12 + t, bx0 + bw - 22 - t:bx0 + bw - 19 - t] = 255
+                self.canvas[by0 + bh - 13 - t, bx0 + 19 + t:bx0 + 22 + t] = 255
+            self.y = (by0 + bh + (7 if sc_tbl < 1.0 else 0)) if is_col else (self.y + 75)
+        self.y_float = float(self.y)
+        self.prev_mb = int(round(1.0 * c.vem_px())) if is_col else int(round(0.2 * c.size_px()))
+        self.prev_kind = "table"
+
+    def add_image(self, b):
+        c = self.cfg
+        im = b.image
+        if getattr(b, 'is_cover', False):
+            if not self.page_empty:
+                self.new_page()
+            self.canvas[:] = 0
+            s = min(c.screen_w / im.width, c.screen_h / im.height)
+            w = max(1, int(round(im.width * s)))
+            h = max(1, int(round(im.height * s)))
+            im_arr = _skia_bilerp_rgb(im, w, h)
+            x = (c.screen_w - w) // 2
+            y = (c.screen_h - h) // 2
+            self.canvas[y:y + h, x:x + w] = im_arr.astype(np.float32)
+            self._mark_page_non_empty()
+            self.new_page()
+            self.prev_mb = 0
+            return
+
+        sc = getattr(c, "img_px_scale", 1.80)
+        nat_w = im.width * sc
+        nat_h = im.height * sc
+        vem_px = c.vem_px()
+        lx = c.x0 + int(round(getattr(b, "left_em", 0.0) * c.size_px()))
+        rx = c.right - int(round(getattr(b, "right_em", 0.0) * c.size_px()))
+        maxw = max(1, rx - lx)
+        maxh = 2036
+        w_pct = getattr(b, "img_width_pct", None)
+        if w_pct is not None and w_pct > 0:
+            target_w = max(1, int(round(maxw * w_pct)))
+            target_h = max(1, int(round(im.height * (target_w / float(im.width)))))
+            if target_h > maxh:
+                target_w = max(1, int(round(target_w * (maxh / float(target_h)))))
+                target_h = maxh
+        else:
+            s = min(1.0, maxw / nat_w, maxh / nat_h)
+            target_w = max(1, int(round(nat_w * s)))
+            target_h = max(1, int(round(nat_h * s)))
+        im = im.resize((target_w, target_h), Image.BILINEAR)
+
+        mt_px = int(round(max(self.prev_mb, getattr(b, "mt_em", 0.0) * vem_px))) if not self.page_empty else 0
+        if (self.y + mt_px + im.height > c.page_bottom or b.page_break_before) and not self.page_empty:
+            self.new_page()
+            self.prev_mb = 0
+            mt_px = 0
+        self.y += mt_px
+        x = lx + (maxw - im.width) // 2
+        y = 167 if (self.page_empty and im.height >= 2000) else (
+            c.top + (maxh - im.height) // 2 if (b.page_break_before and self.page_empty) else self.y
+        )
+        y_draw = (y - 1) if ((getattr(b, 'border_collapse', False) or not self.page_empty) and not b.page_break_before and im.height < 2000 and c.pitch_px() == 57) else y
+        arr = np.array(im, dtype=np.float32)
+        self.canvas[y_draw:y_draw + im.height, x:x + im.width] = arr
+        self.y = y + im.height
+        self.y_float = float(self.y)
+        self._mark_page_non_empty()
+        self.prev_mb = 0
+        self.prev_kind = "image"
+        if b.page_break_before:
+            self.new_page()
+            self.prev_mb = 0
+
+    def add_hr(self, b=None):
+        c = self.cfg
+        is_col = getattr(b, "border_collapse", False) if b is not None else False
+        gap = int(round(0.52 * c.vem_px())) if (is_col and self.prev_mb == 0) else int(round(c.vem_px()))
+        top_gap = (c.pre_hr_top_gap_px if (self.prev_kind == 'pre' and is_col) else max(self.prev_mb, gap))
+        self.y += top_gap
+        if self.y + 3 < c.page_bottom:
+            self.canvas[self.y:self.y + 3, c.x0:c.right] = 136
+        self.y += 3
+        self.y_float = float(self.y)
+        self._mark_page_non_empty()
+        self.prev_mb = int(round(0.50 * c.vem_px())) if is_col else int(round(c.vem_px()))
+        self.prev_kind = "hr"
+
+    def add_error_placeholder_page(self, chapter_id: str, exc: Exception, tb_str: str):
+        c = self.cfg
+        if not self.page_empty:
+            self.new_page()
+        self.current_chapter = chapter_id or "unknown"
+        self._mark_page_non_empty()
+        # Draw clearly marked border box and error text using monospace face
+        bx0, by0, bx1, by1 = c.x0, c.top, c.right, min(c.page_bottom, c.top + 400)
+        self.canvas[by0:by0 + 4, bx0:bx1] = 0
+        self.canvas[by1 - 4:by1, bx0:bx1] = 0
+        self.canvas[by0:by1, bx0:bx0 + 4] = 0
+        self.canvas[by0:by1, bx1 - 4:bx1] = 0
+        face = self.fam.special_face("mono", c.size26)
+        pitch = self.pitch_for(c.size26)
+        adv = face.space26()
+        msg_lines = [
+            f"ERROR IN CHAPTER: {self.current_chapter}",
+            f"{type(exc).__name__}: {str(exc)[:48]}",
+        ]
+        y_cur = by0 + pitch
+        for mline in msg_lines:
+            pl, pen = [], 0
+            for ch in mline:
+                if ch != " ":
+                    gname = face.cmap.get(ord(ch), ".notdef")
+                    pl.append((face, gname, pen))
+                pen += adv
+            base = self.baseline_in(y_cur, pitch, c.size26)
+            self.draw_line(pl, (bx0 + 24) * 64, base)
+            y_cur += pitch
+        self.y = by1 + pitch
+        self.y_float = float(self.y)
+        self.chapter_errors.append({
+            "chapter": self.current_chapter,
+            "exception": repr(exc),
+            "traceback": tb_str,
+        })
+        self.new_page()
+
+    def finish(self):
+        if self.page_empty and self.images:
+            return self.images
+        self.page_chapters.append(self.cur_page_chapter or self.current_chapter)
+        return self.images + [self._to_image()]
+
+def render_blocks(blocks, cfg, family, max_pages=None, return_meta=False):
+    import traceback as _tb
+    pg = Pager(cfg, family)
+    # Group blocks by chapter so a failure in one chapter is contained to that chapter
+    ch_groups = []
+    for b in blocks:
+        ch_id = getattr(b, "chapter", "") or ""
+        if not ch_groups or ch_groups[-1][0] != ch_id:
+            ch_groups.append((ch_id, [b]))
+        else:
+            ch_groups[-1][1].append(b)
+
+    for ch_id, ch_blocks in ch_groups:
+        if max_pages and len(pg.images) >= max_pages:
+            break
+        if ch_id:
+            pg.current_chapter = ch_id
+        try:
+            for b in ch_blocks:
+                if max_pages and len(pg.images) >= max_pages:
+                    break
+                if b.kind == "text":
+                    pg.add_text_block(b)
+                elif b.kind == "pre":
+                    pg.add_pre(b)
+                elif b.kind == "table":
+                    pg.add_table(b)
+                elif b.kind == "image":
+                    pg.add_image(b)
+                elif b.kind == "hr":
+                    pg.add_hr(b)
+        except Exception as exc:
+            pg.add_error_placeholder_page(ch_id or pg.current_chapter, exc, _tb.format_exc())
+    imgs = pg.finish()
+    out_imgs = imgs[:max_pages] if max_pages else imgs
+    if return_meta:
+        meta = {
+            "page_chapters": pg.page_chapters[:len(out_imgs)],
+            "chapter_errors": pg.chapter_errors,
+        }
+        return out_imgs, meta
+    return out_imgs
+
+def render_lines(lines, cfg, family, bold=False, italic=False):
+    pg = Pager(cfg, family)
+    face = family.face(bold, italic, cfg.size26)
+    pitch = pg.pitch_for(cfg.size26)
+    for s in lines:
+        if pg.y + pitch > cfg.page_bottom:
+            break
+        pl, nat = [], 0
+        for n, a in face.shape(s):
+            pl.append((face, n, nat))
+            nat += a
+        base = pg.baseline_in(pg.y, pitch, cfg.size26)
+        pg.draw_line(pl, cfg.x0 * 64, base)
+        if cfg.fractional_pitch_snapping:
+            pg.y_float += float(cfg.pitch_px())
+            pg.y = int(round(pg.y_float))
+        else:
+            pg.y += pitch
+    return pg.finish()[0]

@@ -1,0 +1,90 @@
+{
+  "search_paths": [
+    "corpora",
+    ".",
+    "..",
+    "/working_dir/c_67aa1dc148eace5f/user_uploaded_files/ttl=63d/user_uploaded",
+    "/working_dir/c_67aa1dc148eace5f/work/#exam",
+    "/working_dir/c_67aa1dc148eace5f/work"
+  ],
+  "corpora": {
+    "probe": {
+      "epub": "master_probe_v1.epub",
+      "captures_zip": "master_probe_captures.zip",
+      "config": {
+        "size26": 2688,
+        "x0": 39,
+        "right": 1041,
+        "pitch": 57,
+        "top": 168,
+        "page_bottom": 2203
+      },
+      "max_pages": 98,
+      "capture_page_ranges": [
+        [
+          1,
+          30
+        ],
+        [
+          43,
+          98
+        ]
+      ],
+      "ignore_captures": [
+        "page_099.png"
+      ],
+      "window_y": [
+        83,
+        2240
+      ]
+    },
+    "exam1": {
+      "epub": "kindle_exam_v1.epub",
+      "captures_zip": "exam_screen.zip",
+      "config": {
+        "size26": 2880,
+        "x0": 79,
+        "right": 1001,
+        "pitch": 68,
+        "top": 168,
+        "page_bottom": 2203
+      },
+      "max_pages": 70,
+      "capture_page_ranges": [
+        [
+          1,
+          70
+        ]
+      ],
+      "ignore_captures": [],
+      "window_y": [
+        83,
+        2240
+      ]
+    },
+    "exam2": {
+      "epub": "kindle_exam_v2.epub",
+      "captures_zip": "exam_v2.zip",
+      "config": {
+        "size26": 2688,
+        "x0": 79,
+        "right": 1001,
+        "pitch": 57,
+        "top": 168,
+        "page_bottom": 2203
+      },
+      "max_pages": 65,
+      "capture_page_ranges": [
+        [
+          1,
+          65
+        ]
+      ],
+      "ignore_captures": [],
+      "window_y": [
+        83,
+        2240
+      ]
+    }
+  }
+}
