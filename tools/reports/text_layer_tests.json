@@ -1,0 +1,41 @@
+{
+  "probe": {
+    "pages": 98,
+    "chapters_checked": 23,
+    "test_a_chapter_text_match": true,
+    "test_a_mismatches": [],
+    "test_b_glyph_boxes_equal_cmds": true,
+    "total_glyph_commands": 73580,
+    "total_glyph_boxes": 73580,
+    "test_c_all_boxes_in_page": true,
+    "outside_boxes": 0,
+    "schema_valid": true,
+    "test_d_identical_pixels_with_without": true
+  },
+  "exam1": {
+    "pages": 70,
+    "chapters_checked": 16,
+    "test_a_chapter_text_match": true,
+    "test_a_mismatches": [],
+    "test_b_glyph_boxes_equal_cmds": true,
+    "total_glyph_commands": 45618,
+    "total_glyph_boxes": 45618,
+    "test_c_all_boxes_in_page": true,
+    "outside_boxes": 0,
+    "schema_valid": true,
+    "test_d_identical_pixels_with_without": true
+  },
+  "exam2": {
+    "pages": 65,
+    "chapters_checked": 19,
+    "test_a_chapter_text_match": true,
+    "test_a_mismatches": [],
+    "test_b_glyph_boxes_equal_cmds": true,
+    "total_glyph_commands": 46635,
+    "total_glyph_boxes": 46635,
+    "test_c_all_boxes_in_page": true,
+    "outside_boxes": 0,
+    "schema_valid": true,
+    "test_d_identical_pixels_with_without": true
+  }
+}

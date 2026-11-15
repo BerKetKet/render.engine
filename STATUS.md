@@ -121,3 +121,23 @@ python3 tools/corpus.py --out-dir tools/reports
   python3 tools/corpus.py --only synthetic
   ```
 - **Previous Git Commit**: `aafa698`
+
+
+## Phase 2.5 Completed (Structured Text Layer, Schema & Tests a–d)
+- **What is done**:
+  - Defined the per-page (`page_NNN.json`) and document (`document.json`) structured text layer JSON schema in `docs/text_layer_schema.md`.
+  - Implemented `kindle_render/text_layer.py` (`build_page_text_layer`, `build_document_text_layer`, `validate_page_text_layer`, `validate_document_text_layer`, `write_text_layer_files`).
+  - Added CLI subcommand `kindle_render text IN.epub OUT_DIR` and `--text-layer` flag on `kindle_render epub`.
+  - Added and executed `tools/test_text_layer.py` (saved results to `tools/reports/text_layer_tests.json`), confirming across all three corpora:
+    - **(a) Chapter text equality after normalisation (ignoring hyphenation)**: `probe` 23/23 chapters match, `exam1` 16/16 chapters match, `exam2` 19/19 chapters match.
+    - **(b) Glyph boxes equal glyph draw commands**: `probe` `73,580 == 73,580`, `exam1` `45,618 == 45,618`, `exam2` `46,635 == 46,635`.
+    - **(c) All bounding boxes lie strictly inside the page**: `0` out-of-page boxes across all 233 pages (`probe` 98, `exam1` 70, `exam2` 65); schema validation passed on every page.
+    - **(d) Identical pixels with and without text layer**: 100% bitwise identical SHA-256 hashes on all pages.
+- **What is next**:
+  - Phase 2.6: Expose public functions `render_to_ir(book, cfg)` and `rasterize(ir_page, cfg)` in `kindle_render/__init__.py` and document an example in `README.md`.
+- **Exact commands to resume**:
+  ```bash
+  python3 tools/test_text_layer.py
+  python3 tools/corpus.py --only synthetic
+  ```
+- **Previous Git Commit**: `f43ebbc`

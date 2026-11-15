@@ -410,10 +410,17 @@ class Pager:
                     if not full_txt[pos_t].isspace():
                         g_cnt += 1
                     pos_t += 1
+                l0_broke_inside_word = (pos_t < len(full_txt) and not full_txt[pos_t].isspace())
                 rem_txt = full_txt[pos_t:].lstrip(" ")
                 r0 = runs[0]
                 rem_runs = [Run(rem_txt, r0.bold, r0.italic, scale=r0.scale, fg=r0.fg, bg=getattr(r0, 'bg', None), link_href=getattr(r0, 'link_href', None))] if rem_txt else []
                 rem_items = build_items(rem_runs, self.fam, c, size26, b.display, allow_hyphenation=allow_hyph, lang=getattr(b, "lang", "en"))
+                if rem_items:
+                    l0_max_w = max((it.word_idx for it in line0_seg if isinstance(it, Box)), default=0)
+                    w_off = l0_max_w if l0_broke_inside_word else (l0_max_w + 1)
+                    for it in rem_items:
+                        if isinstance(it, Box):
+                            it.word_idx += w_off
                 rem_lines = make_lines(rem_items, lambda idx: line_w(idx + 1), c, ragged, is_heading=(b.heading > 0), align=b.align) if rem_items else []
                 lines = [(line0_seg, line0_hy)] + rem_lines
         else:
