@@ -9,7 +9,9 @@ Supports:
       (c) position-independent lines (capture line band equal anywhere on rendered page)
   - Dynamic per-chapter page range derivation from layout metadata
   - Per-page raw pixel SHA-256 golden comparison and explicit --update-golden
-  - Double-render determinism verification
+  - Per-page layout IR SHA-256 golden comparison (layout_pages, added in Phase 0.6 / Phase 2.1)
+  - Double-render determinism verification (pixel and layout hashes)
+  - Synthetic generalization suite verification (tools/golden/synthetic.json)
   - Environment, font, hyphenation, and corpus SHA-256 manifest generation
   - Restartable execution (--only <corpus>, --pages N, --skip-existing)
 """
@@ -53,8 +55,6 @@ def sha256_file(path: Path) -> str:
 def sha256_image(im: Image.Image) -> str:
     arr = np.asarray(im)
     return hashlib.sha256(arr.tobytes()).hexdigest()
-
-
 
 
 def get_git_commit() -> str:
@@ -276,12 +276,14 @@ def run_single_corpus(
     max_p = pages_limit if pages_limit is not None else cprof.get("max_pages", 100)
     imgs, meta = render_corpus_once(epub_path, cprof["config"], max_p)
     page_hashes = [sha256_image(im) for im in imgs]
+    layout_hashes = meta.get("layout_hashes", [])
 
     deterministic = True
     if check_determinism:
-        imgs2, _ = render_corpus_once(epub_path, cprof["config"], max_p)
+        imgs2, meta2 = render_corpus_once(epub_path, cprof["config"], max_p)
         page_hashes2 = [sha256_image(im) for im in imgs2]
-        deterministic = (page_hashes == page_hashes2)
+        layout_hashes2 = meta2.get("layout_hashes", [])
+        deterministic = (page_hashes == page_hashes2) and (layout_hashes == layout_hashes2)
 
     if out_dir is not None:
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -308,6 +310,8 @@ def run_single_corpus(
             "sha256": page_hashes[pno - 1],
             "has_capture": (pno in captures),
         }
+        if pno <= len(layout_hashes):
+            entry["layout_sha256"] = layout_hashes[pno - 1]
         if pno in captures:
             cmp_res = compare_page_to_capture(imgs[pno - 1], captures[pno], y0, y1)
             entry.update(cmp_res)
@@ -354,6 +358,8 @@ def run_single_corpus(
     golden_path = REPO_ROOT / "tools" / "golden" / f"{cname}.json"
     golden_ok = True
     golden_mismatches = []
+    layout_golden_ok = True
+    layout_golden_mismatches = []
 
     if update_golden:
         golden_payload = {
@@ -361,6 +367,7 @@ def run_single_corpus(
             "engine_version": getattr(kindle_render, "__version__", "unknown"),
             "page_count": len(imgs),
             "pages": {str(i + 1): h for i, h in enumerate(page_hashes)},
+            "layout_pages": {str(i + 1): h for i, h in enumerate(layout_hashes)} if layout_hashes else {},
         }
         golden_path.parent.mkdir(parents=True, exist_ok=True)
         with open(golden_path, "w") as gf:
@@ -382,6 +389,17 @@ def run_single_corpus(
                     golden_ok = False
                     golden_mismatches.append(f"page_{idx:03d}")
 
+            glayout = gdata.get("layout_pages", {})
+            if glayout:
+                if pages_limit is None and len(layout_hashes) != len(glayout):
+                    layout_golden_ok = False
+                    layout_golden_mismatches.append(f"layout_page_count:{len(layout_hashes)}!={len(glayout)}")
+                for idx, lh in enumerate(layout_hashes, start=1):
+                    glh = glayout.get(str(idx))
+                    if glh != lh:
+                        layout_golden_ok = False
+                        layout_golden_mismatches.append(f"layout_page_{idx:03d}")
+
     summary = {
         "corpus": cname,
         "epub": str(epub_path.name),
@@ -391,17 +409,84 @@ def run_single_corpus(
         "deterministic": deterministic,
         "golden_passed": golden_ok,
         "golden_mismatches": golden_mismatches,
+        "layout_golden_passed": layout_golden_ok,
+        "layout_golden_mismatches": layout_golden_mismatches,
         "chapter_errors": meta.get("chapter_errors", []),
         "totals": totals,
         "chapters": chapters_summary,
         "pages": {str(k): v for k, v in per_page.items()},
     }
-    return summary, (deterministic and golden_ok)
+    return summary, (deterministic and golden_ok and layout_golden_ok)
+
+
+def run_synthetic_suite(prof_cfg: dict, update_golden: bool, check_golden: bool, check_determinism: bool) -> Tuple[dict, bool]:
+    syn_epub = REPO_ROOT / "tools" / "reports" / "synthetic" / "synthetic_generalization.epub"
+    if not syn_epub.is_file():
+        return {"present": False, "passed": True}, True
+
+    imgs, meta = render_corpus_once(syn_epub, prof_cfg, 100)
+    page_hashes = [sha256_image(im) for im in imgs]
+    layout_hashes = meta.get("layout_hashes", [])
+
+    deterministic = True
+    if check_determinism:
+        imgs2, meta2 = render_corpus_once(syn_epub, prof_cfg, 100)
+        page_hashes2 = [sha256_image(im) for im in imgs2]
+        layout_hashes2 = meta2.get("layout_hashes", [])
+        deterministic = (page_hashes == page_hashes2) and (layout_hashes == layout_hashes2)
+
+    golden_path = REPO_ROOT / "tools" / "golden" / "synthetic.json"
+    golden_ok = True
+    layout_golden_ok = True
+    mismatches = []
+
+    if update_golden:
+        golden_payload = {
+            "corpus": "synthetic",
+            "engine_version": getattr(kindle_render, "__version__", "unknown"),
+            "page_count": len(imgs),
+            "pages": {str(i + 1): h for i, h in enumerate(page_hashes)},
+            "layout_pages": {str(i + 1): h for i, h in enumerate(layout_hashes)} if layout_hashes else {},
+        }
+        golden_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(golden_path, "w") as gf:
+            json.dump(golden_payload, gf, indent=2)
+    elif check_golden and golden_path.is_file():
+        with open(golden_path, "r") as gf:
+            gdata = json.load(gf)
+        gpages = gdata.get("pages", {})
+        if len(imgs) != gdata.get("page_count", len(gpages)):
+            golden_ok = False
+            mismatches.append(f"page_count:{len(imgs)}!={gdata.get('page_count')}")
+        for idx, h in enumerate(page_hashes, start=1):
+            if gpages.get(str(idx)) != h:
+                golden_ok = False
+                mismatches.append(f"page_{idx:02d}")
+        glayout = gdata.get("layout_pages", {})
+        if glayout:
+            if len(layout_hashes) != len(glayout):
+                layout_golden_ok = False
+                mismatches.append(f"layout_page_count:{len(layout_hashes)}!={len(glayout)}")
+            for idx, lh in enumerate(layout_hashes, start=1):
+                if glayout.get(str(idx)) != lh:
+                    layout_golden_ok = False
+                    mismatches.append(f"layout_page_{idx:02d}")
+
+    passed = deterministic and golden_ok and layout_golden_ok
+    return {
+        "present": True,
+        "rendered_pages": len(imgs),
+        "deterministic": deterministic,
+        "golden_passed": golden_ok,
+        "layout_golden_passed": layout_golden_ok,
+        "mismatches": mismatches,
+        "passed": passed,
+    }, passed
 
 
 def main():
     ap = argparse.ArgumentParser(description="Corpus runner and golden verifier for kindle_render.")
-    ap.add_argument("--only", choices=["probe", "exam1", "exam2"], help="Run only a single corpus")
+    ap.add_argument("--only", choices=["probe", "exam1", "exam2", "synthetic"], help="Run only a single corpus")
     ap.add_argument("--pages", type=int, default=None, help="Render at most N pages")
     ap.add_argument("--update-golden", action="store_true", help="Explicitly write tools/golden/<corpus>.json")
     ap.add_argument("--no-golden", action="store_true", help="Skip golden comparison (for pre-golden runs)")
@@ -416,6 +501,23 @@ def main():
     profiles_path = REPO_ROOT / "tools" / "profiles.json"
     with open(profiles_path, "r") as pf:
         profiles_data = json.load(pf)
+
+    if args.only == "synthetic":
+        syn_res, syn_ok = run_synthetic_suite(
+            profiles_data["corpora"]["exam2"]["config"],
+            update_golden=args.update_golden,
+            check_golden=(not args.no_golden and not args.update_golden),
+            check_determinism=(not args.no_determinism),
+        )
+        print(
+            f"[synthetic] deterministic={syn_res.get('deterministic')} "
+            f"golden_passed={syn_res.get('golden_passed')} "
+            f"layout_golden_passed={syn_res.get('layout_golden_passed')} "
+            f"pages={syn_res.get('rendered_pages')}"
+        )
+        if not syn_ok:
+            sys.exit(1)
+        return
 
     selected = [args.only] if args.only else ["probe", "exam1", "exam2"]
     epub_overrides = {args.only: args.epub} if (args.only and args.epub) else {}
@@ -441,7 +543,13 @@ def main():
             with open(per_corpus_json, "r") as rf:
                 res = json.load(rf)
             corpus_results[cname] = res
-            print(format_chapter_table(cname, res))
+            tbl_txt = format_chapter_table(cname, res)
+            print(tbl_txt)
+            md_sections.append(f"## Corpus: `{cname}`")
+            md_sections.append("```text")
+            md_sections.append(tbl_txt)
+            md_sections.append("```")
+            md_sections.append("")
             continue
 
         c_out_dir = Path(args.out_dir) / cname if args.out_dir else None
@@ -464,6 +572,7 @@ def main():
         print(tbl_txt)
         print(
             f"[{cname}] deterministic={res['deterministic']} golden_passed={res['golden_passed']} "
+            f"layout_golden_passed={res.get('layout_golden_passed', True)} "
             f"exact_pages={res['totals']['exact_pages']}/{res['compared_pages']} "
             f"pos_lines={res['totals']['pos_exact_lines']}/{res['totals']['capture_lines']} "
             f"pi_lines={res['totals']['pos_indep_lines']}/{res['totals']['capture_lines']}\n"
@@ -474,6 +583,22 @@ def main():
         md_sections.append("```")
         md_sections.append("")
         if not ok:
+            all_passed = False
+
+    if not args.only and args.pages is None:
+        syn_res, syn_ok = run_synthetic_suite(
+            profiles_data["corpora"]["exam2"]["config"],
+            update_golden=args.update_golden,
+            check_golden=(not args.no_golden and not args.update_golden),
+            check_determinism=(not args.no_determinism),
+        )
+        print(
+            f"[synthetic] deterministic={syn_res.get('deterministic')} "
+            f"golden_passed={syn_res.get('golden_passed')} "
+            f"layout_golden_passed={syn_res.get('layout_golden_passed')} "
+            f"pages={syn_res.get('rendered_pages')}"
+        )
+        if not syn_ok:
             all_passed = False
 
     combined = {

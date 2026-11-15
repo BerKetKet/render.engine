@@ -2,10 +2,7 @@
   "search_paths": [
     "corpora",
     ".",
-    "..",
-    "/working_dir/c_67aa1dc148eace5f/user_uploaded_files/ttl=63d/user_uploaded",
-    "/working_dir/c_67aa1dc148eace5f/work/#exam",
-    "/working_dir/c_67aa1dc148eace5f/work"
+    ".."
   ],
   "corpora": {
     "probe": {

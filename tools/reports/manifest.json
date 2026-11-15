@@ -1,6 +1,6 @@
 {
-  "engine_version": "1.6.0",
-  "git_commit": "e02b57d1b41edcf1921702f181a4c181796c1148",
+  "engine_version": "1.6.1",
+  "git_commit": "21eaa593278b452cda406ba45cd40a9e228f2231",
   "python_version": "3.11.2",
   "freetype_version": "2.12.1",
   "fonts_sha256": {
@@ -38,7 +38,7 @@
   },
   "corpus_files_sha256": {
     "probe:epub:master_probe_v1.epub": "95d450c6d0f80d883b6498be86a6d73d497f7b2eb211c8b324bde5f43d9799e6",
-    "probe:captures:master_probe_captures.zip": "13a69bb73f2ca1e3033e96cab6c94fc16593ee0fed53afb2f9dae3980fa47c04",
+    "probe:captures:master_probe_captures.zip": "e36bf2fc0d9390ec6ce04a8fa2b2a8ee0ec4ff86f3db9984777d73ab857120a0",
     "exam1:epub:kindle_exam_v1.epub": "dcb38806168f8cc721a282b4a036ea7a49417be993afebdb5bce8f5c7d87c319",
     "exam1:captures:exam_screen.zip": "c13ffdac76fefa3810c32bfb8c685d4fd7d29de211c2394f467194e8fcf92e6b",
     "exam2:epub:kindle_exam_v2.epub": "e13af963bbe0c91b88b1a51be1b95bc9604ba408b4de854003d3a70d64f9e325",
