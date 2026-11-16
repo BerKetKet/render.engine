@@ -58,3 +58,13 @@
   python3 tools/test_text_layer.py
   python3 tools/corpus.py --only probe --skip-existing
   ```
+
+
+## Stage H `[F]` — Shaping, Tokenization, `<mark>` Highlights & `float32` Justified Pen Accumulation — Completed (`v1.10.0`)
+- **DONE**:
+  - **Stage H1 (`commit 8f2c6f6`)**: Preserved `bg` in `epub.py:_collapse`, added vulgar eighth/third fractions in `fonts.py`, added leading ellipsis `…` splitting and cross-box GPOS kerning across `hyphen`/`endash`/`emdash`/`slash` in `layout.py:build_items` (`+9` exact pages, `0` regressions).
+  - **Stage H2 (`commit c428322`)**: Implemented `float32` justified-line last-word pen accumulation in `layout.py:layout_line` and `page.py` for `(start26 + off26) & 63 == 32` tie-breaking (`222 / 357` exact pages, `9,013 / 9,638` pos lines, `4,611,304` total diff px across all 5 corpora; `0` lost exact pages).
+  - **Goldens & Gates (`commit 91b5736`)**: Updated all 5 corpus goldens; all gates `G1`–`G6` passed (`check_imports.py`, `test_harfbuzz_lock.py`, `test_parallel_raster.py`, `test_text_layer.py`, `test_boundary.py`).
+- **NEXT**:
+  - Evaluate `v1.10.0` against held-out `exam4` when available; remaining items (`ul_indent_em`, `cover` p.1, `dl/dt/dd`, complex scripts) are tracked in `BACKLOG.md`.
+- **CURRENT COMMIT / TAG**: `v1.10.0` (`round1-1.10.0`)

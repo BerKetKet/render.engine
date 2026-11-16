@@ -1,4 +1,4 @@
-__version__ = "1.9.1"
+__version__ = "1.10.0"
 """
 kindle_render v1.9.0 — Universal, viewport-independent EPUB typography, pagination, IR layout, structured text layer, and rasterization engine.
 

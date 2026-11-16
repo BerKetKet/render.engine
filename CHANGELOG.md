@@ -13,6 +13,18 @@
 
 # Changelog
 
+## [1.10.0] - 2026-11-16 (`v1.10.0` — Stage H Fidelity Fixes)
+
+### Stage H1 `[F]`: Cross-Box Kerning, Leading Ellipsis, Vulgar Fractions & `<mark>` Highlights
+- **Cross-Box GPOS Kerning (`kindle_render/layout.py:build_items`)**: Applied `math.floor(face.kern_units(n1, n2) * face.S)` across adjacent unspaced `Box` boundaries split at `hyphen`, `endash`, `emdash`, and `slash`, updating `Box.width` prior to line breaking and removing the duplicate post-justification hyphen tweak in `layout_line`.
+- **Leading Horizontal Ellipsis (`…Word`)**: Included `…` in `lstrip` during hyphenation word extraction and split leading `ellipsis` `Box`es into `Box([ellipsis]) + Penalty(0, 0, False) + Box(rest)`.
+- **Vulgar Fractions (`kindle_render/fonts.py:names_with_clusters`)**: Mapped precomposed third and eighth fraction sequences (`1⁄3`, `2⁄3`, `1⁄8`, `3⁄8`, `5⁄8`, `7⁄8`) to their Unicode codepoints before GSUB/numr/dnom fallback.
+- **Highlight Background (`kindle_render/epub.py:_collapse`)**: Preserved `bg=getattr(r, "bg", None)` on collapsed `Run` instances so `<mark>` highlight rectangles are emitted in `draw_line`.
+
+### Stage H2 `[F]`: `float32` Justified-Line Pen Accumulation
+- **Half-Pixel Tie-Breaking (`kindle_render/layout.py:layout_line`, `kindle_render/page.py`)**: Accumulated per-word widths and `float32` space advances (`sp_fl = f32(std_sp) + f32(delta) / f32(k)`) across uniform-face justified lines to resolve exact `32/64` (`0.50` px) rounding boundaries in the final word of justified lines.
+- **5-Corpus Verification**: Improved total bitwise-identical pages across `probe`, `exam1`, `exam2`, `exam3_normal`, and `exam3_small` from `179/357` to **`222/357`** (`9,013/9,638` positional-exact lines, `4,611,304` total diff pixels; `0` lost exact pages).
+
 ## [1.9.1] - 2026-11-16 (`boundary-1.9.1` — Stage F Contents Page & Stage G Boundary Hardening)
 
 ### Stage F `[F]`: Contents Page (`nav` / p.2) & Ordered List (`<ol><li>`) Subpixel Geometry
