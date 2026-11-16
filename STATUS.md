@@ -32,3 +32,29 @@
   python3 tools/corpus.py --only exam3_normal --no-determinism
   python3 tools/corpus.py --only exam3_small --no-determinism
   ```
+
+
+## Stage F `[F]` (Contents Page `nav` / p.2) & Stage G `[P]` (Boundary Hardening) — Completed (`boundary-1.9.1`)
+- **DONE**:
+  - **Stage F `[F]` (`commits 1677882`, `08889f2`)**:
+    - Measured `<ol><li>` horizontal text indent (`ol_indent_em = 2.1054` across all 3 geometries `(34,51)`, `(42,57)`, `(45,68)`) and Skia subpixel antialiased link underline geometry (`role="link_underline"`, `base_thk = float(round(0.065 * sz_px))`, `y_off_top = base_thk + 0.02612 * sz_px + 0.00245 * pt_px - 0.5855`, `thk_fl = base_thk - 0.00015 * sz_px + 0.00013 * pt_px - 0.00165`, rendered with `min(cov_x, cov_y)` subpixel edge coverage in `kindle_render/raster.py`).
+    - Achieved **`0` diff pixels (`100%` bitwise identity)** on **ALL 5 Contents pages (`p.2`)** across all 5 corpora (`probe` p.2 `27/27`, `exam1` p.2 `21/21`, `exam2` p.2 `27/27`, `exam3_normal` p.2 `18/18`, `exam3_small` p.2 `18/18`) plus `+101` positional-exact lines on body `<ol>` pages (`exam2` p.7 and `exam2` p.12 also became `100%` bitwise identical).
+    - Total across all 5 corpora (`357` compared pages): **`179 / 357` bitwise-identical pages** (`+17` over `1.8.0-rc1`, `+7` over `rhythm-1.9.0`), **`8,913 / 9,638` positional-exact lines** (`+755` over `1.8.0-rc1`, `+218` over `rhythm-1.9.0`), and **`4,888,301` total diff pixels** (`-58.0%` reduction from `11,642,724`). Zero regressions on any corpus.
+  - **Stage G `[P]` (`commit 8bc97c9`)**:
+    - Added full IR deserialization (`PositionedDocument.from_dict`, `PositionedPage.from_dict`, `_cmd_from_dict`) and schema/coordinate invariant validation (`validate_ir_page`, `validate_ir_document`) in `kindle_render/ir.py`.
+    - Added `tools/test_boundary.py` and verified `0` validation errors, `369/369` pages `layout_sha256` round-trip equality, and `25/25` sampled pages `100%` pixel SHA-256 round-trip equality across all 5 corpora (`tools/reports/stage_g/boundary_hardening.json`, `tools/reports/stage_g/boundary_hardening.md`).
+- **NEXT**:
+  - **Stage H `[F]` (Re-scoped Round 1 Fidelity Items)**:
+    1. `<mark>` highlight preservation in `kindle_render/epub.py:_collapse` (`bg=getattr(r, "bg", None)`) and `<mark>` box geometry in `kindle_render/page.py:draw_line`.
+    2. `ul_indent_em` subpixel `em` measurement across `(34,51)`, `(42,57)`, `(45,68)` and `dl/dt/dd` / `figure` / `cover` p.1 block rules.
+    3. Inline monospace `<code>`/`<kbd>`, `sub`/`sup`, drop caps (`.dc::first-letter` / `.ini::first-letter`), hyphenation apostrophes, and complex scripts.
+    4. Subpixel `32/64` tie-breaking in justified line last-word placement (`(start26 + off26) & 63 == 32`).
+- **EXACT COMMANDS TO RESUME**:
+  ```bash
+  python3 tools/check_imports.py
+  python3 tools/test_harfbuzz_lock.py
+  python3 tools/test_boundary.py
+  python3 tools/test_parallel_raster.py
+  python3 tools/test_text_layer.py
+  python3 tools/corpus.py --only probe --skip-existing
+  ```

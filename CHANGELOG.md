@@ -13,6 +13,18 @@
 
 # Changelog
 
+## [1.9.1] - 2026-11-16 (`boundary-1.9.1` — Stage F Contents Page & Stage G Boundary Hardening)
+
+### Stage F `[F]`: Contents Page (`nav` / p.2) & Ordered List (`<ol><li>`) Subpixel Geometry
+- **Ordered List Content Indent (`ol_indent_em`)**: Updated `Config.ol_indent_em` from `2.0` to `2.1054` (`round(2.1054 * size_px)` px: `72` px at `34` px, `88` px at `42` px, `95` px at `45` px), matching the content `x` start across all 3 geometries and all 5 corpora (`probe`, `exam1`, `exam2`, `exam3_normal`, `exam3_small`).
+- **Ordered List Marker Offset**: Computed `<ol>` marker right-aligned offset `m_x26 = start26 - (m_w + sp26)` directly from the content start `start26`.
+- **Subpixel Antialiased Link Underlines (`role="link_underline"`)**: Added `link_underline` rule emission in `kindle_render/page.py` (`base_thk = float(round(0.065 * sz_px))`, `y_off_top = base_thk + 0.02612 * sz_px + 0.00245 * pt_px - 0.5855`, `thk_fl = base_thk - 0.00015 * sz_px + 0.00013 * pt_px - 0.00165`) and separable 1D subpixel edge coverage `min(cov_x, cov_y)` in `kindle_render/raster.py`.
+- **Verification**: All 5 Contents pages (`p.2`) across `probe`, `exam1`, `exam2`, `exam3_normal`, and `exam3_small` achieved `0` differing pixels (`100%` bitwise identity), and `exam2` p.7 and p.12 also became `100%` bitwise identical (`179/357` exact pages, `8,913/9,638` positional-exact lines across all 5 corpora).
+
+### Stage G `[P]`: Layout / Raster IR Boundary Hardening
+- **Round-Trip Deserialization & Validation**: Added `PositionedDocument.from_dict`, `PositionedPage.from_dict`, `_cmd_from_dict`, `validate_ir_page`, and `validate_ir_document` in `kindle_render/ir.py`.
+- **Verification (`tools/test_boundary.py`)**: Verified `0` IR schema/coordinate invariant errors and `100%` `layout_sha256` round-trip equality across all `369` rendered pages (`5` corpora), plus `100%` pixel SHA-256 identity when rasterizing deserialized IR pages.
+
 ## 1.7.0
 - **Decoupled Layout & Rasterization via Serializable IR (`kindle_render/ir.py`, `kindle_render/page.py`, `kindle_render/raster.py`)**:
   - Introduced versioned (`ir_version = "1.0"`) intermediate representation data classes (`PositionedDocument`, `PositionedPage`, `GlyphCommand`, `RectCommand`, `RuleCommand`, `RingBulletCommand`, `ImageCommand`, `TextBlockMeta`) with canonical sorted-key JSON serialization and SHA-256 layout hashing (`layout_pages` in `tools/golden/*.json`).
