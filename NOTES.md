@@ -22,7 +22,7 @@
      - Added `exam/v3/settings_panels/` containing 16 Kindle UI settings menu screenshots.
 3. **Milestone Progress (Stages A through E / v1.9.0)**:
    - **Stage A (`1.8.0-rc1`)**: Version lock & loud failure for HarfBuzz, baseline goldens for `exam3_normal` & `exam3_small`, unaligned pair filtering across 5 corpora (`tools/rhythm.py`).
-   - **Stage B**: Read-only Kindle layout hypothesis registry (`docs/hypotheses/kindle_formulae_v0.md`) and evaluators (`tools/hypotheses/evaluate.py`).
+   - **Stage B**: Read-only Kindle layout hypothesis registry (`docs/hypotheses/kindle_formulae_v0.md`), reading theme presets (`docs/hypotheses/kindle_themes.md`), and evaluators (`tools/hypotheses/evaluate.py`).
    - **Stage C**: Cross-geometry vertical rhythm normalization (`eff_body_pitch`, exact heading margin multipliers, spacer advances, horizontal `em`/`rem` basis).
    - **Stage D**: Page-break rules for list items, uncollapsed tables, and horizontal rules (`add_hr`).
    - **Stage E**: Forced `<br/>` segment line breaking in `break_kp` achieving 100% bitwise matching on key ragged pages (`exam3_normal` p.48-49, `exam3_small` p.31), plus full last-glyph rounding census.
