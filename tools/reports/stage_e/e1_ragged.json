@@ -1,0 +1,67 @@
+{
+  "probe": {
+    "exact_pages": 37,
+    "pages": 86,
+    "pos_exact_lines": 2703,
+    "total_dev_lines": 2863,
+    "pi_exact_lines": 2705,
+    "displaced_lines": 2,
+    "total_diff_pixels": 476566,
+    "golden_mismatches": [],
+    "layout_golden_mismatches": []
+  },
+  "exam1": {
+    "exact_pages": 42,
+    "pages": 70,
+    "pos_exact_lines": 1405,
+    "total_dev_lines": 1568,
+    "pi_exact_lines": 1411,
+    "displaced_lines": 6,
+    "total_diff_pixels": 1577125,
+    "golden_mismatches": [],
+    "layout_golden_mismatches": []
+  },
+  "exam2": {
+    "exact_pages": 35,
+    "pages": 65,
+    "pos_exact_lines": 1322,
+    "total_dev_lines": 1529,
+    "pi_exact_lines": 1343,
+    "displaced_lines": 21,
+    "total_diff_pixels": 1140913,
+    "golden_mismatches": [],
+    "layout_golden_mismatches": []
+  },
+  "exam3_normal": {
+    "exact_pages": 42,
+    "pages": 82,
+    "pos_exact_lines": 1835,
+    "total_dev_lines": 2027,
+    "pi_exact_lines": 1847,
+    "displaced_lines": 12,
+    "total_diff_pixels": 965580,
+    "golden_mismatches": [
+      "page_048",
+      "page_049"
+    ],
+    "layout_golden_mismatches": [
+      "layout_page_048",
+      "layout_page_049"
+    ]
+  },
+  "exam3_small": {
+    "exact_pages": 16,
+    "pages": 54,
+    "pos_exact_lines": 1430,
+    "total_dev_lines": 1651,
+    "pi_exact_lines": 1455,
+    "displaced_lines": 25,
+    "total_diff_pixels": 1114849,
+    "golden_mismatches": [
+      "page_031"
+    ],
+    "layout_golden_mismatches": [
+      "layout_page_031"
+    ]
+  }
+}

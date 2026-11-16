@@ -7,7 +7,7 @@
   "mean_delta_ink": 0.0,
   "exact_boundary_count": 574,
   "within_1px_boundary_count": 576,
-  "page_top_count": 47,
+  "page_top_count": 46,
   "page_tops": [
     {
       "corpus": "exam3_small",
@@ -260,18 +260,6 @@
       "device_top_ink": 234,
       "engine_top_ink": 234,
       "delta_top_ink": 0
-    },
-    {
-      "corpus": "exam3_small",
-      "geometry": "34px_pitch51",
-      "page": 26,
-      "chapter": "e06_structure",
-      "first_in_chapter": false,
-      "first_block_kind": "pre",
-      "heading_size_px": null,
-      "device_top_ink": 265,
-      "engine_top_ink": 178,
-      "delta_top_ink": -87
     },
     {
       "corpus": "exam3_small",

@@ -1,0 +1,69 @@
+{
+  "stage": "E2",
+  "hypothesis": "Last-glyph 1px right-edge rounding tie on justified lines",
+  "census_across_5_corpora": {
+    "criterion": "Justified lines where shifting only gs[-1].x by -1 px makes the rendered line band 100% bitwise equal to the device capture",
+    "probe": {
+      "helped_lines": 5,
+      "already_exact_with_same_terminal_adv26_mod64_eq_32": 0
+    },
+    "exam1": {
+      "helped_lines": 2,
+      "already_exact_with_same_terminal_adv26_mod64_eq_32": 4
+    },
+    "exam2": {
+      "helped_lines": 0,
+      "already_exact_with_same_terminal_adv26_mod64_eq_32": 0
+    },
+    "exam3_normal": {
+      "helped_lines": 3,
+      "already_exact_with_same_terminal_adv26_mod64_eq_32": 8
+    },
+    "exam3_small": {
+      "helped_lines": 24,
+      "already_exact_with_same_terminal_adv26_mod64_eq_32": 49
+    },
+    "totals": {
+      "helped_lines": 34,
+      "already_exact_lines_at_same_tie": 61
+    }
+  },
+  "terminal_glyphs_at_half_pixel_tie": [
+    {
+      "glyph": "k",
+      "font_size_px": 45,
+      "adv26": 1696,
+      "adv_px": 26.5,
+      "x_right_aligned": 975
+    },
+    {
+      "glyph": "m",
+      "font_size_px": 45,
+      "adv26": 2848,
+      "adv_px": 44.5,
+      "x_right_aligned": 957
+    },
+    {
+      "glyph": "e",
+      "font_size_px": 34,
+      "adv26": 1120,
+      "adv_px": 17.5,
+      "x_right_aligned": 984
+    }
+  ],
+  "candidates_tested": [
+    {
+      "candidate": "(a) Change place_phase from 0.5 to 0.49 in Config",
+      "result": "REJECTED \u2014 shifts hundreds of interior glyphs at (pos26 & 63) == 32 across all 5 corpora, dropping exact pages."
+    },
+    {
+      "candidate": "(b) Floor/round-half-down only on last glyph of justified lines when ((start26 + off) & 63) == 32",
+      "result": "REJECTED \u2014 while helping 34 lines across the 5 corpora, it regresses 61 lines that are ALREADY 100% bitwise identical at the exact same terminal glyph x-coordinate (4 on exam1, 8 on exam3_normal, 49 on exam3_small), violating the zero-regression gate."
+    },
+    {
+      "candidate": "(c) Unrounded float accumulation of glyph advances across the line before quantizing the terminal glyph",
+      "result": "REJECTED \u2014 sub-26.6 float accumulation drifts from Kindle's per-word/per-space 26.6 fixed-point placement on 61 currently exact lines."
+    }
+  ],
+  "decision": "Keep place_phase = 0.5 unchanged per Stage E2 rule ('Accept only if zero regressions')."
+}

@@ -732,7 +732,7 @@ def _orig_break_kp(items, line_w, tolerance, cfg, ragged):
 TABLE_CONSEC = (0.0, 1.0, 1.5, 2.0, 3.0, 5.0, 8.0, 13.0, 21.0)
 TABLE_WINDOW = (0.0, 0.0, 0.0, 1.0, 3.0, 8.0, 9.0, 10.0, 10.0)
 
-def break_kp(items, line_w, tolerance, cfg, ragged):
+def break_kp(items, line_w, tolerance, cfg, ragged, in_forced_seg=False):
     """
     Backward Dynamic Programming Paragraph Composer.
     """
@@ -819,7 +819,48 @@ def break_kp(items, line_w, tolerance, cfg, ragged):
 
     N = len(nodes)
     has_internal_forced = any(nd["is_forced"] for nd in nodes[:-1])
-    if varies_dropcap or has_internal_forced:
+    if varies_dropcap:
+        return _orig_break_kp(items, line_w, tolerance, cfg, ragged)
+    if has_internal_forced and ragged:
+        out_breaks = []
+        seg_start = 0
+        seg_line_idx = 0
+        for idx_it, it in enumerate(items):
+            if isinstance(it, Penalty) and it.penalty <= -INF:
+                seg_items = list(items[seg_start:idx_it])
+                while seg_items and isinstance(seg_items[-1], Glue):
+                    seg_items.pop()
+                if not seg_items:
+                    out_breaks.append(idx_it)
+                    seg_line_idx += 1
+                else:
+                    base_idx = seg_line_idx
+                    seg_lw = (lambda k, _b=base_idx: line_w(_b + k)) if callable(line_w) else line_w
+                    seg_res = break_kp(seg_items, seg_lw, tolerance, cfg, ragged, in_forced_seg=True)
+                    if not seg_res:
+                        return _orig_break_kp(items, line_w, tolerance, cfg, ragged)
+                    for b in seg_res[:-1]:
+                        out_breaks.append(seg_start + b)
+                    out_breaks.append(idx_it)
+                    seg_line_idx += len(seg_res)
+                seg_start = idx_it + 1
+                while seg_start < n_items and isinstance(items[seg_start], Glue):
+                    seg_start += 1
+        if seg_start < n_items:
+            seg_items = list(items[seg_start:n_items])
+            while seg_items and isinstance(seg_items[-1], Glue):
+                seg_items.pop()
+            if seg_items:
+                base_idx = seg_line_idx
+                seg_lw = (lambda k, _b=base_idx: line_w(_b + k)) if callable(line_w) else line_w
+                seg_res = break_kp(seg_items, seg_lw, tolerance, cfg, ragged, in_forced_seg=True)
+                if not seg_res:
+                    return _orig_break_kp(items, line_w, tolerance, cfg, ragged)
+                for b in seg_res[:-1]:
+                    out_breaks.append(seg_start + b)
+                out_breaks.append(n_items)
+        return out_breaks
+    if has_internal_forced:
         return _orig_break_kp(items, line_w, tolerance, cfg, ragged)
 
     indent_w = (l1 - l0)
@@ -857,7 +898,7 @@ def break_kp(items, line_w, tolerance, cfg, ragged):
         else:
             w9_flag = 1 if nodes[i - 1]["is_hyph"] else 0
             w10 = w28 & w9_flag
-            if w10 == 1:
+            if w10 == 1 and not in_forced_seg:
                 c = 5.0
                 s1 = 5.0
                 w9 = 1

@@ -9,11 +9,11 @@
       "prediction": "Predicts integer heading top/bottom block margins from floored V_em(P) = floor(P/1.2) across all geometries.",
       "observations_by_geometry": {
         "34px_pitch51": {
-          "n": 21,
-          "exact_count": 1,
-          "exact_share": 0.0476,
-          "within_1px_count": 6,
-          "within_1px_share": 0.2857
+          "n": 23,
+          "exact_count": 16,
+          "exact_share": 0.6957,
+          "within_1px_count": 21,
+          "within_1px_share": 0.913
         },
         "42px_pitch57": {
           "n": 102,
@@ -23,11 +23,11 @@
           "within_1px_share": 1.0
         },
         "45px_pitch68": {
-          "n": 82,
-          "exact_count": 51,
-          "exact_share": 0.622,
-          "within_1px_count": 77,
-          "within_1px_share": 0.939
+          "n": 88,
+          "exact_count": 52,
+          "exact_share": 0.5909,
+          "within_1px_count": 84,
+          "within_1px_share": 0.9545
         }
       },
       "source": "tools/reports/rhythm/gaps_*.json (aligned heading boundaries across probe, exam1, exam2, exam3_normal, exam3_small)",
@@ -73,10 +73,10 @@
       "prediction": "Page-top headings retain mt_px(h_k) plus +1 px when k == 1 across all geometries.",
       "observations_by_geometry": {
         "34px_pitch51": {
-          "n": 15,
-          "exact_count": 1,
-          "exact_share": 0.0667,
-          "within_1px_count": 15,
+          "n": 16,
+          "exact_count": 16,
+          "exact_share": 1.0,
+          "within_1px_count": 16,
           "within_1px_share": 1.0
         },
         "42px_pitch57": {
@@ -457,10 +457,10 @@
       "prediction": "26.6 fixed-point shaping, justification, placement, and baseline offset match device glyph positions.",
       "observations_by_geometry": {
         "34px_pitch51": {
-          "n": 570,
-          "exact_count": 568,
+          "n": 573,
+          "exact_count": 571,
           "exact_share": 0.9965,
-          "within_1px_count": 570,
+          "within_1px_count": 573,
           "within_1px_share": 1.0
         },
         "42px_pitch57": {
@@ -471,10 +471,10 @@
           "within_1px_share": 0.9634
         },
         "45px_pitch68": {
-          "n": 819,
-          "exact_count": 818,
+          "n": 825,
+          "exact_count": 824,
           "exact_share": 0.9988,
-          "within_1px_count": 819,
+          "within_1px_count": 825,
           "within_1px_share": 1.0
         }
       },

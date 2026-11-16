@@ -4,8 +4,8 @@
   "boundary_count": 350,
   "aligned_boundary_count": 310,
   "unaligned_boundary_count": 40,
-  "mean_delta_ink": -0.0032,
-  "exact_boundary_count": 309,
+  "mean_delta_ink": 0.0,
+  "exact_boundary_count": 310,
   "within_1px_boundary_count": 310,
   "page_top_count": 63,
   "page_tops": [
@@ -5092,11 +5092,11 @@
       "same_block": false,
       "heading_size_px": null,
       "device_gap_ink": 80,
-      "engine_gap_ink": 79,
-      "delta_ink": -1,
+      "engine_gap_ink": 80,
+      "delta_ink": 0,
       "device_gap_base": 125,
-      "engine_gap_base": 124,
-      "delta_base": -1,
+      "engine_gap_base": 125,
+      "delta_base": 0,
       "status": "aligned"
     },
     {

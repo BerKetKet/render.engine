@@ -36,6 +36,6 @@
 | paragraph -> h5 | 1 (insufficient) | 0 (insufficient) | 1 (insufficient) |
 | paragraph -> h6 | 1 (insufficient) | 2 (insufficient) | 1 (insufficient) |
 | paragraph -> li | 0 (insufficient) | 1 (insufficient) | 0 (insufficient) |
-| paragraph -> paragraph | 543 (ok) | 1083 (ok) | 728 (ok) |
+| paragraph -> paragraph | 543 (ok) | 1083 (ok) | 729 (ok) |
 | paragraph -> pre | 0 (insufficient) | 1 (insufficient) | 0 (insufficient) |
 | pre -> paragraph | 0 (insufficient) | 1 (insufficient) | 0 (insufficient) |

@@ -4,9 +4,9 @@
     "boundary_count": 350,
     "aligned_boundary_count": 310,
     "unaligned_boundary_count": 40,
-    "exact_boundary_count": 309,
+    "exact_boundary_count": 310,
     "within_1px_boundary_count": 310,
-    "mean_delta_ink": -0.0032,
+    "mean_delta_ink": 0.0,
     "page_top_count": 63
   },
   "exam2": {
@@ -14,18 +14,18 @@
     "boundary_count": 302,
     "aligned_boundary_count": 259,
     "unaligned_boundary_count": 43,
-    "exact_boundary_count": 257,
+    "exact_boundary_count": 258,
     "within_1px_boundary_count": 258,
-    "mean_delta_ink": 0.0888,
+    "mean_delta_ink": 0.0927,
     "page_top_count": 54
   },
   "exam3_normal": {
     "geometry": "45px_pitch68",
-    "boundary_count": 595,
-    "aligned_boundary_count": 595,
+    "boundary_count": 596,
+    "aligned_boundary_count": 596,
     "unaligned_boundary_count": 0,
-    "exact_boundary_count": 594,
-    "within_1px_boundary_count": 595,
+    "exact_boundary_count": 595,
+    "within_1px_boundary_count": 596,
     "mean_delta_ink": -0.0017,
     "page_top_count": 74
   },
@@ -37,7 +37,7 @@
     "exact_boundary_count": 574,
     "within_1px_boundary_count": 576,
     "mean_delta_ink": 0.0,
-    "page_top_count": 47
+    "page_top_count": 46
   },
   "probe": {
     "geometry": "42px_pitch57",
