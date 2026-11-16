@@ -179,3 +179,9 @@ Every calibration constant, lookup table, and conditional formula in `kindle_ren
 5. **Uppercase Tilde Composites & Extended Latin Diacritics (`exam2` X09 Pages 19, 21)**.
 6. **Nav/TOC Antialiased Underlines (`probe` p.2, `exam1` p.2, `exam2` p.2)**.
 7. **Table Header Mid-Word Break in Narrow Columns (`page.py:add_table`)**.
+
+
+## Stage G Boundary Hardening (`kindle_render/ir.py`, `tools/test_boundary.py`)
+- **Round-Trip IR Deserialization (`from_dict` / `from_json`)**: `PositionedDocument.from_dict`, `PositionedPage.from_dict`, and `_cmd_from_dict` reconstruct all IR commands (`GlyphCommand`, `RectCommand`, `RuleCommand` including subpixel `link_underline` coordinates, `RingBulletCommand`, and `ImageCommand` via `image_store`) from canonical JSON/dict representations while preserving identical `layout_sha256()` digests across all 369 rendered pages.
+- **IR Schema & Coordinate Invariant Validation (`validate_ir_page` / `validate_ir_document`)**: Validates schema version (`1.0`), positive page dimensions, monotonic page numbering, valid command discriminators, non-negative bounds (`x1 >= x0`, `y1 >= y0`), RGB channels in `[0, 255]`, and finite subpixel coordinates.
+- **Boundary Test Suite (`tools/test_boundary.py`)**: Enforces `check_imports()`, zero IR validation errors, 100% `layout_sha256()` round-trip preservation on all 369 pages across all 5 corpora, and 100% pixel SHA-256 identity when rasterizing deserialized IR pages.

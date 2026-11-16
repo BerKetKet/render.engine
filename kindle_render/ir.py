@@ -132,13 +132,14 @@ class RuleCommand:
     kind: str = "rule"
 
     def to_dict(self) -> Dict[str, Any]:
+        is_fl = (self.role == "link_underline")
         return {
             "kind": "rule",
             "role": self.role,
-            "x0": int(self.x0),
-            "y0": int(self.y0),
-            "x1": int(self.x1),
-            "y1": int(self.y1),
+            "x0": round(float(self.x0), 6) if is_fl else int(self.x0),
+            "y0": round(float(self.y0), 6) if is_fl else int(self.y0),
+            "x1": round(float(self.x1), 6) if is_fl else int(self.x1),
+            "y1": round(float(self.y1), 6) if is_fl else int(self.y1),
             "color": list(self.color),
             "link_href": self.link_href,
         }
@@ -259,7 +260,7 @@ class PositionedDocument:
     screen_h: int = 2340
     bg: Tuple[int, int, int] = (255, 255, 255)
     fg: Tuple[int, int, int] = (0, 0, 0)
-    engine_version: str = "1.8.0-rc1"
+    engine_version: str = "1.9.0"
     ir_version: str = IR_VERSION
 
     def to_dict(self) -> Dict[str, Any]:
@@ -274,3 +275,165 @@ class PositionedDocument:
             "chapter_errors": self.chapter_errors,
             "pages": [p.to_dict() for p in self.pages],
         })
+
+    @classmethod
+    def from_dict(cls, d: Dict[str, Any], image_store: Optional[Dict[str, np.ndarray]] = None) -> "PositionedDocument":
+        pages = [PositionedPage.from_dict(p, image_store=image_store) for p in d.get("pages", [])]
+        return cls(
+            pages=pages,
+            chapter_errors=list(d.get("chapter_errors", [])),
+            screen_w=int(d.get("screen_w", 1080)),
+            screen_h=int(d.get("screen_h", 2340)),
+            bg=tuple(int(x) for x in d.get("bg", (255, 255, 255))),
+            fg=tuple(int(x) for x in d.get("fg", (0, 0, 0))),
+            engine_version=str(d.get("engine_version", "1.9.0")),
+            ir_version=str(d.get("ir_version", IR_VERSION)),
+        )
+
+
+def _cmd_from_dict(d: Dict[str, Any], image_store: Optional[Dict[str, np.ndarray]] = None) -> Any:
+    k = d.get("kind")
+    if k == "glyph":
+        colr = None
+        if d.get("colr_layers"):
+            colr = [
+                (str(layer["glyph_name"]), int(layer["glyph_id"]), tuple(int(c) for c in layer["color"]))
+                for layer in d["colr_layers"]
+            ]
+        return GlyphCommand(
+            font_id=str(d["font_id"]),
+            font_path=str(d.get("font_path", d["font_id"])),
+            glyph_id=int(d["glyph_id"]),
+            glyph_name=str(d["glyph_name"]),
+            size26=int(d["size26"]),
+            boldness_level=int(d.get("boldness_level", 0)),
+            x=int(d["x"]),
+            baseline=int(d["baseline"]),
+            start26=int(d["start26"]),
+            off26=int(d["off26"]),
+            adv26=int(d["adv26"]),
+            dx_px=int(d.get("dx_px", 0)),
+            dy_px=int(d.get("dy_px", 0)),
+            color=tuple(int(c) for c in d.get("color", (0, 0, 0))),
+            colr_layers=colr,
+            bbox=tuple(int(b) for b in d.get("bbox", (0, 0, 0, 0))),
+            unicode_text=str(d.get("unicode_text", "")),
+            is_synthetic_hyphen=bool(d.get("is_synthetic_hyphen", False)),
+            is_list_marker=bool(d.get("is_list_marker", False)),
+            is_table_chrome=bool(d.get("is_table_chrome", False)),
+            is_drop_cap=bool(d.get("is_drop_cap", False)),
+            is_ligature=bool(d.get("is_ligature", False)),
+            block_idx=int(d.get("block_idx", -1)),
+            line_idx=int(d.get("line_idx", -1)),
+            word_idx=int(d.get("word_idx", -1)),
+            logical_word_idx=int(d.get("logical_word_idx", -1)),
+            logical_char_idx=int(d.get("logical_char_idx", 0)),
+            direction=str(d.get("direction", "ltr")),
+            link_href=d.get("link_href"),
+        )
+    if k == "rect":
+        return RectCommand(
+            x0=int(d["x0"]),
+            y0=int(d["y0"]),
+            x1=int(d["x1"]),
+            y1=int(d["y1"]),
+            color=tuple(int(c) for c in d["color"]),
+            role=str(d.get("role", "rect")),
+        )
+    if k == "rule":
+        role = str(d.get("role", "rule"))
+        is_fl = (role == "link_underline")
+        return RuleCommand(
+            x0=float(d["x0"]) if is_fl else int(d["x0"]),
+            y0=float(d["y0"]) if is_fl else int(d["y0"]),
+            x1=float(d["x1"]) if is_fl else int(d["x1"]),
+            y1=float(d["y1"]) if is_fl else int(d["y1"]),
+            color=tuple(int(c) for c in d["color"]),
+            role=role,
+            link_href=d.get("link_href"),
+        )
+    if k == "ring_bullet":
+        return RingBulletCommand(
+            cx=int(d["cx"]),
+            cy=int(d["cy"]),
+            r=int(d["r"]),
+            color=tuple(int(c) for c in d["color"]),
+        )
+    if k == "image":
+        sha = str(d.get("image_sha256", ""))
+        w, h = int(d["width"]), int(d["height"])
+        px = image_store.get(sha) if (image_store and sha in image_store) else np.zeros((h, w, 3), dtype=np.uint8)
+        return ImageCommand(
+            x=int(d["x"]),
+            y=int(d["y"]),
+            width=w,
+            height=h,
+            pixels=px,
+            role=str(d.get("role", "image")),
+            image_sha256=sha,
+        )
+    raise ValueError(f"Unknown IR command kind: {k!r}")
+
+
+def _page_from_dict(cls, d: Dict[str, Any], image_store: Optional[Dict[str, np.ndarray]] = None) -> "PositionedPage":
+    cmds = [_cmd_from_dict(c, image_store=image_store) for c in d.get("commands", [])]
+    blks = [
+        TextBlockMeta(
+            block_idx=int(b["block_idx"]),
+            chapter=str(b["chapter"]),
+            kind=str(b["kind"]),
+            heading_level=int(b.get("heading_level", 0)),
+            list_level=int(b.get("list_level", 0)),
+            list_marker=b.get("list_marker"),
+            table_caption=b.get("table_caption"),
+            table_rows=b.get("table_rows"),
+            bbox=tuple(int(x) for x in b.get("bbox", (0, 0, 0, 0))),
+        )
+        for b in d.get("blocks", [])
+    ]
+    return cls(
+        page_number=int(d["page_number"]),
+        chapter=str(d["chapter"]),
+        width=int(d["width"]),
+        height=int(d["height"]),
+        bg=tuple(int(x) for x in d.get("bg", (255, 255, 255))),
+        fg=tuple(int(x) for x in d.get("fg", (0, 0, 0))),
+        commands=cmds,
+        blocks=blks,
+        ir_version=str(d.get("ir_version", IR_VERSION)),
+    )
+
+
+PositionedPage.from_dict = classmethod(_page_from_dict)
+
+
+def validate_ir_page(page: PositionedPage) -> List[str]:
+    errors: List[str] = []
+    if page.ir_version != IR_VERSION:
+        errors.append(f"page {page.page_number}: ir_version {page.ir_version!r} != {IR_VERSION!r}")
+    W, H = int(page.width), int(page.height)
+    block_ids = {int(b.block_idx) for b in page.blocks}
+    for i, cmd in enumerate(page.commands):
+        k = getattr(cmd, "kind", None)
+        if k == "glyph":
+            bx0, by0, bx1, by1 = cmd.bbox
+            if not (0 <= bx0 <= bx1 <= W and 0 <= by0 <= by1 <= H):
+                errors.append(f"page {page.page_number} cmd {i}: glyph bbox {cmd.bbox} outside page (0,0,{W},{H})")
+            if cmd.block_idx != -1 and cmd.block_idx not in block_ids:
+                errors.append(f"page {page.page_number} cmd {i}: glyph block_idx {cmd.block_idx} not in page.blocks")
+        elif k in ("rect", "rule"):
+            if not (0.0 <= float(cmd.x0) <= float(cmd.x1) <= float(W) and 0.0 <= float(cmd.y0) <= float(cmd.y1) <= float(H)):
+                errors.append(f"page {page.page_number} cmd {i}: {k} bounds ({cmd.x0},{cmd.y0},{cmd.x1},{cmd.y1}) outside page")
+        elif k == "image":
+            if not (0 <= cmd.x and cmd.x + cmd.width <= W and 0 <= cmd.y and cmd.y + cmd.height <= H):
+                errors.append(f"page {page.page_number} cmd {i}: image bounds outside page")
+    return errors
+
+
+def validate_ir_document(doc: PositionedDocument) -> List[str]:
+    errors: List[str] = []
+    if doc.ir_version != IR_VERSION:
+        errors.append(f"doc ir_version {doc.ir_version!r} != {IR_VERSION!r}")
+    for p in doc.pages:
+        errors.extend(validate_ir_page(p))
+    return errors

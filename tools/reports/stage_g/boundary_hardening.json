@@ -1,0 +1,70 @@
+{
+  "import_graph_passed": true,
+  "corpora": {
+    "probe": {
+      "pages": 98,
+      "validation_errors": 0,
+      "layout_roundtrip_passed": true,
+      "sampled_pixel_roundtrip_pages": [
+        1,
+        2,
+        80,
+        87,
+        88
+      ],
+      "sampled_pixel_roundtrip_passed": true
+    },
+    "exam1": {
+      "pages": 70,
+      "validation_errors": 0,
+      "layout_roundtrip_passed": true,
+      "sampled_pixel_roundtrip_pages": [
+        1,
+        2,
+        42,
+        45,
+        47
+      ],
+      "sampled_pixel_roundtrip_passed": true
+    },
+    "exam2": {
+      "pages": 65,
+      "validation_errors": 0,
+      "layout_roundtrip_passed": true,
+      "sampled_pixel_roundtrip_pages": [
+        1,
+        2,
+        8,
+        35,
+        36
+      ],
+      "sampled_pixel_roundtrip_passed": true
+    },
+    "exam3_normal": {
+      "pages": 82,
+      "validation_errors": 0,
+      "layout_roundtrip_passed": true,
+      "sampled_pixel_roundtrip_pages": [
+        1,
+        2,
+        36,
+        41,
+        48
+      ],
+      "sampled_pixel_roundtrip_passed": true
+    },
+    "exam3_small": {
+      "pages": 54,
+      "validation_errors": 0,
+      "layout_roundtrip_passed": true,
+      "sampled_pixel_roundtrip_pages": [
+        1,
+        2,
+        3,
+        26,
+        31
+      ],
+      "sampled_pixel_roundtrip_passed": true
+    }
+  }
+}
