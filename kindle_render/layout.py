@@ -558,8 +558,10 @@ def break_balanced_ragged(items, line_w, w_last: float = 0.7):
     if n == 0:
         return []
     W = [0]
+    Z = [0]
     for it in items:
         W.append(W[-1] + (it.width if isinstance(it, (Box, Glue)) else 0))
+        Z.append(Z[-1] + (it.shrink if isinstance(it, Glue) else 0))
 
     cands = []
     for i, it in enumerate(items):
@@ -580,8 +582,9 @@ def break_balanced_ragged(items, line_w, w_last: float = 0.7):
                 s += 1
             pen_w = items[b].width if (b < n and isinstance(items[b], Penalty)) else 0
             w = W[b] - W[s] + pen_w
+            z = Z[b] - Z[s]
             L = line_w(ln_a)
-            if w > L and s < b:
+            if w > L + z and s < b:
                 continue
             short = max(0.0, (L - w) / float(max(1, L)))
             wt = w_last if (b == n or is_forced) else 1.0
@@ -1062,13 +1065,7 @@ def make_lines(items, line_w, cfg, ragged, is_heading=False, align=None):
     items = _split_overwide_boxes(items, line_w, cfg)
 
     if is_heading:
-        n_boxes = sum(1 for it in items if isinstance(it, Box))
-        w_all_but_last = sum(it.width for it in items[:-2] if isinstance(it, (Box, Glue))) if len(items) >= 3 else 0
-        if (n_boxes >= 5 or (n_boxes == 4 and w_all_but_last > 0.72 * line_w(0))) and isinstance(items[-1], Box) and len(items[-1].glyphs) <= getattr(cfg, "runt_min_chars", 7):
-            if len(items) >= 3 and isinstance(items[-2], Glue) and isinstance(items[-3], Box):
-                pair_w = items[-3].width + items[-2].width + items[-1].width
-                if pair_w <= line_w(0):
-                    items[-2].non_breaking = True
+
         for idx, it in enumerate(items[:-1]):
             if isinstance(it, Box) and it.glyphs:
                 if it.glyphs[0][1] == 'parenleft' and it.glyphs[-1][1] != 'parenright':
@@ -1083,7 +1080,7 @@ def make_lines(items, line_w, cfg, ragged, is_heading=False, align=None):
             and isinstance(items[-3], Box) and items[-3].glyphs and items[-3].glyphs[-1][1] == "colon"
         )
         is_large_hd = any(isinstance(it, Box) and it.glyphs and it.glyphs[0][0].size26 > cfg.size26 for it in items)
-        w_last_hd = 0.15 if (is_all_caps_hd or has_colon_long_end) else (0.7 if is_large_hd else 0.62)
+        w_last_hd = 0.65
         br = break_balanced_ragged(items, line_w, w_last=w_last_hd)
         if not br:
             br = break_greedy(items, line_w, cfg, ragged=True, allow_shrink=False)

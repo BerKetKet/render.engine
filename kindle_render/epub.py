@@ -161,7 +161,7 @@ def _em(val, cfg, pct_base_px=None, use_root_em=False):
     v, u = float(m.group(1)), m.group(2) or "px"
     sz = cfg.size26 / 64.0
     if u in ("em", "rem"):
-        if use_root_em and abs(v) >= 1.99:
+        if use_root_em:
             return v * cfg.base_root_em_px() / sz
         return v
     if u == "px":
@@ -365,7 +365,7 @@ def _doc_blocks(z, href, html, cfg):
                 new_inline["baseline_shift_em"] = (-0.21 * cfg.pitch_px()) / (cfg.size_px() * (5.0 / 6.0))
             elif nm == "sub":
                 new_inline["scale"] = inline_state["scale"] * (5.0 / 6.0)
-                new_inline["baseline_shift_em"] = 13.0 / (cfg.size_px() * (5.0 / 6.0))
+                new_inline["baseline_shift_em"] = int(0.30 * cfg.size_px() + 0.4) / (cfg.size_px() * (5.0 / 6.0))
             elif nm == "small":
                 new_inline["scale"] = inline_state["scale"] * (5.0 / 6.0)
             if props.get("font-variant") == "small-caps":
@@ -477,9 +477,10 @@ def _doc_blocks(z, href, html, cfg):
                 hyph_flag = False if hyph_prop in ("none", "manual") else (True if hyph_prop == "auto" else None)
 
                 has_col_css = any(sel == "table" and p.get("border-collapse") == "collapse" for sel, p in rules)
-                ml_val = _em(props.get("margin-left"), cfg, pct_base_px=box_w, use_root_em=True) or 0.0
+                ml_val = 0.0 if nm in ("blockquote", "figure") else (_em(props.get("margin-left"), cfg, pct_base_px=box_w, use_root_em=True) or 0.0)
+                mr_val = 0.0 if nm in ("blockquote", "figure") else (_em(props.get("margin-right"), cfg, pct_base_px=box_w, use_root_em=True) or 0.0)
                 cur_left = inh_left + ml_val
-                cur_right = inh_right + (_em(props.get("margin-right"), cfg, pct_base_px=box_w, use_root_em=True) or 0.0)
+                cur_right = inh_right + mr_val
                 cur_list_level = list_level
 
                 if nm in ("blockquote", "figure"):

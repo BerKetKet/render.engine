@@ -4,9 +4,9 @@
     "boundary_count": 350,
     "aligned_boundary_count": 310,
     "unaligned_boundary_count": 40,
-    "exact_boundary_count": 310,
+    "exact_boundary_count": 309,
     "within_1px_boundary_count": 310,
-    "mean_delta_ink": 0.0,
+    "mean_delta_ink": -0.0032,
     "page_top_count": 63
   },
   "exam2": {
@@ -14,30 +14,30 @@
     "boundary_count": 302,
     "aligned_boundary_count": 259,
     "unaligned_boundary_count": 43,
-    "exact_boundary_count": 258,
+    "exact_boundary_count": 257,
     "within_1px_boundary_count": 258,
-    "mean_delta_ink": 0.0927,
+    "mean_delta_ink": 0.0888,
     "page_top_count": 54
   },
   "exam3_normal": {
     "geometry": "45px_pitch68",
-    "boundary_count": 584,
-    "aligned_boundary_count": 584,
+    "boundary_count": 595,
+    "aligned_boundary_count": 595,
     "unaligned_boundary_count": 0,
-    "exact_boundary_count": 581,
-    "within_1px_boundary_count": 584,
+    "exact_boundary_count": 594,
+    "within_1px_boundary_count": 595,
     "mean_delta_ink": -0.0017,
-    "page_top_count": 71
+    "page_top_count": 74
   },
   "exam3_small": {
     "geometry": "34px_pitch51",
-    "boundary_count": 570,
-    "aligned_boundary_count": 570,
+    "boundary_count": 576,
+    "aligned_boundary_count": 576,
     "unaligned_boundary_count": 0,
-    "exact_boundary_count": 544,
-    "within_1px_boundary_count": 559,
-    "mean_delta_ink": -0.0544,
-    "page_top_count": 45
+    "exact_boundary_count": 574,
+    "within_1px_boundary_count": 576,
+    "mean_delta_ink": 0.0,
+    "page_top_count": 47
   },
   "probe": {
     "geometry": "42px_pitch57",

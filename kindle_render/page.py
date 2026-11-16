@@ -347,7 +347,7 @@ class Pager:
         if getattr(b, "is_spacer", False):
             if not self.page_empty:
                 extra_sp_lead = max(0.0, std_body_pitch - (19.0 / 14.0) * c.size_px())
-                self.y_float += (std_body_pitch - 4.04124 * extra_sp_lead)
+                self.y_float += ((10.0 / 17.0) * std_body_pitch if extra_sp_lead > 0.0 else float(std_body_pitch))
                 self.y = int(round(self.y_float))
             return
 
@@ -355,16 +355,18 @@ class Pager:
         self._block_counter += 1
 
         has_custom_lh = getattr(b, "line_height", None) is not None
+        extra_lead = max(0.0, std_body_pitch - (19.0 / 14.0) * c.size_px())
+        eff_body_pitch = max(float(std_body_pitch), (68.0 / 45.0) * c.size_px()) if (extra_lead > 0.0 and (b.heading or b.scale > 1.0)) else float(std_body_pitch)
         if has_custom_lh:
             pitch = int(b.line_height * vem_px * b.scale + 1e-6) if (1.5 < b.line_height < 2.0) else int(round(b.line_height * vem_px * b.scale))
             pitch_fl = float(pitch)
             std_pitch = int(round(std_body_pitch * b.scale))
             lead_diff = pitch - std_pitch
-            lh_top_delta = (lead_diff // 2) if (lead_diff >= 0 or std_body_pitch != 57) else -((-lead_diff) // 2)
+            lh_top_delta = (lead_diff // 2) if (lead_diff >= 0 or extra_lead > 0.0) else -((-lead_diff) // 2)
             lh_bot_delta = lead_diff - lh_top_delta
         else:
-            pitch = int(round(float(std_body_pitch) * b.scale))
-            pitch_fl = float(int(std_body_pitch * b.scale)) if (b.heading in (2, 3) and std_body_pitch == 57) else (float(pitch) if (std_body_pitch != 57 or b.heading == 0) else (float(std_body_pitch) * b.scale))
+            pitch = int(round(eff_body_pitch * b.scale))
+            pitch_fl = (float(int(eff_body_pitch * b.scale)) if b.heading in (2, 3) else float(eff_body_pitch * b.scale)) if (extra_lead == 0.0 and b.heading) else float(pitch)
             lh_top_delta = 0
             lh_bot_delta = 0
 
@@ -504,28 +506,29 @@ class Pager:
             placed.append((pl, off26))
 
         if b.heading:
-            extra_lead = max(0.0, std_body_pitch - (19.0 / 14.0) * c.size_px())
             h_idx = b.heading - 1
-            mt_base_em = (0.6632, 0.8140, 0.9717, 1.3263, 1.6487, 2.2938)[h_idx]
-            mb_base_em = (0.6632, 0.8281, 0.9717, 1.3263, 1.6487, 2.2938)[h_idx]
-            mt_lead_k = (0.14 if h_idx in (0, 5) else (0.0 if h_idx == 3 else 0.25))
-            mb_lead_k = (0.35 if h_idx == 2 else (0.0 if h_idx in (0, 1, 3) else 0.28))
+            mt_base_em = (0.66, 0.81, 0.963, 1.32, 1.64, 2.29)[h_idx]
+            mb_base_em = (0.66, 0.822, 0.963, 1.32, 1.64, 2.30)[h_idx]
+            is_tall_lead = std_body_pitch < 3 * (std_body_pitch - c.size_px())
+            mt_lead_k = (0.10 if h_idx == 0 else (0.28 if h_idx == 1 else (0.25 if h_idx == 2 else ((0.05 if is_tall_lead else 0.25) if h_idx == 4 else (0.25 if (h_idx == 5 and is_tall_lead) else 0.0)))))
+            mb_lead_k = (0.10 if h_idx in (0, 3) else (0.05 if h_idx == 1 else (0.40 if h_idx == 2 else ((0.12 if is_tall_lead else 0.35) if h_idx == 4 else 0.28))))
             mt = int(round(mt_base_em * b.scale * vem_px + mt_lead_k * extra_lead))
             mb_est = int(round(mb_base_em * b.scale * vem_px + mb_lead_k * extra_lead))
         else:
-            mt = (int(round(b.mt_em * vem_px * b.scale)) if (getattr(b, 'list_level', 0) > 0 and getattr(b, 'border_collapse', False) and (getattr(b, 'bullet', None) == '\u2022' or (getattr(b, 'ol_number', None) and b.ol_number[0].isupper()))) else int(b.mt_em * vem_px * b.scale + 1e-6)) if b.mt_em else 0
-            mb_est = (int(b.mb_em * vem_px * b.scale + 1e-6) if (std_body_pitch == 57 and b.mb_em == 1.0) else int(round(b.mb_em * vem_px * b.scale))) if b.mb_em else 0
+            eff_vem = (max(float(std_body_pitch), (68.0 / 45.0) * c.size_px()) if extra_lead > 0.0 else float(std_body_pitch)) / 1.2
+            mt = (int(b.mt_em * eff_vem * b.scale + 0.25) if (getattr(b, 'list_level', 0) > 0 and extra_lead > 0.0) else (int(round(b.mt_em * vem_px * b.scale)) if (getattr(b, 'list_level', 0) > 0 and getattr(b, 'border_collapse', False) and (getattr(b, 'bullet', None) == '\u2022' or (getattr(b, 'ol_number', None) and b.ol_number[0].isupper()))) else int(b.mt_em * vem_px * b.scale + 1e-6))) if b.mt_em else 0
+            mb_est = (int(b.mb_em * vem_px * b.scale + 0.4) if b.mb_em == 1.0 else int(math.ceil(b.mb_em * vem_px * b.scale - 0.5))) if b.mb_em else 0
         gap = max(self.prev_mb, mt)
-        if std_body_pitch == 57:
-            prev_h = getattr(self, "prev_heading", 0)
+        prev_h = getattr(self, "prev_heading", 0)
+        if b.heading == 1 and prev_h == 0 and not self.page_empty:
+            gap += 1
+        if extra_lead == 0.0:
             if b.heading == 2 and prev_h == 1:
                 gap -= 1
             elif b.heading == 3 and prev_h == 1:
                 gap -= 2
             elif b.heading == 2 and prev_h == 2:
                 gap = 58
-            elif b.heading == 1 and prev_h == 0 and not self.page_empty:
-                gap += 1
             elif b.heading == 0 and prev_h == 1 and (b.scale > 1.0 or b.mt_em > 1.0):
                 gap -= 1
             elif b.heading == 0 and prev_h == 3:
@@ -547,7 +550,7 @@ class Pager:
             self.y = int(round(self.y_float))
         elif c.margin_at_page_top and b.heading:
             top_mt = mt
-            extra_top = (c.heading_top_extra_px if (b.heading == 1 and std_body_pitch == 57) else (4 if (b.heading == 3 and std_body_pitch == 57 and len(lines) >= 3) else 0))
+            extra_top = (c.heading_top_extra_px if b.heading == 1 else (4 if (b.heading == 3 and extra_lead == 0.0 and len(lines) >= 3) else 0))
             self.y_float += top_mt + extra_top
             self.y = int(round(self.y_float))
 
@@ -566,7 +569,7 @@ class Pager:
                 self.new_page()
                 if i == 0 and c.margin_at_page_top and b.heading:
                     top_mt = mt
-                    extra_top = (c.heading_top_extra_px if (b.heading == 1 and std_body_pitch == 57) else (4 if (b.heading == 3 and std_body_pitch == 57 and len(lines) >= 3) else 0))
+                    extra_top = (c.heading_top_extra_px if b.heading == 1 else (4 if (b.heading == 3 and extra_lead == 0.0 and len(lines) >= 3) else 0))
                     self.y_float += top_mt + extra_top
                     self.y = int(round(self.y_float))
                 continue
@@ -580,7 +583,7 @@ class Pager:
                     if not self.page_empty:
                         self.new_page()
                         if i == 0 and c.margin_at_page_top and b.heading:
-                            extra_top = (c.heading_top_extra_px if (b.heading == 1 and std_body_pitch == 57) else (4 if (b.heading == 3 and std_body_pitch == 57 and len(lines) >= 3) else 0))
+                            extra_top = (c.heading_top_extra_px if b.heading == 1 else (4 if (b.heading == 3 and extra_lead == 0.0 and len(lines) >= 3) else 0))
                             self.y_float += mt + extra_top
                             self.y = int(round(self.y_float))
                         continue
@@ -612,7 +615,7 @@ class Pager:
 
                 if cur_scale > 1.0 and not b.heading:
                     extra_asc = int((cur_scale - 1.0) * vem_px)
-                    cur_pitch = int(round(cur_scale * std_p)) if (std_body_pitch != 57 or cur_scale >= 2.0) else (std_p + extra_asc + int((cur_scale - 1.0) * (std_p - vem_px) + 0.49))
+                    cur_pitch = int(cur_scale * std_p + 0.45) if (extra_lead > 0.0 or cur_scale >= 2.0) else (std_p + extra_asc + int((cur_scale - 1.0) * (std_p - vem_px) + 0.49))
                     cur_pitch_fl = float(cur_pitch)
                     base = self.baseline_in(self.y, std_p, size26) + extra_asc + (lh_top_delta if has_custom_lh else 0)
                 elif inline_imgs and max(im.height for im in inline_imgs) > pitch:
@@ -804,7 +807,7 @@ class Pager:
         if is_col:
             mt_tbl = max(self.prev_mb, int(round(1.0 * c.vem_px())))
         else:
-            mt_tbl = int(round(0.67 * c.size_px())) if self.prev_kind == "hr" else max(self.prev_mb, int(round(0.4 * c.size_px())))
+            mt_tbl = int(round(0.67 * (c.vem_px() + 1.0 if c.pitch_px() < 55 else c.size_px()))) if self.prev_kind == "hr" else max(self.prev_mb, int(round(0.4 * c.size_px())))
         if not self.page_empty:
             self.y += mt_tbl
 
@@ -953,7 +956,7 @@ class Pager:
             row_pad = 10 if is_col else 15
             top_pad = 0
         else:
-            row_pad = 11 if is_col else 16
+            row_pad = 11 if is_col else min(16, int(0.25 * c.size_px() + 5.8))
             top_pad = 3 if is_col else -1
 
         cell_pad = c.collapsed_table_pad_scaled if sc_tbl <= 0.75 else c.collapsed_table_pad_1x
@@ -1247,7 +1250,7 @@ class Pager:
         elif not is_col and sc_tbl < 1.0:
             rule_y_float = last_base + 29.102
         elif not is_col:
-            rule_y_float = last_base + 28.706
+            rule_y_float = last_base + 28.706 + 0.455 * (std_pitch - 57)
         else:
             rule_y_float = last_base + 23.957
 
@@ -1283,6 +1286,7 @@ class Pager:
         self.y_float = float(self.y)
         self.prev_mb = int(round(1.0 * c.vem_px())) if is_col else int(round(0.2 * c.size_px()))
         self.prev_kind = "table"
+        self._mark_page_non_empty()
 
     def add_image(self, b):
         c = self.cfg
@@ -1342,7 +1346,7 @@ class Pager:
         y = 167 if (self.page_empty and im.height >= 2000) else (
             c.top + (maxh - im.height) // 2 if (b.page_break_before and self.page_empty) else self.y
         )
-        y_draw = (y - 1) if ((getattr(b, 'border_collapse', False) or not self.page_empty) and not b.page_break_before and im.height < 2000 and c.pitch_px() == 57) else y
+        y_draw = (y - 1) if ((getattr(b, 'border_collapse', False) or not self.page_empty) and not b.page_break_before and im.height < 2000 and c.pitch_px() <= (19.0 / 14.0) * c.size_px() + 0.5) else y
         arr_u8 = np.array(im, dtype=np.uint8)
         self.cur_ir_page.commands.append(ImageCommand(
             x=x, y=y_draw, width=im.width, height=im.height, pixels=arr_u8, role="block"
@@ -1359,8 +1363,9 @@ class Pager:
     def add_hr(self, b=None):
         c = self.cfg
         is_col = getattr(b, "border_collapse", False) if b is not None else False
-        gap = int(round(0.52 * c.vem_px())) if (is_col and self.prev_mb == 0) else int(round(c.vem_px()))
-        top_gap = (c.pre_hr_top_gap_px if (self.prev_kind == 'pre' and is_col) else max(self.prev_mb, gap))
+        has_extra_lead = c.pitch_px() > (19.0 / 14.0) * c.size_px() + 0.5
+        gap = int(round(0.52 * c.vem_px())) if (is_col and self.prev_mb == 0) else (int(c.vem_px() - 1.5) if has_extra_lead else int(round(c.vem_px())))
+        top_gap = (c.pre_hr_top_gap_px if (self.prev_kind == 'pre' and is_col) else (gap if has_extra_lead else max(self.prev_mb, gap)))
         self.y += top_gap
         if self.y + 3 < c.page_bottom:
             self.cur_ir_page.commands.append(RuleCommand(
@@ -1369,7 +1374,7 @@ class Pager:
         self.y += 3
         self.y_float = float(self.y)
         self._mark_page_non_empty()
-        self.prev_mb = int(round(0.50 * c.vem_px())) if is_col else int(round(c.vem_px()))
+        self.prev_mb = int(round(0.50 * c.vem_px())) if is_col else int(c.vem_px() + 0.5)
         self.prev_kind = "hr"
 
     def add_error_placeholder_page(self, chapter_id: str, exc: Exception, tb_str: str):
