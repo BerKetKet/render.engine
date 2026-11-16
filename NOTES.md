@@ -13,7 +13,13 @@
    - Independent instance-owned FreeType rasterizer state design (`ir.py`, `raster.py`).
    - Clean git working tree; no tracked secrets, credentials, or unscrubbed logs.
 2. **Corpus & Ground Truth Data**:
-   - Added `exam/` directory containing `v1`, `v2`, and `v3` test EPUB fixtures along with complete Kindle hardware screenshots, capture logs, index CSVs, and capture state JSONs across all font sizes.
+   - Added `exam/` directory containing `v1`, `v2`, and `v3` test EPUB fixtures.
+   - `exam/v3` (`kindle_exam_v3.epub`): Complete ground truth dataset totaling 2,307 pages across 14 batches:
+     - 12 Bookerly font sizes (`size_00_Bookerly` through `size_11_Bookerly`, 2,127 pages) under verified Standard layout (Line spacing 2/5, Paragraph/Word/Char spacing 1/5, Medium margins ~80px, Justified).
+     - Compact theme preset (`theme_Compact`, 56 pages, pitch 53px, narrow margins 40px).
+     - Large theme preset (`theme_Large`, 124 pages, pitch 82px, wide margins 133px).
+     - All 14 batches labeled with verified reading configurations in `settings.txt`, `state.json`, and documented in `exam/v3/README.md`.
+     - Added `exam/v3/settings_panels/` containing 16 Kindle UI settings menu screenshots.
 3. **Milestone Progress (Stages A through E / v1.9.0)**:
    - **Stage A (`1.8.0-rc1`)**: Version lock & loud failure for HarfBuzz, baseline goldens for `exam3_normal` & `exam3_small`, unaligned pair filtering across 5 corpora (`tools/rhythm.py`).
    - **Stage B**: Read-only Kindle layout hypothesis registry (`docs/hypotheses/kindle_formulae_v0.md`) and evaluators (`tools/hypotheses/evaluate.py`).
@@ -28,5 +34,4 @@
 - **Stage F (Contents Page)**: Pending owner review before initiation.
 
 ## Next Steps
-- Push tracked `exam/` corpus and updated `NOTES.md` to GitHub remote (`BerKetKet/render.engine`).
-- Resume Stage F upon review.
+- Stage F (Contents Page): Pending owner review before initiation.
