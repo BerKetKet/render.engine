@@ -1,6 +1,6 @@
 {
   "engine_version": "1.9.0",
-  "git_commit": "6959ef66c4e5542daaa25e2f403429700c563546",
+  "git_commit": "1677882e66273572b923ea3453fde179a6965da0",
   "python_version": "3.11.2",
   "os_arch": "Linux-6.12.105+-x86_64",
   "pillow_version": "11.1.0",

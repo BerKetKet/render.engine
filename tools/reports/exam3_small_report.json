@@ -11,12 +11,12 @@
   "layout_golden_mismatches": [],
   "chapter_errors": [],
   "totals": {
-    "exact_pages": 16,
-    "diff_pixels": 1114849,
+    "exact_pages": 17,
+    "diff_pixels": 1012257,
     "capture_lines": 1651,
     "render_lines": 1651,
-    "pos_exact_lines": 1430,
-    "pos_indep_lines": 1455,
+    "pos_exact_lines": 1474,
+    "pos_indep_lines": 1499,
     "displaced_lines": 25
   },
   "chapters": [
@@ -40,12 +40,12 @@
       "end_page": 2,
       "rendered_pages": 1,
       "compared_pages": 1,
-      "exact_pages": 0,
-      "diff_pixels": 70891,
+      "exact_pages": 1,
+      "diff_pixels": 0,
       "capture_lines": 18,
       "render_lines": 18,
-      "pos_exact_lines": 1,
-      "pos_indep_lines": 1,
+      "pos_exact_lines": 18,
+      "pos_indep_lines": 18,
       "displaced_lines": 0
     },
     {
@@ -125,11 +125,11 @@
       "rendered_pages": 4,
       "compared_pages": 4,
       "exact_pages": 1,
-      "diff_pixels": 83558,
+      "diff_pixels": 51857,
       "capture_lines": 103,
       "render_lines": 103,
-      "pos_exact_lines": 47,
-      "pos_indep_lines": 47,
+      "pos_exact_lines": 74,
+      "pos_indep_lines": 74,
       "displaced_lines": 0
     },
     {
@@ -263,15 +263,15 @@
     "2": {
       "page": 2,
       "chapter": "nav",
-      "sha256": "7e3e474fcb157d4746bfbfe32532486d22e2154beea2c134c19fdcb283e48ee9",
+      "sha256": "7058f373b52c9731b5e84e556bdcddfbe8813ea9e56e5e1a413cd6793a3a4445",
       "has_capture": true,
-      "layout_sha256": "6e1347132dab1ab5915f0407cdaefb6b1a114895b912ee5e4df9463e22aafcfc",
-      "exact_page": false,
-      "diff_pixels": 70891,
+      "layout_sha256": "57ae2693a4dc4b22ecd16526b04a712eba869877b2bd097085f6c4df31ff9cd3",
+      "exact_page": true,
+      "diff_pixels": 0,
       "capture_lines": 18,
       "render_lines": 18,
-      "pos_exact_lines": 1,
-      "pos_indep_lines": 1,
+      "pos_exact_lines": 18,
+      "pos_indep_lines": 18,
       "displaced_lines": 0
     },
     "3": {
@@ -585,15 +585,15 @@
     "25": {
       "page": 25,
       "chapter": "e06_structure",
-      "sha256": "62742d9d08a18e3220634753439fa42742c9bb5854954d52ba0573c03a5e6976",
+      "sha256": "dc5ddcd7e0872e4d7f23f9799884d1e4e342d278c8b9fdf05b4cbf838d86b9c2",
       "has_capture": true,
-      "layout_sha256": "c4a7b48aad991c5571a607aaea2d9c5d2f5e491025ae30f52e5dc4c083f08b1e",
+      "layout_sha256": "e0d47efc3094be3ba6ef9b918bc3e4c813f00487ba3095d64791b1b0afa55753",
       "exact_page": false,
-      "diff_pixels": 38293,
+      "diff_pixels": 6592,
       "capture_lines": 38,
       "render_lines": 38,
-      "pos_exact_lines": 4,
-      "pos_indep_lines": 4,
+      "pos_exact_lines": 31,
+      "pos_indep_lines": 31,
       "displaced_lines": 0
     },
     "26": {

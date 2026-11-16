@@ -11,12 +11,12 @@
   "layout_golden_mismatches": [],
   "chapter_errors": [],
   "totals": {
-    "exact_pages": 37,
-    "diff_pixels": 476566,
+    "exact_pages": 38,
+    "diff_pixels": 418393,
     "capture_lines": 2863,
     "render_lines": 2863,
-    "pos_exact_lines": 2703,
-    "pos_indep_lines": 2705,
+    "pos_exact_lines": 2741,
+    "pos_indep_lines": 2743,
     "displaced_lines": 2
   },
   "chapters": [
@@ -40,12 +40,12 @@
       "end_page": 2,
       "rendered_pages": 1,
       "compared_pages": 1,
-      "exact_pages": 0,
-      "diff_pixels": 46056,
+      "exact_pages": 1,
+      "diff_pixels": 0,
       "capture_lines": 27,
       "render_lines": 27,
-      "pos_exact_lines": 1,
-      "pos_indep_lines": 1,
+      "pos_exact_lines": 27,
+      "pos_indep_lines": 27,
       "displaced_lines": 0
     },
     {
@@ -307,11 +307,11 @@
       "rendered_pages": 4,
       "compared_pages": 4,
       "exact_pages": 1,
-      "diff_pixels": 266665,
+      "diff_pixels": 254548,
       "capture_lines": 46,
       "render_lines": 46,
-      "pos_exact_lines": 6,
-      "pos_indep_lines": 8,
+      "pos_exact_lines": 18,
+      "pos_indep_lines": 20,
       "displaced_lines": 2
     },
     {
@@ -361,15 +361,15 @@
     "2": {
       "page": 2,
       "chapter": "nav",
-      "sha256": "06e7fb0741eb46f1f0621e2c82bea557cc7f660f9155a347eb03c3fed348b8c5",
+      "sha256": "1b4d402e90a3abf24196af70b44ca63a1480b1eb187abcfa6467378a0477d8e3",
       "has_capture": true,
-      "layout_sha256": "1e7aa13135471b46206496667056b74c98c09c0aabbb3c98d014ec099b3ecc7f",
-      "exact_page": false,
-      "diff_pixels": 46056,
+      "layout_sha256": "5382326e3e2113af0afd21f7fec6c0ad95823e382c9fc9d28193ca0163adebeb",
+      "exact_page": true,
+      "diff_pixels": 0,
       "capture_lines": 27,
       "render_lines": 27,
-      "pos_exact_lines": 1,
-      "pos_indep_lines": 1,
+      "pos_exact_lines": 27,
+      "pos_indep_lines": 27,
       "displaced_lines": 0
     },
     "3": {
@@ -1467,15 +1467,15 @@
     "87": {
       "page": 87,
       "chapter": "e3_blocks",
-      "sha256": "0e71d192acba020939543c9cffc00e4adc47e00d5a07aef6e27877693e7e0b77",
+      "sha256": "be9665b509504d8dc98ff1bb7f4dce6363c6dde02615f15c891761f42dae6974",
       "has_capture": true,
-      "layout_sha256": "017be4e5e5472b075c262c4cb56ba03173aa24ed7f95a4be44bb2143dac715d0",
+      "layout_sha256": "94a8261ac85d2267a87f110172b83fb9a6a41c2f76b705849006ca3b31675a4f",
       "exact_page": false,
-      "diff_pixels": 60934,
+      "diff_pixels": 48817,
       "capture_lines": 29,
       "render_lines": 29,
-      "pos_exact_lines": 4,
-      "pos_indep_lines": 4,
+      "pos_exact_lines": 16,
+      "pos_indep_lines": 16,
       "displaced_lines": 0
     },
     "88": {
