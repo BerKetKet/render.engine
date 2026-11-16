@@ -1,0 +1,38 @@
+{
+  "size_index": 0,
+  "pages_saved": 56,
+  "last_page_number": 56,
+  "last_body_hash": "0eeab1527a9bef2c06e15076fc9b6608574d0bd7641d1f42c5ba85c3733885a1",
+  "finished": true,
+  "failed": false,
+  "stop_reason": "page did not change after 3 taps: end of book",
+  "chunks": [
+    {
+      "start_time": "2026-11-16T14:18:06.227706",
+      "end_time": "2026-11-16T14:20:32.333360",
+      "pages_saved": 50
+    },
+    {
+      "start_time": "2026-11-16T14:20:32.549472",
+      "end_time": "2026-11-16T14:20:54.658184",
+      "pages_saved": 6
+    }
+  ],
+  "measured_pitch": 53,
+  "median_first_ink_col": 40.0,
+  "tap_retries_total": 0,
+  "adb_retries_total": 0,
+  "reading_settings": {
+    "theme": "Compact",
+    "font_family": "Bookerly",
+    "font_size_index": 3,
+    "font_size_step": "4/12 (~3/12)",
+    "line_spacing": "1/4 (notch 1 of 4, position 0, minimum)",
+    "paragraph_spacing": "1/4 (notch 1 of 4, position 0, minimum)",
+    "word_spacing": "1/4 (notch 1 of 4, position 0, minimum)",
+    "character_spacing": "1/4 (notch 1 of 4, position 0, minimum)",
+    "margins": "Narrow (notch 1 of 3, ~40px median first ink column)",
+    "alignment": "Justified",
+    "reading_mode": "Immersive (status bar & progress overlay hidden)"
+  }
+}

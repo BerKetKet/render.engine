@@ -1,0 +1,19 @@
+arguments: ['scripts/capture_exam_r20.py', '--folder-name', 'theme_Compact', '--root', '/home/bgg/captures/exam_v3', '--chunk', '50']
+datetime: 2026-11-16T14:18:06.227706
+device_model: TrebleDroid with GApps
+android_version: 13
+screen_size: 1080x2340
+kindle_version: 8.159.0.100(2.0.115180.0)
+
+reading_settings:
+  theme: Compact
+  font_family: Bookerly
+  font_size_index: 3
+  font_size_step: 4/12 (~3/12)
+  line_spacing: 1/4 (notch 1 of 4, position 0, minimum)
+  paragraph_spacing: 1/4 (notch 1 of 4, position 0, minimum)
+  word_spacing: 1/4 (notch 1 of 4, position 0, minimum)
+  character_spacing: 1/4 (notch 1 of 4, position 0, minimum)
+  margins: Narrow (notch 1 of 3, ~40px median first ink column)
+  alignment: Justified
+  reading_mode: Immersive (status bar & progress overlay hidden)
