@@ -432,7 +432,7 @@ def build_items(runs, family, cfg, size26, display=False, hyphenator=None, allow
                         syllables[-1] = syllables[-1] + tok[-1]
                     clean_tok = "".join(syllables)
                 else:
-                    no_lead = core_tok.lstrip('([\u201c\u2018"\'\u00ab')
+                    no_lead = core_tok.lstrip('([\u201c\u2018"\'\u00ab\u2026')
                     lead_punct = core_tok[:len(core_tok) - len(no_lead)]
                     alpha = no_lead.rstrip('.,!?:;\u201d\u2019"\')]\u00bb\u2026')
                     trail_punct = no_lead[len(alpha):] + (tok[-1] if has_trailing_hyphen else "")
@@ -531,6 +531,41 @@ def build_items(runs, family, cfg, size26, display=False, hyphenator=None, allow
         if items[-1].glyphs and items[-1].glyphs[0][1] == "bracketleft" and items[-1].glyphs[-1][1] == "bracketright":
             if items[-3].glyphs and items[-3].glyphs[-1][1] in ("quotedblright", "quoteright", "guillemotright"):
                 items[-2].non_breaking = True
+
+    # Split any Box starting with leading ellipsis so it can break/hyphenate independently
+    split_items = []
+    for it in items:
+        if isinstance(it, Box) and len(it.glyphs) >= 2 and it.glyphs[0][1] == "ellipsis":
+            g_ell = [it.glyphs[0]]
+            g_rest = it.glyphs[1:]
+            split_items.append(Box(g_ell, g_ell[0][2], word_idx=it.word_idx, direction=it.direction))
+            split_items.append(Penalty(0, 0, False))
+            split_items.append(Box(g_rest, sum(g[2] for g in g_rest), word_idx=it.word_idx, direction=it.direction))
+        else:
+            split_items.append(it)
+    items = split_items
+
+    # Apply GPOS kerning across unspaced tokenizer split boundaries (hyphen/endash/emdash/slash)
+    DASH_SPLIT_GLYPHS = {"hyphen", "endash", "emdash", "slash"}
+    for idx in range(len(items) - 1):
+        b1 = items[idx]
+        if not (isinstance(b1, Box) and b1.glyphs):
+            continue
+        b2 = None
+        if isinstance(items[idx + 1], Box) and items[idx + 1].glyphs:
+            b2 = items[idx + 1]
+        elif (idx + 2 < len(items) and isinstance(items[idx + 1], Penalty)
+              and not items[idx + 1].flagged and isinstance(items[idx + 2], Box) and items[idx + 2].glyphs):
+            b2 = items[idx + 2]
+        if b2 is not None:
+            g1, g2 = b1.glyphs[-1], b2.glyphs[0]
+            f1, n1, a1, f2, n2 = g1[0], g1[1], g1[2], g2[0], g2[1]
+            if f1 is not None and f1 is f2 and getattr(f1, "use_kern", False) and (n1 in DASH_SPLIT_GLYPHS or n2 in DASH_SPLIT_GLYPHS):
+                ku = f1.kern_units(n1, n2)
+                if ku != 0:
+                    k_adv = math.floor(ku * f1.S)
+                    b1.glyphs[-1] = (f1, n1, a1 + k_adv) + g1[3:]
+                    b1.width += k_adv
 
     return items
 
@@ -1316,13 +1351,7 @@ def layout_line(seg, hy, width26, justify, last, cfg):
                 pen += adv
                 if g_idx < len(it.glyphs) - 1:
                     pen += t_gap
-                elif name == "hyphen":
-                    nxt_box = next((seg[j] for j in range(i + 1, min(len(seg), i + 3)) if isinstance(seg[j], Box)), None)
-                    nxt_ok = (i + 1 < len(seg) and isinstance(seg[i + 1], Box)) or (i + 2 < len(seg) and isinstance(seg[i + 1], Penalty) and isinstance(seg[i + 2], Box))
-                    if nxt_ok and nxt_box and nxt_box.glyphs:
-                        nxt_g = nxt_box.glyphs[0]
-                        if face is not None and nxt_g[0] is face and face.use_kern:
-                            pen += math.floor(face.kern_units(name, nxt_g[1]) * face.S)
+
         elif isinstance(it, Glue):
             sp_w = it.width + extra_glue[i]
             s_meta = getattr(it, 'style_meta', None)
