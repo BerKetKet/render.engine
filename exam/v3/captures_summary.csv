@@ -1,0 +1,57 @@
+size_index,pages_saved,finished,failed,stop_reason,measured_pitch,median_first_ink_col,timestamp
+0,54,True,False,page did not change after 3 taps: end of book,51,79.0,2026-11-16T10:41:57.319183
+1,50,False,False,chunk complete,56,80.0,2026-11-16T10:46:54.748943
+1,59,True,False,page did not change after 3 taps: end of book,56,80.0,2026-11-16T10:47:26.508512
+2,50,False,False,chunk complete,59,80.0,2026-11-16T10:53:50.642376
+2,69,True,False,page did not change after 3 taps: end of book,59,80.0,2026-11-16T10:54:50.987441
+3,50,False,False,chunk complete,63,80.0,2026-11-16T10:59:17.178095
+3,73,True,False,page did not change after 3 taps: end of book,63,80.0,2026-11-16T11:00:30.443512
+4,50,False,False,chunk complete,68,80.0,2026-11-16T11:03:18.866284
+4,82,True,False,page did not change after 3 taps: end of book,68,80.0,2026-11-16T11:04:58.997000
+5,50,False,False,chunk complete,71,80.0,2026-11-16T11:07:47.928039
+5,89,True,False,page did not change after 3 taps: end of book,71,80.0,2026-11-16T11:09:48.834519
+6,50,False,False,chunk complete,76,80.0,2026-11-16T11:12:37.273831
+6,100,False,False,chunk complete,76,80.0,2026-11-16T11:15:08.125120
+6,100,True,False,page did not change after 3 taps: end of book,76,80.0,2026-11-16T11:15:13.246886
+7,50,False,False,chunk complete,83,81.0,2026-11-16T11:18:02.013756
+7,100,False,False,chunk complete,83,81.0,2026-11-16T11:20:32.372888
+7,121,True,False,page did not change after 3 taps: end of book,83,81.0,2026-11-16T11:21:39.227154
+8,50,False,False,chunk complete,91,81.0,2026-11-16T11:24:26.485224
+8,100,False,False,chunk complete,91,81.0,2026-11-16T11:26:56.690991
+8,145,True,False,page did not change after 3 taps: end of book,91,81.0,2026-11-16T11:29:13.954316
+9,50,False,False,chunk complete,127,82.0,2026-11-16T11:32:01.736150
+9,100,False,False,chunk complete,127,82.0,2026-11-16T11:34:32.081900
+9,150,False,False,chunk complete,127,82.0,2026-11-16T11:37:02.344246
+9,196,True,False,page did not change after 3 taps: end of book,127,82.0,2026-11-16T11:39:23.505877
+10,50,False,False,chunk complete,171,93.0,2026-11-16T11:42:09.987872
+10,100,False,False,chunk complete,171,93.0,2026-11-16T11:44:39.719108
+10,150,False,False,chunk complete,171,93.0,2026-11-16T11:47:09.429564
+10,200,False,False,chunk complete,171,93.0,2026-11-16T11:49:38.981786
+10,250,False,False,chunk complete,171,93.0,2026-11-16T11:52:08.226193
+10,300,False,False,chunk complete,171,93.0,2026-11-16T11:54:38.370771
+10,350,False,False,chunk complete,171,93.0,2026-11-16T11:57:07.959062
+10,400,False,False,chunk complete,171,93.0,2026-11-16T11:59:37.340772
+10,450,False,False,chunk complete,171,93.0,2026-11-16T12:02:06.447756
+10,500,False,False,chunk complete,171,93.0,2026-11-16T12:04:36.033837
+10,520,True,False,page did not change after 3 taps: end of book,171,93.0,2026-11-16T12:05:40.615305
+11,50,False,False,chunk complete,230,85.0,2026-11-16T12:08:27.013235
+11,100,False,False,chunk complete,230,85.0,2026-11-16T12:10:56.048493
+11,150,False,False,chunk complete,230,85.0,2026-11-16T12:13:25.163351
+11,200,False,False,chunk complete,230,85.0,2026-11-16T12:15:53.993946
+11,250,False,False,chunk complete,230,85.0,2026-11-16T12:18:23.245238
+11,300,False,False,chunk complete,230,85.0,2026-11-16T12:20:53.167917
+11,350,False,False,chunk complete,230,85.0,2026-11-16T12:23:22.265636
+11,400,False,False,chunk complete,230,85.0,2026-11-16T12:25:51.409887
+11,450,False,False,chunk complete,230,85.0,2026-11-16T12:28:20.923733
+11,500,False,False,chunk complete,230,85.0,2026-11-16T12:30:50.275802
+11,550,False,False,chunk complete,230,85.0,2026-11-16T12:33:19.306331
+11,600,False,False,chunk complete,230,85.0,2026-11-16T12:35:49.103810
+11,650,False,False,chunk complete,230,85.0,2026-11-16T12:38:19.591369
+11,700,False,False,chunk complete,230,85.0,2026-11-16T12:40:50.604030
+11,719,True,False,page did not change after 3 taps: end of book,230,85.0,2026-11-16T12:41:52.310421
+0,2,True,False,page did not change after 3 taps: end of book,,,2026-11-16T14:10:52.681081
+0,50,False,False,chunk complete,53,40.0,2026-11-16T14:20:32.393350
+0,56,True,False,page did not change after 3 taps: end of book,53,40.0,2026-11-16T14:20:54.696814
+0,50,False,False,chunk complete,82,133.0,2026-11-16T14:27:10.614487
+0,100,False,False,chunk complete,82,133.0,2026-11-16T14:29:40.195362
+0,124,True,False,page did not change after 3 taps: end of book,82,133.0,2026-11-16T14:30:55.848637
