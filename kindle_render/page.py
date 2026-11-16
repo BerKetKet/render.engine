@@ -567,8 +567,8 @@ class Pager:
                 line_i_pitch = pitch_fl * cur_scale_i if (cur_scale_i > 1.0 and not b.heading) else pitch_fl
             if not self.page_empty and self.y + line_i_pitch > c.page_bottom:
                 self.new_page()
-                if i == 0 and c.margin_at_page_top and b.heading:
-                    top_mt = mt
+                if i == 0 and c.margin_at_page_top and (b.heading or (getattr(b, 'list_level', 0) > 0 and b.mt_em)):
+                    top_mt = mt if b.heading else int(round(b.mt_em * vem_px * b.scale))
                     extra_top = (c.heading_top_extra_px if b.heading == 1 else (4 if (b.heading == 3 and extra_lead == 0.0 and len(lines) >= 3) else 0))
                     self.y_float += top_mt + extra_top
                     self.y = int(round(self.y_float))
@@ -582,9 +582,10 @@ class Pager:
                 if ((not b.heading and take < c.widow_orphan and i == 0 and n >= c.widow_orphan)) or take <= 0:
                     if not self.page_empty:
                         self.new_page()
-                        if i == 0 and c.margin_at_page_top and b.heading:
+                        if i == 0 and c.margin_at_page_top and (b.heading or (getattr(b, 'list_level', 0) > 0 and b.mt_em)):
+                            top_mt = mt if b.heading else int(round(b.mt_em * vem_px * b.scale))
                             extra_top = (c.heading_top_extra_px if b.heading == 1 else (4 if (b.heading == 3 and extra_lead == 0.0 and len(lines) >= 3) else 0))
-                            self.y_float += mt + extra_top
+                            self.y_float += top_mt + extra_top
                             self.y = int(round(self.y_float))
                         continue
                     take = max(1, min(room, remaining))
@@ -1138,6 +1139,8 @@ class Pager:
         tot_tbl_h = sum(row_hs)
         if self.y + tot_tbl_h > c.page_bottom and not self.page_empty:
             self.new_page()
+            if not is_col and c.pitch_px() > (19.0 / 14.0) * c.size_px() + 0.5:
+                self.y += 8
 
         self._ensure_block_meta_on_page(block_idx, b, kind_override="table", table_rows_meta=table_rows_meta)
 
@@ -1366,8 +1369,12 @@ class Pager:
         has_extra_lead = c.pitch_px() > (19.0 / 14.0) * c.size_px() + 0.5
         gap = int(round(0.52 * c.vem_px())) if (is_col and self.prev_mb == 0) else (int(c.vem_px() - 1.5) if has_extra_lead else int(round(c.vem_px())))
         top_gap = (c.pre_hr_top_gap_px if (self.prev_kind == 'pre' and is_col) else (gap if has_extra_lead else max(self.prev_mb, gap)))
-        self.y += top_gap
-        if self.y + 3 < c.page_bottom:
+        if not self.page_empty and self.y + top_gap + 3 > c.page_bottom:
+            self.new_page()
+            self.y += int(c.vem_px() - 1.5)
+        else:
+            self.y += top_gap
+        if self.y + 3 <= c.page_bottom:
             self.cur_ir_page.commands.append(RuleCommand(
                 x0=c.x0, y0=self.y, x1=c.right, y1=self.y + 3, color=(136, 136, 136), role="hr"
             ))
