@@ -665,7 +665,7 @@ def _collapse(runs):
                 small_caps=r.small_caps, underline=r.underline,
                 strike=r.strike, code=r.code,
                 letter_spacing_em=r.letter_spacing_em,
-                word_spacing_em=r.word_spacing_em, fg=r.fg,
+                word_spacing_em=r.word_spacing_em, fg=r.fg, bg=getattr(r, 'bg', None),
                 nowrap=getattr(r, 'nowrap', False),
                 from_text_transform=getattr(r, 'from_text_transform', False),
                 link_href=getattr(r, 'link_href', None)

@@ -219,7 +219,12 @@ class Face:
             if k in text:
                 text = text.replace(k, v)
         if "\u2044" in text:
-            text = text.replace("1\u20442", "\u00bd").replace("1\u20444", "\u00bc").replace("3\u20444", "\u00be")
+            for k_fr, v_fr in [
+                ("1\u20442", "\u00bd"), ("1\u20444", "\u00bc"), ("3\u20444", "\u00be"),
+                ("1\u20443", "\u2153"), ("2\u20443", "\u2154"),
+                ("1\u20448", "\u215b"), ("3\u20448", "\u215c"), ("5\u20448", "\u215d"), ("7\u20448", "\u215e"),
+            ]:
+                text = text.replace(k_fr, v_fr)
             if "\u2044" in text and self.numr_map and self.dnom_map:
                 out = []
                 i = 0

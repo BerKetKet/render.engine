@@ -1,0 +1,143 @@
+{
+  "probe": {
+    "exact_pages": 38,
+    "pages": 86,
+    "pos_exact_lines": 2741,
+    "total_dev_lines": 2863,
+    "pi_exact_lines": 2743,
+    "displaced_lines": 2,
+    "total_diff_pixels": 418393,
+    "nav_page_2": {
+      "page": 2,
+      "chapter": "nav",
+      "sha256": "1b4d402e90a3abf24196af70b44ca63a1480b1eb187abcfa6467378a0477d8e3",
+      "has_capture": true,
+      "layout_sha256": "5382326e3e2113af0afd21f7fec6c0ad95823e382c9fc9d28193ca0163adebeb",
+      "exact_page": true,
+      "diff_pixels": 0,
+      "capture_lines": 27,
+      "render_lines": 27,
+      "pos_exact_lines": 27,
+      "pos_indep_lines": 27,
+      "displaced_lines": 0
+    },
+    "golden_mismatches": [
+      "page_002",
+      "page_087"
+    ]
+  },
+  "exam1": {
+    "exact_pages": 43,
+    "pages": 70,
+    "pos_exact_lines": 1439,
+    "total_dev_lines": 1568,
+    "pi_exact_lines": 1446,
+    "displaced_lines": 7,
+    "total_diff_pixels": 1534617,
+    "nav_page_2": {
+      "page": 2,
+      "chapter": "nav",
+      "sha256": "88d2875e16a0134cd6e33a366d342ca5ee428af6454ae7750c0a0bdc17113ccc",
+      "has_capture": true,
+      "layout_sha256": "96291033a85ae872685468b95d5d774d322b4ae90a3cc8b157a60712e7295c01",
+      "exact_page": true,
+      "diff_pixels": 0,
+      "capture_lines": 21,
+      "render_lines": 21,
+      "pos_exact_lines": 21,
+      "pos_indep_lines": 21,
+      "displaced_lines": 0
+    },
+    "golden_mismatches": [
+      "page_002",
+      "page_046"
+    ]
+  },
+  "exam2": {
+    "exact_pages": 38,
+    "pages": 65,
+    "pos_exact_lines": 1390,
+    "total_dev_lines": 1529,
+    "pi_exact_lines": 1411,
+    "displaced_lines": 21,
+    "total_diff_pixels": 1046253,
+    "nav_page_2": {
+      "page": 2,
+      "chapter": "nav",
+      "sha256": "2496e074452f65173ef73c529617be7f61886e33c58d9537a1c4184a0be6d8b3",
+      "has_capture": true,
+      "layout_sha256": "3fffdf5eae4e180a62519b33fcfee9f46cbf31e3868259b2ee0f3dbf58d301df",
+      "exact_page": true,
+      "diff_pixels": 0,
+      "capture_lines": 27,
+      "render_lines": 27,
+      "pos_exact_lines": 27,
+      "pos_indep_lines": 27,
+      "displaced_lines": 0
+    },
+    "golden_mismatches": [
+      "page_002",
+      "page_007",
+      "page_008",
+      "page_011",
+      "page_012",
+      "page_013",
+      "page_035"
+    ]
+  },
+  "exam3_normal": {
+    "exact_pages": 43,
+    "pages": 82,
+    "pos_exact_lines": 1869,
+    "total_dev_lines": 2027,
+    "pi_exact_lines": 1897,
+    "displaced_lines": 28,
+    "total_diff_pixels": 876781,
+    "nav_page_2": {
+      "page": 2,
+      "chapter": "nav",
+      "sha256": "36bf40b8ba3fd1dd285b28b2be416eb252f58b86aa2329c9f4da629ae5aa51ba",
+      "has_capture": true,
+      "layout_sha256": "318807b1f73a3f43ce15e5d17ee7b2152888dd6afd61bc732e3e9d7892be9c49",
+      "exact_page": true,
+      "diff_pixels": 0,
+      "capture_lines": 18,
+      "render_lines": 18,
+      "pos_exact_lines": 18,
+      "pos_indep_lines": 18,
+      "displaced_lines": 0
+    },
+    "golden_mismatches": [
+      "page_002",
+      "page_039",
+      "page_040"
+    ]
+  },
+  "exam3_small": {
+    "exact_pages": 17,
+    "pages": 54,
+    "pos_exact_lines": 1474,
+    "total_dev_lines": 1651,
+    "pi_exact_lines": 1499,
+    "displaced_lines": 25,
+    "total_diff_pixels": 1012257,
+    "nav_page_2": {
+      "page": 2,
+      "chapter": "nav",
+      "sha256": "7058f373b52c9731b5e84e556bdcddfbe8813ea9e56e5e1a413cd6793a3a4445",
+      "has_capture": true,
+      "layout_sha256": "57ae2693a4dc4b22ecd16526b04a712eba869877b2bd097085f6c4df31ff9cd3",
+      "exact_page": true,
+      "diff_pixels": 0,
+      "capture_lines": 18,
+      "render_lines": 18,
+      "pos_exact_lines": 18,
+      "pos_indep_lines": 18,
+      "displaced_lines": 0
+    },
+    "golden_mismatches": [
+      "page_002",
+      "page_025"
+    ]
+  }
+}

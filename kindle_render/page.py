@@ -168,8 +168,8 @@ class Pager:
                 adv_bg = pl_tup[3] if len(pl_tup) > 3 else 0
                 x0_bg = math.floor((start26 + off_bg) / 64.0 + self.cfg.place_phase)
                 x1_bg = math.floor((start26 + off_bg + adv_bg) / 64.0 + self.cfg.place_phase) + 1
-                y0_bg = max(0, baseline - int(round(0.81 * self.cfg.size_px())))
-                y1_bg = min(H, baseline + int(round(0.33 * self.cfg.size_px())) + 1)
+                y0_bg = max(0, baseline - int(round(0.900 * self.cfg.size_px())))
+                y1_bg = min(H, y0_bg + int(math.floor(self.cfg.pitch / 1.2)) + 1)
                 self.cur_ir_page.commands.append(RectCommand(
                     x0=max(0, x0_bg), y0=y0_bg, x1=min(W, x1_bg), y1=y1_bg,
                     color=tuple(s_meta_bg["bg"]), role="mark_bg"
@@ -245,7 +245,7 @@ class Pager:
                 col_rgb = tuple(fg_col if fg_col is not None else self.cfg.fg)
                 stroke_h = int(self.cfg.size_px() // 22.5) + 1
                 l_href = s_meta.get("link_href")
-                if s_meta.get("underline"):
+                if s_meta.get("underline") and not l_href:
                     uy = baseline + dy_px + (7 - stroke_h)
                     if 0 <= uy < H - stroke_h:
                         self.cur_ir_page.commands.append(RuleCommand(
@@ -259,6 +259,37 @@ class Pager:
                             x0=max(0, x), y0=sy, x1=min(W, x_end + 1), y1=sy + stroke_h,
                             color=col_rgb, role="strike", link_href=l_href
                         ))
+
+        # Emit merged subpixel link_underline RuleCommand for contiguous underlined link spans
+        link_spans = []
+        for pl_tup in placements:
+            s_meta = pl_tup[4] if len(pl_tup) > 4 else None
+            if s_meta and s_meta.get("underline") and s_meta.get("link_href"):
+                off = pl_tup[2]
+                adv26 = pl_tup[3] if len(pl_tup) > 3 else 0
+                dy_px = s_meta.get("dy_px", 0)
+                fg_col = tuple(s_meta.get("fg") if s_meta.get("fg") is not None else self.cfg.fg)
+                l_href = s_meta.get("link_href")
+                x0_fl = (start26 + off) / 64.0
+                x1_fl = (start26 + off + adv26) / 64.0
+                if link_spans and link_spans[-1][4] == l_href and link_spans[-1][2] == dy_px:
+                    link_spans[-1][1] = x1_fl
+                else:
+                    link_spans.append([x0_fl, x1_fl, dy_px, fg_col, l_href])
+        if link_spans:
+            sz_px = self.cfg.size_px()
+            pt_px = self.cfg.pitch_px()
+            base_thk = float(round(0.065 * sz_px))
+            y_off_top = base_thk + 0.02612 * sz_px + 0.00245 * pt_px + getattr(self.cfg, "link_underline_base_offset", -0.5855)
+            thk_fl = base_thk - 0.00015 * sz_px + 0.00013 * pt_px - 0.00165
+            for x0_fl, x1_fl, dy_px, fg_col, l_href in link_spans:
+                yt = baseline + dy_px + y_off_top
+                yb = yt + thk_fl
+                if 0.0 <= yt and yb <= H:
+                    self.cur_ir_page.commands.append(RuleCommand(
+                        x0=max(0.0, x0_fl), y0=yt, x1=min(float(W), x1_fl), y1=yb,
+                        color=fg_col, role="link_underline", link_href=l_href
+                    ))
 
     def pitch_for(self, size26):
         c = self.cfg
@@ -492,7 +523,8 @@ class Pager:
 
         for i, (seg, hy) in enumerate(lines):
             last = (i == len(lines) - 1)
-            pl, nat, hang_left = layout_line(seg, hy, line_w(i), justify, last, c)
+            line_base_x26 = c.x0 * 64 + int(round(left_px * 64)) + ((drop_adv26 + drop_gap26) if (drop_letter and i < drop_lines) else (indent26 if i == 0 else 0))
+            pl, nat, hang_left = layout_line(seg, hy, line_w(i), justify, last, c, base_x26=(line_base_x26 if b.align not in ("center", "right") else None))
             off26 = -hang_left
             if drop_letter and i < drop_lines:
                 off26 += drop_adv26 + drop_gap26
@@ -522,6 +554,8 @@ class Pager:
         prev_h = getattr(self, "prev_heading", 0)
         if b.heading == 1 and prev_h == 0 and not self.page_empty:
             gap += 1
+        elif b.heading == 0 and prev_h == 1 and getattr(b, "list_level", 0) > 0 and extra_lead > 0.0 and std_body_pitch < (68.0 / 45.0) * c.size_px():
+            gap -= 1
         if extra_lead == 0.0:
             if b.heading == 2 and prev_h == 1:
                 gap -= 1
