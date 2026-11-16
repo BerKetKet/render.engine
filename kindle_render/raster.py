@@ -418,6 +418,18 @@ class Rasterizer:
                     g = self.cache.get_by_params(font_path, cmd.size26, cmd.boldness_level, cmd.glyph_name, cmd.glyph_id)
                     if g is not None:
                         self._draw_glyph_on_canvas(canvas, g, cmd.x, cmd.baseline, cmd.color)
+            elif k == "rule" and getattr(cmd, "role", None) == "link_underline":
+                x0_fl, y0_fl, x1_fl, y1_fl = float(cmd.x0), float(cmd.y0), float(cmd.x1), float(cmd.y1)
+                ix0, ix1 = max(0, int(math.floor(x0_fl))), min(W, int(math.ceil(x1_fl)))
+                iy0, iy1 = max(0, int(math.floor(y0_fl))), min(H, int(math.ceil(y1_fl)))
+                if iy1 > iy0 and ix1 > ix0:
+                    fg = np.array(cmd.color, dtype=np.float32)
+                    xs = np.arange(ix0, ix1, dtype=np.float32)
+                    cx = np.clip(np.minimum(xs + 1.0, x1_fl) - np.maximum(xs, x0_fl), 0.0, 1.0)
+                    for y_px in range(iy0, iy1):
+                        cy = max(0.0, min(1.0, min(y_px + 1.0, y1_fl) - max(float(y_px), y0_fl)))
+                        al = np.minimum(cx, cy)[..., None]
+                        canvas[y_px, ix0:ix1] = canvas[y_px, ix0:ix1] * (1.0 - al) + fg * al
             elif k in ("rect", "rule"):
                 x0 = max(0, int(cmd.x0))
                 y0 = max(0, int(cmd.y0))

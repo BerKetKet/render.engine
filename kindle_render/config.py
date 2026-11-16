@@ -131,7 +131,8 @@ class Config:
     dd_indent_em: float = 1.1286
     ul_indent_em: float = 2.0000
     ul_nested_indent_em: float = 1.9762
-    ol_indent_em: float = 2.0952
+    ol_indent_em: float = 2.1054              # DEVICE-CONSTANT (measured across 3 geometries / 5 corpora: probe p.2/87 x=127.42px, exam2 p.2/7 x=167.42px, exam1 p.2/45 & exam3_normal p.2/39 x=173.74px, exam3_small p.2/24 x=150.58px)
+    link_underline_base_offset: float = -0.5855 # DEVICE-CONSTANT (measured across 3 geometries / 5 corpora: probe p.2, exam1 p.2, exam2 p.2, exam3_normal p.2, exam3_small p.2): subpixel link underline top offset relative to stroke_h + 0.0261*size_px + 0.0025*pitch
     css_px_scale: float = 2.625
     para_gap_em: float = 0.0
 
