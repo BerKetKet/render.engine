@@ -168,8 +168,8 @@ class Pager:
                 adv_bg = pl_tup[3] if len(pl_tup) > 3 else 0
                 x0_bg = math.floor((start26 + off_bg) / 64.0 + self.cfg.place_phase)
                 x1_bg = math.floor((start26 + off_bg + adv_bg) / 64.0 + self.cfg.place_phase) + 1
-                y0_bg = max(0, baseline - int(round(0.81 * self.cfg.size_px())))
-                y1_bg = min(H, baseline + int(round(0.33 * self.cfg.size_px())) + 1)
+                y0_bg = max(0, baseline - int(round(0.900 * self.cfg.size_px())))
+                y1_bg = min(H, y0_bg + int(math.floor(self.cfg.pitch / 1.2)) + 1)
                 self.cur_ir_page.commands.append(RectCommand(
                     x0=max(0, x0_bg), y0=y0_bg, x1=min(W, x1_bg), y1=y1_bg,
                     color=tuple(s_meta_bg["bg"]), role="mark_bg"
