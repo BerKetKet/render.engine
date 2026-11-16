@@ -6,6 +6,7 @@ Implements:
 4. Contiguous small-caps shaping, Arabic contextual joining, Devanagari GSUB shaping, and BiDi segment isolation
 """
 import math
+import numpy as np
 import re
 from dataclasses import dataclass
 from typing import List, Tuple, Optional
@@ -1238,7 +1239,7 @@ def make_lines(items, line_w, cfg, ragged, is_heading=False, align=None):
         start = b + 1
     return lines
 
-def layout_line(seg, hy, width26, justify, last, cfg):
+def layout_line(seg, hy, width26, justify, last, cfg, base_x26=None):
     """Computes exact glyph placements for a single line."""
     if not seg and not hy:
         return [], 0, 0
@@ -1324,6 +1325,58 @@ def layout_line(seg, hy, width26, justify, last, cfg):
                     e = base + (1 if (cfg.remainder == "first" and j < rem) or (cfg.remainder == "last" and j >= k - rem) else 0)
                     extra_glue[gi] = e
 
+    f32_dx_map = {}
+    if (base_x26 is not None and justify and not (last and cfg.last_line_flush_left)
+            and glues and abs(delta) >= 5
+            and not (cfg.micro_tracking and (delta > int(round(sum(seg[gi].stretch for gi in glues))) or delta < -int(round(sum(seg[gi].shrink for gi in glues)))))):
+        has_mixed = len({(g[0].path, g[0].size26) for x in seg if isinstance(x, Box) for g in x.glyphs if g[0] is not None}) > 1
+        std_sp = seg[glues[0]].width
+        if not has_mixed and all(seg[gi].width == std_sp for gi in glues):
+            f32 = np.float32
+            k_gl = len(glues)
+            sp_fl = f32(std_sp) + f32(delta) / f32(k_gl)
+            off_fl = f32(0.0)
+            w_acc = 0
+            # Accumulate per-word widths and float32 space advances up to the last word
+            last_box_idx = max((idx_s for idx_s, it_s in enumerate(seg) if isinstance(it_s, Box)), default=-1)
+            if last_box_idx >= 0:
+                last_w_id = seg[last_box_idx].word_idx
+                start26_line = base_x26 - hang_left
+                cur_pen_int = 0
+                in_last_w = False
+                last_w_start_int = 0
+                for idx_s, it_s in enumerate(seg):
+                    if isinstance(it_s, Box):
+                        if it_s.word_idx == last_w_id and not in_last_w:
+                            in_last_w = True
+                            last_w_start_int = cur_pen_int
+                        if in_last_w:
+                            pass
+                        else:
+                            w_acc += it_s.width
+                        cur_pen_int += it_s.width
+                    elif isinstance(it_s, Glue):
+                        if not in_last_w:
+                            if w_acc > 0:
+                                off_fl = f32(off_fl + f32(w_acc))
+                                w_acc = 0
+                            off_fl = f32(off_fl + sp_fl)
+                        cur_pen_int += it_s.width + extra_glue[idx_s]
+                if w_acc > 0:
+                    off_fl = f32(off_fl + f32(w_acc))
+                # Check glyphs in the last word at subpixel == 32
+                cur_g_pen = last_w_start_int
+                for idx_s, it_s in enumerate(seg):
+                    if isinstance(it_s, Box) and it_s.word_idx == last_w_id:
+                        for g_idx, g_tup in enumerate(it_s.glyphs):
+                            if ((start26_line + cur_g_pen) & 63) == 32:
+                                g_pen_fl = f32(f32(start26_line) + f32(off_fl + f32(cur_g_pen - last_w_start_int)))
+                                x_fl = int(math.floor(float(g_pen_fl) / 64.0 + 0.5))
+                                x_int = int(math.floor((start26_line + cur_g_pen) / 64.0 + cfg.place_phase))
+                                if x_fl != x_int:
+                                    f32_dx_map[(idx_s, g_idx)] = x_fl - x_int
+                            cur_g_pen += g_tup[2]
+
     out = []
     pen = 0
     vis_word_idx = 0
@@ -1344,6 +1397,8 @@ def layout_line(seg, hy, width26, justify, last, cfg):
             for g_idx, g_tup in enumerate(it.glyphs):
                 face, name, adv = g_tup[0], g_tup[1], g_tup[2]
                 s_meta = dict(g_tup[3]) if (len(g_tup) > 3 and g_tup[3] is not None) else {}
+                if (i, g_idx) in f32_dx_map:
+                    s_meta["dx_px"] = s_meta.get("dx_px", 0) + f32_dx_map[(i, g_idx)]
                 s_meta["word_idx"] = vis_word_idx
                 s_meta["logical_word_idx"] = s_meta.get("moved_rtl_period_word_idx", it.word_idx)
                 s_meta["direction"] = s_meta.get("direction", it.direction)

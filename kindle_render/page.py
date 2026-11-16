@@ -523,7 +523,8 @@ class Pager:
 
         for i, (seg, hy) in enumerate(lines):
             last = (i == len(lines) - 1)
-            pl, nat, hang_left = layout_line(seg, hy, line_w(i), justify, last, c)
+            line_base_x26 = c.x0 * 64 + int(round(left_px * 64)) + ((drop_adv26 + drop_gap26) if (drop_letter and i < drop_lines) else (indent26 if i == 0 else 0))
+            pl, nat, hang_left = layout_line(seg, hy, line_w(i), justify, last, c, base_x26=(line_base_x26 if b.align not in ("center", "right") else None))
             off26 = -hang_left
             if drop_letter and i < drop_lines:
                 off26 += drop_adv26 + drop_gap26
