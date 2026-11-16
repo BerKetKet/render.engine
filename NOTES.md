@@ -12,7 +12,9 @@
    - G4 import graph integrity verified clean via `python3 tools/check_imports.py` (0 errors).
    - Independent instance-owned FreeType rasterizer state design (`ir.py`, `raster.py`).
    - Clean git working tree; no tracked secrets, credentials, or unscrubbed logs.
-2. **Milestone Progress (Stages A through E / v1.9.0)**:
+2. **Corpus & Ground Truth Data**:
+   - Added `exam/` directory containing `v1`, `v2`, and `v3` test EPUB fixtures along with complete Kindle hardware screenshots, capture logs, index CSVs, and capture state JSONs across all font sizes.
+3. **Milestone Progress (Stages A through E / v1.9.0)**:
    - **Stage A (`1.8.0-rc1`)**: Version lock & loud failure for HarfBuzz, baseline goldens for `exam3_normal` & `exam3_small`, unaligned pair filtering across 5 corpora (`tools/rhythm.py`).
    - **Stage B**: Read-only Kindle layout hypothesis registry (`docs/hypotheses/kindle_formulae_v0.md`) and evaluators (`tools/hypotheses/evaluate.py`).
    - **Stage C**: Cross-geometry vertical rhythm normalization (`eff_body_pitch`, exact heading margin multipliers, spacer advances, horizontal `em`/`rem` basis).
@@ -22,9 +24,9 @@
 
 ## What is Broken / Open Issues
 - **HarfBuzz Host vs Lock**: Host runtime HarfBuzz on CachyOS is `15.1.0`, whereas reproducibility lock in `requirements.lock` targets `6.0.0` (Docker container required for exact shaping reproduction).
-- **Corpora Availability**: External test EPUB fixtures (`kindle_exam_v2.epub`, `master_probe_v1.epub`, etc.) are untracked per `DATA_PROVENANCE.md` and must be placed in `corpora/` to run full corpus tests.
+- **Remaining Fixtures**: Master probe fixtures (`master_probe_v1.epub`, etc.) remain untracked per `DATA_PROVENANCE.md` until added.
 - **Stage F (Contents Page)**: Pending owner review before initiation.
 
 ## Next Steps
-- Push `main` branch and tags (`1.8.0-rc1`, `prep-baseline-1.6.1`, `refactor-1.7.0`, `rhythm-1.9.0`, `rhythm-base`, `round1-partial`, `v1.6.1`) to new GitHub repository (`BerKetKet/render.engine`).
+- Push tracked `exam/` corpus and updated `NOTES.md` to GitHub remote (`BerKetKet/render.engine`).
 - Resume Stage F upon review.
