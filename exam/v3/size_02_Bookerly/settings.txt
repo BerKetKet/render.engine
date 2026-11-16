@@ -1,0 +1,6 @@
+arguments: ['scripts/capture_exam_r20.py', '--size-index', '2', '--root', '/home/bgg/captures/exam_v3', '--chunk', '50']
+datetime: 2026-11-16T10:51:23.791544
+device_model: TrebleDroid with GApps
+android_version: 13
+screen_size: 1080x2340
+kindle_version: 8.159.0.100(2.0.115180.0)

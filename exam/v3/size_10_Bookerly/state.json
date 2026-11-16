@@ -1,0 +1,70 @@
+{
+  "size_index": 10,
+  "pages_saved": 520,
+  "last_page_number": 520,
+  "last_body_hash": "4f2102fa7d4ae1776592215153c49cab6d6368d7cd7ff6a3b53458e1416f378d",
+  "finished": true,
+  "failed": false,
+  "stop_reason": "page did not change after 3 taps: end of book",
+  "chunks": [
+    {
+      "start_time": "2026-11-16T11:39:43.564092",
+      "end_time": "2026-11-16T11:42:09.969720",
+      "pages_saved": 50
+    },
+    {
+      "start_time": "2026-11-16T11:42:10.124081",
+      "end_time": "2026-11-16T11:44:39.681129",
+      "pages_saved": 50
+    },
+    {
+      "start_time": "2026-11-16T11:44:39.848042",
+      "end_time": "2026-11-16T11:47:09.375252",
+      "pages_saved": 50
+    },
+    {
+      "start_time": "2026-11-16T11:47:09.559274",
+      "end_time": "2026-11-16T11:49:38.906766",
+      "pages_saved": 50
+    },
+    {
+      "start_time": "2026-11-16T11:49:39.124165",
+      "end_time": "2026-11-16T11:52:08.110893",
+      "pages_saved": 50
+    },
+    {
+      "start_time": "2026-11-16T11:52:08.385248",
+      "end_time": "2026-11-16T11:54:38.258243",
+      "pages_saved": 50
+    },
+    {
+      "start_time": "2026-11-16T11:54:38.530425",
+      "end_time": "2026-11-16T11:57:07.718707",
+      "pages_saved": 50
+    },
+    {
+      "start_time": "2026-11-16T11:57:08.105874",
+      "end_time": "2026-11-16T11:59:37.199096",
+      "pages_saved": 50
+    },
+    {
+      "start_time": "2026-11-16T11:59:37.461687",
+      "end_time": "2026-11-16T12:02:06.271988",
+      "pages_saved": 50
+    },
+    {
+      "start_time": "2026-11-16T12:02:06.587694",
+      "end_time": "2026-11-16T12:04:35.851923",
+      "pages_saved": 50
+    },
+    {
+      "start_time": "2026-11-16T12:04:36.157176",
+      "end_time": "2026-11-16T12:05:40.423544",
+      "pages_saved": 20
+    }
+  ],
+  "measured_pitch": 171,
+  "median_first_ink_col": 93.0,
+  "tap_retries_total": 0,
+  "adb_retries_total": 0
+}

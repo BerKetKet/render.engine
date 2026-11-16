@@ -1,0 +1,25 @@
+{
+  "size_index": 5,
+  "pages_saved": 89,
+  "last_page_number": 89,
+  "last_body_hash": "00c9cc60977f878739c508c1c5791b432cd68d7d2822f0e026ff14b23ebcff2f",
+  "finished": true,
+  "failed": false,
+  "stop_reason": "page did not change after 3 taps: end of book",
+  "chunks": [
+    {
+      "start_time": "2026-11-16T11:05:19.507810",
+      "end_time": "2026-11-16T11:07:47.889890",
+      "pages_saved": 50
+    },
+    {
+      "start_time": "2026-11-16T11:07:48.076992",
+      "end_time": "2026-11-16T11:09:48.781132",
+      "pages_saved": 39
+    }
+  ],
+  "measured_pitch": 71,
+  "median_first_ink_col": 80.0,
+  "tap_retries_total": 0,
+  "adb_retries_total": 0
+}
