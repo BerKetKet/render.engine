@@ -71,3 +71,6 @@
 
 ## `v1.10.1` — `<mark>` Highlight Bounds (`hhea.ascent` + `floor(pitch/1.2)`)
 - Updated `page.py:draw_line` (`commit 812c24a`), `-2,244` diff px on `exam2` p.40 (`4,609,060` total diff px across all 5 corpora), all gates `G1`–`G6` passed.
+
+## `v1.10.2` — Bug Fixes & Hardening
+- Fixed tall table splitting, dynamic scaled-run `room` check, `Config(size26=2176, pitch=0).pitch_px() == 51`, `_skia_bilerp_rgb` hardcoding, and `base_root_em_px` docstring; verified `tools/test_bugfixes.py` and all gates `G1`–`G6`.

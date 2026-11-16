@@ -13,6 +13,12 @@
 
 # Changelog
 
+## [1.10.2] - 2026-11-16 (`v1.10.2` — Pagination, Overflow, Config & De-Overfitting Fixes)
+- **Tall Table Splitting (`kindle_render/page.py:add_table`)**: Split tables taller than one page cleanly between rows across page boundaries without overflowing `page_bottom` (`tools/test_bugfixes.py`).
+- **Dynamic Line-Pitch Room Check (`kindle_render/page.py:add_text_block`)**: Computed `room` and `take` using each line actual `cur_pitch_fl` (accounting for scaled runs and tall inline images) rather than constant block `pitch_fl`.
+- **Half-Up Rounding & Compact Default Pitch (`kindle_render/config.py:pitch_px`, `kindle_render/page.py`)**: Used `math.floor(x + 0.5)` in `pitch_px()` and defaulted `pitch == 0` at `size_px <= 36` to `1.5 * size_px` (`51` px at `34` px), plus corrected `base_root_em_px()` docstring (`28.8125 px`).
+- **Removed `_skia_bilerp_rgb` Special-Case (`kindle_render/page.py`)**: Replaced `1000->1080` and `1500->1620` hardcoding with general `W_in / W_out` and `H_in / H_out` scaling (`exam3_normal` and `exam3_small` covers `-357` diff px each).
+
 ## [1.10.1] - 2026-11-16 (`v1.10.1` — Mark Highlight Vertical Bounds)
 - **Highlight Box Bounds (`kindle_render/page.py:draw_line`)**: Updated `<mark>` background rectangle vertical bounds to use `hhea.ascent` (`0.900 * size_px` above baseline) and `floor(pitch / 1.2)` line box height (`-2,244` diff pixels on `exam2` p.40; zero regressions across all 5 corpora).
 
