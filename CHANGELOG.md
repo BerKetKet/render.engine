@@ -13,6 +13,9 @@
 
 # Changelog
 
+## [1.10.1] - 2026-11-16 (`v1.10.1` — Mark Highlight Vertical Bounds)
+- **Highlight Box Bounds (`kindle_render/page.py:draw_line`)**: Updated `<mark>` background rectangle vertical bounds to use `hhea.ascent` (`0.900 * size_px` above baseline) and `floor(pitch / 1.2)` line box height (`-2,244` diff pixels on `exam2` p.40; zero regressions across all 5 corpora).
+
 ## [1.10.0] - 2026-11-16 (`v1.10.0` — Stage H Fidelity Fixes)
 
 ### Stage H1 `[F]`: Cross-Box Kerning, Leading Ellipsis, Vulgar Fractions & `<mark>` Highlights
