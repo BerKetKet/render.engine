@@ -15,13 +15,17 @@
    - Bug fix suite clean: `python3 tools/test_bugfixes.py` passes (tall table splitting, dynamic line-pitch room check, compact default pitch).
    - Clean git working tree; no tracked secrets, credentials, or unscrubbed logs.
 2. **Corpus & Ground Truth Data**:
-   - Added `exam/` directory containing `v1`, `v2`, and `v3` test EPUB fixtures.
+   - Added `exam/` directory containing `v1`, `v2`, `v3`, and `tables_images_exam` test EPUB fixtures.
    - `exam/v3` (`kindle_exam_v3.epub`): Complete ground truth dataset totaling 2,307 pages across 14 batches:
      - 12 Bookerly font sizes (`size_00_Bookerly` through `size_11_Bookerly`, 2,127 pages) under verified Standard layout (Line spacing 2/5, Paragraph/Word/Char spacing 1/5, Medium margins ~80px, Justified).
      - Compact theme preset (`theme_Compact`, 56 pages, pitch 53px, narrow margins 40px).
      - Large theme preset (`theme_Large`, 124 pages, pitch 82px, wide margins 133px).
      - All 14 batches labeled with verified reading configurations in `settings.txt`, `state.json`, and documented in `exam/v3/README.md`.
      - Added `exam/v3/settings_panels/` containing 16 Kindle UI settings menu screenshots.
+   - `exam/tables_images_exam` (`kindle_tables_images_exam.epub`): Ground truth dataset for tables and images layout totaling 225 files (40 MB) across 3 theme presets captured on Samsung Galaxy M32 (`1080x2340`):
+     - `theme_Compact`: 35 rendered pages, 23 expanded table screenshots, `index.csv`, `settings.txt`, and `state.json`.
+     - `theme_Standard`: 44 rendered pages, 27 expanded table screenshots, `index.csv`, `settings.txt`, and `state.json`.
+     - `theme_Large`: 57 rendered pages, expanded table screenshots, `index.csv`, `settings.txt`, and `state.json`.
 3. **Milestone Progress (Stages A through H / v1.10.2)**:
    - **Stage A (`1.8.0-rc1`)**: Version lock & loud failure for HarfBuzz, baseline goldens for `exam3_normal` & `exam3_small`, unaligned pair filtering across 5 corpora (`tools/rhythm.py`).
    - **Stage B**: Read-only Kindle layout hypothesis registry (`docs/hypotheses/kindle_formulae_v0.md`), reading theme presets (`docs/hypotheses/kindle_themes.md`), and evaluators (`tools/hypotheses/evaluate.py`).
