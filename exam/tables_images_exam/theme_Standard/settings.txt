@@ -1,0 +1,9 @@
+book: kindle_tables_images_exam.epub
+theme: theme_Standard
+pages_saved: 44
+tables_expanded: 27
+start_time: 2026-11-17T07:48:09.874087
+end_time: 2026-11-17T07:53:16.406159
+device_model: Samsung Galaxy M32 (TrebleDroid GApps, Android 13)
+screen_size: 1080x2340
+kindle_version: 8.159.0.100
