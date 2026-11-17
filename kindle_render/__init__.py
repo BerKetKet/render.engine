@@ -1,6 +1,6 @@
-__version__ = "1.10.1"
+__version__ = "1.10.2"
 """
-kindle_render v1.9.0 — Universal, viewport-independent EPUB typography, pagination, IR layout, structured text layer, and rasterization engine.
+kindle_render v1.10.2 — Universal, viewport-independent EPUB typography, pagination, IR layout, structured text layer, and rasterization engine.
 
 Core compute mechanisms:
 - Decoupled layout-to-IR (`PositionedDocument` / `PositionedPage` / `RenderCommand`) and instance-owned FreeType rasterization (`render_to_ir`, `rasterize`, `Rasterizer`)

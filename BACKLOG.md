@@ -31,3 +31,5 @@ Per the prep handoff rules, no fidelity tuning was performed after freezing the 
 
 - **`epub.py:_collapse` Drops `run.bg` on `<mark>` Runs (`epub.py:668`)**:
   - `_collapse(runs)` constructs `r_copy = Run(...)` without passing `bg=getattr(r, 'bg', None)`, causing `<mark>` background highlights parsed in `walk()` (`new_inline["bg"] = (255, 255, 0)`) to be silently dropped before `build_items`. Preserved in v1.7.0 per zero-pixel-change rule (`exam2` p.40 and `synthetic` p.3 depend on this).
+
+- **Resolved (`layout.py:build_items`)**: Apostrophe elision splitting (`1 <= a_idx <= 6` for ASCII and typographic apostrophes) is active before `LiangHyphenator.hyphenate_word()`.

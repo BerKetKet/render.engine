@@ -1,3 +1,4 @@
+import math
 import os
 from dataclasses import dataclass
 from typing import Tuple, Dict
@@ -146,14 +147,16 @@ class Config:
     def pitch_px(self) -> int:
         if self.pitch > 0:
             return self.pitch
-        return int(round(self.pitch_ratio * self.size_px()))
+        sz = self.size_px()
+        ratio = 1.5 if sz <= 36.0 else self.pitch_ratio
+        return int(math.floor(ratio * sz + 0.5))
 
     def vem_px(self) -> float:
         """Dynamic vertical CSS em unit derived from body line pitch (std_pitch / 1.2)."""
         return self.pitch_px() / 1.2
 
     def base_root_em_px(self) -> float:
-        """Base CSS root em in device pixels (11sp * 2.625 = 28.875 px)."""
+        """Base CSS root em in device pixels (10.97619sp * 2.625 = 28.8125 px)."""
         return self.base_root_em_sp * self.css_px_scale
 
     def boldness_dilation_funits(self) -> int:

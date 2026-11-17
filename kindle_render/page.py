@@ -24,13 +24,17 @@ from .ir import (
     TextBlockMeta,
 )
 
+def _rhu(x: float) -> int:
+    return int(math.floor(x + 0.5))
+
+
 def _skia_bilerp_rgb(im: Image.Image, W_out: int, H_out: int, x0: float = -0.009802, sx: float = 0.0, y0: float = -0.041117, sy: float = 0.0) -> np.ndarray:
     arr = np.array(im.convert("RGB"), dtype=np.float64)
     H_in, W_in = arr.shape[:2]
     if sx <= 0.0:
-        sx = (60680 / 65536.0) if (W_in == 1000 and W_out == 1080) else (W_in / float(W_out))
+        sx = W_in / float(W_out)
     if sy <= 0.0:
-        sy = (60680 / 65536.0) if (H_in == 1500 and H_out == 1620) else (H_in / float(H_out))
+        sy = H_in / float(H_out)
     ys = np.clip(y0 + sy * np.arange(H_out), 0, H_in - 1)
     xs = np.clip(x0 + sx * np.arange(W_out), 0, W_in - 1)
     yi = np.floor(ys).astype(int)
@@ -607,8 +611,26 @@ class Pager:
                     self.y_float += top_mt + extra_top
                     self.y = int(round(self.y_float))
                 continue
-            room = int((c.page_bottom - self.y) // pitch_fl)
             remaining = n - i
+            acc_y = float(self.y)
+            room = 0
+            for k_r in range(remaining):
+                pl_r, _ = placed[i + k_r]
+                sc_r = max((pt[0].size26 / float(size26) for pt in pl_r if pt[0] is not None), default=1.0)
+                sc_r = max(1.0, sc_r)
+                inl_r = [pt[2][1] for pt in pl_r if pt[1] == "__inline_img__"]
+                if inl_r and max(im.height for im in inl_r) > pitch:
+                    lp_r = float(pitch + max(0, max(im.height for im in inl_r) - (self.baseline_in(0, pitch, size26) - 6)))
+                elif sc_r > 1.0 and not b.heading:
+                    std_p_r = _rhu(std_body_pitch * b.scale)
+                    extra_asc_r = int((sc_r - 1.0) * vem_px)
+                    lp_r = float(int(sc_r * std_p_r + 0.45) if (extra_lead > 0.0 or sc_r >= 2.0) else (std_p_r + extra_asc_r + int((sc_r - 1.0) * (std_p_r - vem_px) + 0.49)))
+                else:
+                    lp_r = pitch_fl
+                if acc_y + lp_r > c.page_bottom:
+                    break
+                acc_y += lp_r
+                room += 1
             take = min(room, remaining)
             if take < remaining:
                 if not b.heading and remaining - take < c.widow_orphan:
@@ -1178,6 +1200,21 @@ class Pager:
 
         self._ensure_block_meta_on_page(block_idx, b, kind_override="table", table_rows_meta=table_rows_meta)
 
+        # Compute per-row page index and y-coordinate so tall tables (> 1 page) split cleanly between rows
+        row_pages = [0] * nrows
+        row_y_start = [0] * nrows
+        row_y_end = [0] * nrows
+        cur_pg_idx = 0
+        cur_y = self.y
+        for ri in range(nrows):
+            if ri > 0 and cur_y + row_hs[ri] > c.page_bottom:
+                cur_pg_idx += 1
+                cur_y = c.top
+            row_pages[ri] = cur_pg_idx
+            row_y_start[ri] = cur_y
+            cur_y += row_hs[ri]
+            row_y_end[ri] = cur_y
+        # Keep existing row_ys for single-page tables and per-row page lookup for multi-page tables
         row_ys = [self.y]
         for rh in row_hs:
             row_ys.append(row_ys[-1] + rh)
@@ -1204,15 +1241,26 @@ class Pager:
             col_r_pad.append(rp)
 
         last_base = self.y
-        for ri, ci, lines_c, is_h, align, cs, rs, face in wrapped_cells:
-            y_top = row_ys[ri] + top_pad
-            y_bot = row_ys[ri + rs]
-            span_h = y_bot - row_ys[ri]
+        active_tbl_pg = 0
+        # Sort cells by row index so multi-page table page breaks advance monotonically
+        for ri, ci, lines_c, is_h, align, cs, rs, face in sorted(wrapped_cells, key=lambda x: (x[0], x[1])):
+            while row_pages[ri] > active_tbl_pg:
+                self._mark_page_non_empty()
+                self.new_page()
+                self._ensure_block_meta_on_page(block_idx, b, kind_override="table", table_rows_meta=table_rows_meta)
+                active_tbl_pg += 1
+                last_base = self.y
+            r_y0 = row_y_start[ri] if active_tbl_pg > 0 else row_ys[ri]
+            r_y1 = (row_y_end[ri] if rs == 1 else (r_y0 + sum(row_hs[ri:ri + rs]))) if active_tbl_pg > 0 else row_ys[ri + rs]
+            y_top = r_y0 + top_pad
+            y_bot = r_y1
+            span_h = y_bot - r_y0
             n_l = len(lines_c)
             block_h = n_l * line_p
             if rs > 1:
-                first_base = self.baseline_in(row_ys[ri] + top_pad, line_p, tbl_size26)
-                last_sp_base = self.baseline_in(row_ys[ri + rs - 1] + top_pad + (row_max_lines[ri + rs - 1] - 1) * line_p, line_p, tbl_size26)
+                first_base = self.baseline_in(r_y0 + top_pad, line_p, tbl_size26)
+                last_row_y0 = r_y0 + sum(row_hs[ri:ri + rs - 1])
+                last_sp_base = self.baseline_in(last_row_y0 + top_pad + (row_max_lines[ri + rs - 1] - 1) * line_p, line_p, tbl_size26)
                 if has_spans:
                     last_sp_base += 1
                 mid_base = (first_base + last_sp_base) // 2

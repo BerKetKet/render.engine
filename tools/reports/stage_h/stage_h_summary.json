@@ -1,0 +1,79 @@
+{
+  "stage": "Stage H",
+  "version": "1.10.2",
+  "tag": "v1.10.2",
+  "items_completed": [
+    {
+      "id": "H1",
+      "title": "Cross-box dash/slash GPOS kerning, leading ellipsis splitting & hyphenation, vulgar third/eighth fractions, and <mark> highlight bg preservation",
+      "delta_exact_pages": "+9 (179 -> 188)",
+      "delta_diff_px": -257355,
+      "lost_exact_pages": 0
+    },
+    {
+      "id": "H2",
+      "title": "General float32 justified-line last-word pen accumulation (sp_fl = f32(std_sp) + f32(delta)/f32(k))",
+      "delta_exact_pages": "+34 (188 -> 222)",
+      "delta_diff_px": -406374,
+      "lost_exact_pages": 0
+    },
+    {
+      "id": "H3",
+      "title": "Bookerly hhea.ascent (0.900em) and floor(pitch/1.2) <mark> highlight vertical bounds",
+      "delta_exact_pages": "0 (222 -> 222)",
+      "delta_diff_px": -2244,
+      "lost_exact_pages": 0
+    },
+    {
+      "id": "H4",
+      "title": "8-Item Bug-Fix Sweep (tall table splitting, dynamic scaled-run room check, floor(x+0.5) & pitch=0 at 34px->51, docstring/backlog cleanup, _skia_bilerp_rgb de-overfitting, verified device behaviors for multi-line heading split & n_items>1000 greedy fallback)",
+      "delta_exact_pages": "0 (222 -> 222)",
+      "delta_diff_px": 0,
+      "lost_exact_pages": 0
+    }
+  ],
+  "corpora": {
+    "probe": {
+      "exact_pages": 43,
+      "compared_pages": 86,
+      "pos_exact_lines": 2753,
+      "total_lines": 2863,
+      "diff_px": 416248
+    },
+    "exam1": {
+      "exact_pages": 50,
+      "compared_pages": 70,
+      "pos_exact_lines": 1452,
+      "total_lines": 1568,
+      "diff_px": 1516670
+    },
+    "exam2": {
+      "exact_pages": 40,
+      "compared_pages": 65,
+      "pos_exact_lines": 1395,
+      "total_lines": 1529,
+      "diff_px": 1034912
+    },
+    "exam3_normal": {
+      "exact_pages": 60,
+      "compared_pages": 82,
+      "pos_exact_lines": 1899,
+      "total_lines": 2027,
+      "diff_px": 762315
+    },
+    "exam3_small": {
+      "exact_pages": 29,
+      "compared_pages": 54,
+      "pos_exact_lines": 1514,
+      "total_lines": 1651,
+      "diff_px": 878921
+    }
+  },
+  "totals": {
+    "exact_pages": 222,
+    "compared_pages": 357,
+    "pos_exact_lines": 9013,
+    "total_lines": 9638,
+    "diff_px": 4609066
+  }
+}
