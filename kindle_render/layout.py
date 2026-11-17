@@ -291,7 +291,7 @@ def build_items(runs, family, cfg, size26, display=False, hyphenator=None, allow
     for run in runs:
         if getattr(run, 'image', None) is not None:
             im = run.image
-            sc = cfg.dpi_scale
+            sc = (size26 / 1024.0) if size26 != 2688 else cfg.dpi_scale
             w_sc = max(1, int(round(im.width * sc)))
             h_sc = max(1, int(round(im.height * sc)))
             from PIL import Image as PILImage
@@ -775,7 +775,7 @@ def break_kp(items, line_w, tolerance, cfg, ragged, in_forced_seg=False):
     n_items = len(items)
     if n_items == 0:
         return []
-    if n_items > 1000:
+    if n_items > getattr(cfg, "max_kp_items", 1000):
         return None
 
     l0 = float(line_w(0))
