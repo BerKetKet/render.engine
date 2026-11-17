@@ -13,6 +13,14 @@
 
 # Changelog
 
+## [1.11.0] - 2026-11-18
+### Added
+- Registered `tables_images` (`kindle_tables_images_exam.epub` + `tables_images_standard_captures.zip`) as the 6th corpus in `tools/profiles.json` and `tools/corpus.py`.
+- Added `Config.extra_lead_px()` helper with `0.5px` integer-pitch rounding tolerance so Compact (`39px/pitch 53`) remains in the tight-spacing regime.
+- Added `tools/score_dir.py` for scoring capture folders across arbitrary viewport geometries (`Standard`, `Compact`, `Large`) and `tools/test_bugfixes.py` regression suite.
+- Generalized cross-theme block image viewport scaling (`sc = maxw / 512.0`), HTML `width`/`height` attributes, CSS `px`/`%` widths, RGBA white alpha-compositing, tall-image page-remainder fitting, multi-image inline `<p>` runs, and inline image scaling (`size26 / 1024.0`).
+- Generalized cross-theme collapsed table layout: `row_pad = int(0.28 * size_px)`, `row_ys[-1]` bottom rule placement, chromeless table detection (`has_chrome`), multi-page row-chunk splitting with per-page bottom rule + popup icon and top continuation rule (`y = 167..170`), unbreakable single-word `<th>` headers, and rich cell rendering (`<b>`, `<i>`, `<a>`, `<ul><li>`, `<img/>`).
+
 ## [1.10.1] - 2026-11-16 (`v1.10.1` — Mark Highlight Vertical Bounds)
 - **Highlight Box Bounds (`kindle_render/page.py:draw_line`)**: Updated `<mark>` background rectangle vertical bounds to use `hhea.ascent` (`0.900 * size_px` above baseline) and `floor(pitch / 1.2)` line box height (`-2,244` diff pixels on `exam2` p.40; zero regressions across all 5 corpora).
 

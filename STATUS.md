@@ -69,5 +69,5 @@
   - Evaluate `v1.10.0` against held-out `exam4` when available; remaining items (`ul_indent_em`, `cover` p.1, `dl/dt/dd`, complex scripts) are tracked in `BACKLOG.md`.
 - **CURRENT COMMIT / TAG**: `v1.10.0` (`round1-1.10.0`)
 
-## `v1.10.1` — `<mark>` Highlight Bounds (`hhea.ascent` + `floor(pitch/1.2)`)
+## `v1.11.0` — `<mark>` Highlight Bounds (`hhea.ascent` + `floor(pitch/1.2)`)
 - Updated `page.py:draw_line` (`commit 812c24a`), `-2,244` diff px on `exam2` p.40 (`4,609,060` total diff px across all 5 corpora), all gates `G1`–`G6` passed.
