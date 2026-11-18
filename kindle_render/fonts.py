@@ -109,7 +109,7 @@ class Face:
 
         self.tt = TTFont(path)
         self.upem = self.tt['head'].unitsPerEm
-        self.S = (size26 / float(self.upem)) - 1e-9
+        self.S = (((size26 << 16) // self.upem) / 65536.0) if (self.upem == 1000 and (size26 & 63) == 0) else ((size26 / float(self.upem)) - 1e-9)
         self.cmap = self.tt.getBestCmap() or {}
         self.hmtx = self.tt['hmtx']
         self.glyf = self.tt['glyf'] if 'glyf' in self.tt else None

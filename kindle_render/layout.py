@@ -559,9 +559,10 @@ def build_items(runs, family, cfg, size26, display=False, hyphenator=None, allow
               and not items[idx + 1].flagged and isinstance(items[idx + 2], Box) and items[idx + 2].glyphs):
             b2 = items[idx + 2]
         if b2 is not None:
+            is_direct_run_join = isinstance(items[idx + 1], Box)
             g1, g2 = b1.glyphs[-1], b2.glyphs[0]
             f1, n1, a1, f2, n2 = g1[0], g1[1], g1[2], g2[0], g2[1]
-            if f1 is not None and f1 is f2 and getattr(f1, "use_kern", False) and (n1 in DASH_SPLIT_GLYPHS or n2 in DASH_SPLIT_GLYPHS):
+            if f1 is not None and f1 is f2 and getattr(f1, "use_kern", False) and ((is_direct_run_join and len(g1) > 3 and isinstance(g1[3], dict) and (g1[3].get("underline") or g1[3].get("strike") or g1[3].get("fg"))) or n1 in DASH_SPLIT_GLYPHS or n2 in DASH_SPLIT_GLYPHS):
                 ku = f1.kern_units(n1, n2)
                 if ku != 0:
                     k_adv = math.floor(ku * f1.S)
@@ -1239,7 +1240,7 @@ def make_lines(items, line_w, cfg, ragged, is_heading=False, align=None):
         start = b + 1
     return lines
 
-def layout_line(seg, hy, width26, justify, last, cfg, base_x26=None):
+def layout_line(seg, hy, width26, justify, last, cfg, base_x26=None, indent_frac26: float = 0.0):
     """Computes exact glyph placements for a single line."""
     if not seg and not hy:
         return [], 0, 0
@@ -1337,25 +1338,45 @@ def layout_line(seg, hy, width26, justify, last, cfg, base_x26=None):
             sp_fl = f32(std_sp) + f32(delta) / f32(k_gl)
             off_fl = f32(0.0)
             w_acc = 0
-            # Accumulate per-word widths and float32 space advances up to the last word
             last_box_idx = max((idx_s for idx_s, it_s in enumerate(seg) if isinstance(it_s, Box)), default=-1)
             if last_box_idx >= 0:
                 last_w_id = seg[last_box_idx].word_idx
                 start26_line = base_x26 - hang_left
+                start26_fl_w1 = f32(start26_line) + f32(indent_frac26)
+                sp_fl_w1 = f32(std_sp) + (f32(delta) - f32(indent_frac26)) / f32(k_gl)
                 cur_pen_int = 0
                 in_last_w = False
                 last_w_start_int = 0
+                m_glues = 0
+                w1_off_fl = f32(0.0)
+                w1_acc = 0
                 for idx_s, it_s in enumerate(seg):
                     if isinstance(it_s, Box):
+                        if indent_frac26 > 0.0 and m_glues == 1 and it_s.word_idx != last_w_id:
+                            w1_box_fl = f32(w1_off_fl + f32(w1_acc))
+                            w1_pen_int = cur_pen_int
+                            for g_idx, g_tup in enumerate(it_s.glyphs):
+                                if ((start26_line + w1_pen_int) & 63) == 31:
+                                    g_pen_fl = f32(start26_fl_w1 + f32(w1_box_fl + f32(w1_pen_int - cur_pen_int)))
+                                    x_fl = int(math.floor(float(g_pen_fl) / 64.0 + 0.5))
+                                    x_int = int(math.floor((start26_line + w1_pen_int) / 64.0 + cfg.place_phase))
+                                    if x_fl != x_int:
+                                        f32_dx_map[(idx_s, g_idx)] = x_fl - x_int
+                                w1_pen_int += g_tup[2]
+                        w1_acc += it_s.width
                         if it_s.word_idx == last_w_id and not in_last_w:
                             in_last_w = True
                             last_w_start_int = cur_pen_int
-                        if in_last_w:
-                            pass
-                        else:
+                        if not in_last_w:
                             w_acc += it_s.width
                         cur_pen_int += it_s.width
                     elif isinstance(it_s, Glue):
+                        if m_glues == 0:
+                            if w1_acc > 0:
+                                w1_off_fl = f32(w1_off_fl + f32(w1_acc))
+                                w1_acc = 0
+                            w1_off_fl = f32(w1_off_fl + sp_fl_w1)
+                        m_glues += 1
                         if not in_last_w:
                             if w_acc > 0:
                                 off_fl = f32(off_fl + f32(w_acc))
@@ -1364,7 +1385,6 @@ def layout_line(seg, hy, width26, justify, last, cfg, base_x26=None):
                         cur_pen_int += it_s.width + extra_glue[idx_s]
                 if w_acc > 0:
                     off_fl = f32(off_fl + f32(w_acc))
-                # Check glyphs in the last word at subpixel == 32
                 cur_g_pen = last_w_start_int
                 for idx_s, it_s in enumerate(seg):
                     if isinstance(it_s, Box) and it_s.word_idx == last_w_id:
