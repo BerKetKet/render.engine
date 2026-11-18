@@ -637,7 +637,7 @@ def _doc_blocks(z, href, html, cfg):
                         ol_counter += 1
                     else:
                         ul_base = getattr(cfg, "ul_indent_em", 2.0000)
-                        ul_nest = getattr(cfg, "ul_nested_indent_em", 1.9762)
+                        ul_nest = getattr(cfg, "ul_nested_indent_em", 2.0000)
                         kw["left_em"] = inh_left + ul_base + (lvl_eff - 1) * ul_nest
                         if lst_type == "square":
                             kw["bullet"] = "\u25a0"

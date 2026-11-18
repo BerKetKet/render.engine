@@ -551,7 +551,7 @@ class Pager:
             mb_est = int(round(mb_base_em * b.scale * vem_px + mb_lead_k * extra_lead)) + (1 if h_idx == 0 else 0)
         else:
             eff_vem = (max(float(std_body_pitch), (68.0 / 45.0) * c.size_px()) if extra_lead > 0.0 else float(std_body_pitch)) / 1.2
-            mt = (int(b.mt_em * eff_vem * b.scale + 0.25) if (getattr(b, 'list_level', 0) > 0 and extra_lead > 0.0) else (int(round(b.mt_em * vem_px * b.scale)) if (getattr(b, 'list_level', 0) > 0 and getattr(b, 'border_collapse', False) and (getattr(b, 'bullet', None) == '\u2022' or (getattr(b, 'ol_number', None) and b.ol_number[0].isupper()))) else int(b.mt_em * vem_px * b.scale + 1e-6))) if b.mt_em else 0
+            mt = (int(b.mt_em * eff_vem * b.scale + 0.25) if (getattr(b, 'list_level', 0) > 0 and extra_lead > 0.0) else (int(round(b.mt_em * vem_px * b.scale)) if (getattr(b, 'list_level', 0) > 0 and ((getattr(b, 'bullet', None) == '\u2022' and b.mt_em == 1.0) or (getattr(b, 'border_collapse', False) and (getattr(b, 'bullet', None) == '\u2022' or (getattr(b, 'ol_number', None) and b.ol_number[0].isupper()))))) else int(b.mt_em * vem_px * b.scale + 1e-6))) if b.mt_em else 0
             mb_est = (int(b.mb_em * vem_px * b.scale + 0.4) if b.mb_em == 1.0 else int(math.ceil(b.mb_em * vem_px * b.scale - 0.5))) if b.mb_em else 0
         gap = max(self.prev_mb, mt)
         prev_h = getattr(self, "prev_heading", 0)
@@ -568,7 +568,7 @@ class Pager:
                 gap -= 2
             elif b.heading == 2 and prev_h == 2:
                 gap = 58
-            elif b.heading == 0 and prev_h == 1 and (b.scale > 1.0 or b.mt_em > 1.0):
+            elif b.heading == 0 and prev_h == 1 and (b.scale > 1.0 or b.mt_em > 1.0 or (b.left_em > 0.0 and getattr(b, 'list_level', 0) == 0)):
                 gap -= 1
             elif b.heading == 0 and prev_h == 3:
                 gap += (2 if getattr(b, "bullet", None) is not None else 1)

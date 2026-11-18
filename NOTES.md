@@ -2,9 +2,9 @@
 
 ## Current State
 - **Working Directory**: `/home/bgg/projects/render.engine`
-- **Module**: `kindle_render` v1.11.3
+- **Module**: `kindle_render` v1.11.4
 - **Git Branch**: `engine`
-- **Latest Tag**: `v1.11.3`
+- **Latest Tag**: `v1.11.4`
 - **Python Runtime**: Python 3.13, FreeType 2.13+, HarfBuzz (Docker lock: 6.0.0, host CachyOS: 15.1.0)
 
 ## Scope
@@ -35,6 +35,10 @@
      - **v1.11.2 (Task C3)**: Extended cross-Box OpenType GPOS kerning in `build_items` across unspaced inline span boundaries (`<u>`, `<s>`, `<span>`) sharing the same `Face` (`e07_inline`).
      - **v1.11.3 (Task C4)**: Untruncated `float32` first-line `text-indent` subpixel remainder (`indent_frac26 = (indent_em * size_px * 64.0) - indent26`) in `layout_line` for `sub == 31` tie-breaking (`+3` exact pages on `exam3_small`).
      - Added analysis tools & diagnostic documents: `tools/score_all.py`, `tools/fit_geometry.py`, `tools/block_residuals.py`, `tools/ab_diff.py`, `docs/audit_v1_11_0.md`, `docs/diagnosis_task_c.md`, `docs/hypotheses/unproven_v1_11_0.md`, and crops.
+   - **v1.11.4 (`v1.11.4`)**: Integrated release 1.11.4 from `kindle_render_v1.11.4.zip`:
+     - Restored `ul_nested_indent_em` from `1.9762` to CSS standard `2.0000` em (`config.py`, `epub.py`), improving nested unordered list alignment across 6 geometries with zero lost exact pages.
+     - Tight-regime block and bullet spacing in `page.py`: rounded first-item bullet top margin `mt = int(round(b.mt_em * vem_px * b.scale))` for `bullet == '•'` and applied `gap -= 1` to indented non-list blocks (`b.left_em > 0.0 and list_level == 0`) following `<h1>`.
+     - Evaluated candidate proposals A, B, C, D against device captures in `tools/reports/incorporate/REPORT.md`, incorporated Candidate D, and updated golden files for `probe`, `exam1`, `exam3_normal`, and `exam3_small`.
 
 ## What is Broken / Open Issues
 - **HarfBuzz Host vs Lock**: Host runtime HarfBuzz on CachyOS is `15.1.0`, whereas reproducibility lock in `requirements.lock` targets `6.0.0` (Docker container required for exact shaping reproduction).
@@ -43,4 +47,4 @@
 
 ## Next Steps
 - Evaluate against held-out `exam4` when available.
-- Push release `v1.11.3` and updated branches (`main`, `engine`) and tags to GitHub.
+- Push release `v1.11.4` and updated branches (`main`, `engine`) and tags to GitHub.
