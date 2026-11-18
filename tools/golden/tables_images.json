@@ -1,7 +1,7 @@
 {
   "corpus": "tables_images",
   "environment_fingerprint": "0a54d71bb5a5988b99f67f4281f2ff9d339c91c8324fc6496a50d77ebf952e3d",
-  "engine_version": "1.10.2",
+  "engine_version": "1.11.5",
   "page_count": 44,
   "pages": {
     "1": "1fa91d1104100f5d31c5947ca84fae0aadd89bca13d99dcbe20d9da2fdd97ed9",

@@ -604,6 +604,7 @@ class Family:
     }
 
     def __init__(self, cfg):
+        verify_harfbuzz(allow_unshaped=getattr(cfg, "allow_unshaped", False))
         self.cfg = cfg
         self._faces = {}
 

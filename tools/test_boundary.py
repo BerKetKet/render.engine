@@ -38,8 +38,6 @@ def main() -> int:
     with open(REPO_ROOT / "tools" / "profiles.json") as f:
         profs = json.load(f)
     search_paths = profs.get("search_paths", ["corpora", ".", ".."])
-    if "/tmp/work" not in search_paths:
-        search_paths = ["/tmp/work"] + list(search_paths)
 
     report = {"import_graph_passed": True, "corpora": {}}
     sample_pages_map = {
@@ -99,10 +97,10 @@ def main() -> int:
         }
         print(f"[boundary:{cname}] pages={len(ir_doc.pages)} valid=True layout_rt=True pixel_rt={pixel_matches}/{len(sampled)} PASSED")
 
-    os.makedirs(REPO_ROOT / "tools" / "reports" / "stage_g", exist_ok=True)
-    with open(REPO_ROOT / "tools" / "reports" / "stage_g" / "boundary_hardening.json", "w") as f:
+    os.makedirs(REPO_ROOT / "tools" / "reports_local", exist_ok=True)
+    with open(REPO_ROOT / "tools" / "reports_local" / "boundary_hardening.json", "w") as f:
         json.dump(report, f, indent=2)
-    with open(REPO_ROOT / "tools" / "reports" / "stage_g" / "boundary_hardening.md", "w") as f:
+    with open(REPO_ROOT / "tools" / "reports_local" / "boundary_hardening.md", "w") as f:
         f.write("""# Stage G `[P]` — Layout / Raster IR Boundary Hardening Report
 
 ## Summary of Boundary Hardening Verification Across All 5 Corpora

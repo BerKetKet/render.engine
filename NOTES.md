@@ -2,9 +2,9 @@
 
 ## Current State
 - **Working Directory**: `/home/bgg/projects/render.engine`
-- **Module**: `kindle_render` v1.11.4
+- **Module**: `kindle_render` v1.11.5
 - **Git Branch**: `engine`
-- **Latest Tag**: `v1.11.4`
+- **Latest Tag**: `v1.11.5`
 - **Python Runtime**: Python 3.13, FreeType 2.13+, HarfBuzz (Docker lock: 6.0.0, host CachyOS: 15.1.0)
 
 ## Scope
@@ -40,6 +40,12 @@
      - Tight-regime block and bullet spacing in `page.py`: rounded first-item bullet top margin `mt = int(round(b.mt_em * vem_px * b.scale))` for `bullet == '•'` and applied `gap -= 1` to indented non-list blocks (`b.left_em > 0.0 and list_level == 0`) following `<h1>`.
      - Evaluated candidate proposals A, B, C, D against device captures in `tools/reports/incorporate/REPORT.md`, incorporated Candidate D, and updated golden files for `probe`, `exam1`, `exam3_normal`, and `exam3_small`.
 
+   - **v1.11.5 (`v1.11.5`)**: Integrated release 1.11.5 from `kindle_render_v1.11.5.zip` (Port-Ready Baseline):
+     - Clean-clone reproducibility (`H1`): Updated `tools/profiles.json` and `tools/corpus.py` to resolve EPUBs and captures directly under `exam/`, routed tool outputs to `tools/reports_local/`, added `tools/run_gates.py`.
+     - Goldens & baseline metrics (`H2`): Updated all goldens to `engine_version: "1.11.5"`, added goldens for `sizes_00..07`, `e3_compact`, `e3_large`, `ti_compact`, `ti_large`, and baseline hash equivalence reports (`baseline_1.11.5.json`, `baseline_1.11.5.md`).
+     - HarfBuzz policy (`H3`): Enforced `verify_harfbuzz(cfg.allow_unshaped)` in `Family.__init__` with `--allow-unshaped` in `kindle_render/cli.py` and exact-pin policy documentation in `docs/environment.md`.
+     - Added numerics inventory (`docs/numerics_inventory.md`), determinism tests (`tools/test_determinism.py`), and asset/weight documentation (`docs/ASSETS.md`, `docs/repo_weight.md`).
+
 ## What is Broken / Open Issues
 - **HarfBuzz Host vs Lock**: Host runtime HarfBuzz on CachyOS is `15.1.0`, whereas reproducibility lock in `requirements.lock` targets `6.0.0` (Docker container required for exact shaping reproduction).
 - **Corpus Fixtures**: Corpus EPUBs and captures reside on the `main` branch.
@@ -47,4 +53,4 @@
 
 ## Next Steps
 - Evaluate against held-out `exam4` when available.
-- Push release `v1.11.4` and updated branches (`main`, `engine`) and tags to GitHub.
+- Push release `v1.11.5` and updated branches (`main`, `engine`) and tags to GitHub.

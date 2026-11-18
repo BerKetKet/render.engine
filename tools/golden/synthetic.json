@@ -1,6 +1,6 @@
 {
   "corpus": "synthetic",
-  "engine_version": "1.10.2",
+  "engine_version": "1.11.5",
   "page_count": 3,
   "pages": {
     "1": "c0956b2018139180434cb380c096ddcb839b4ed3d6f2a82030133da7f58fdaab",
@@ -11,5 +11,6 @@
     "1": "2bcca6c5d280e5ae5d683338d044857e3421068e947984f50ead952805fc385e",
     "2": "d66c88fc61614e37addc7a32fb5b2f0fd903628ca246368b10907670dd51b001",
     "3": "fb0feea5df94670d8674738db86f31185e19124fd36acfc35c2565bad45450ad"
-  }
+  },
+  "environment_fingerprint": "0a54d71bb5a5988b99f67f4281f2ff9d339c91c8324fc6496a50d77ebf952e3d"
 }

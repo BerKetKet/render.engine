@@ -1,123 +1,41 @@
-# `kindle_render` Status Log (`STATUS.md`)
+# `kindle_render` Project Status — `v1.11.5` (Port-Ready Baseline)
 
-## Current Version & Milestone
-- **Version**: `1.11.2` (`kindle_render/__init__.py`)
-- **Tag**: `v1.11.1`
-- **Completed**:
-  - **Stage A `[P]` (Hygiene, tag `1.8.0-rc1`)**: HarfBuzz `6.0.0` version lock & loud failure (`kindle_render/fonts.py`, `tools/test_harfbuzz_lock.py`); `NO-GOLDEN` reporting + `exam3_normal` & `exam3_small` baseline goldens + `page_bottom` check (`tools/reports/stage_a/page_bottom_verification.json`); `tools/rhythm.py` `unaligned` pair filter across all 5 corpora (`tools/reports/rhythm/coverage.json`, `coverage.md`, `base.json`); complete grep-backed spacing inventory (`tools/reports/rhythm/inventory.md`).
-  - **Stage B `[P]` (Hypothesis Registry)**: Read-only `docs/hypotheses/kindle_formulae_v0.md` (`SHA-256: 5e24606c502f14c3de8d77536cdb74f5eb00eaa0d6bc4e87d78807b34a692c81`), pure evaluators in `tools/hypotheses/evaluate.py`, and 5-corpus evaluation in `tools/reports/hypotheses/registry.json` & `reconcile.md`.
-  - **Stage C `[F]` (Cross-Geometry Vertical Rhythm)**: Removed all `std_body_pitch == 57` / `pitch_px() == 57` branches and back-solved 4–5 digit constants (`4.04124`, `0.6632`, `0.8140`, etc.) in `kindle_render/page.py`; implemented cross-geometry `eff_body_pitch`, 2–3 digit heading margin multipliers (`0 px` residual across all 36 cells), `(10/17) * std_body_pitch` spacer advance, `base_root_em_px` horizontal `em`/`rem` resolution, and inter-word shrink (`w <= L + z`) in `break_balanced_ragged` (`tools/reports/rhythm/c1_models.md`, `c2_logo_cv.md`, `c3_smoothness.md`, `c4_anomalies.md`).
-  - **Stage D `[F]` (Page-Break Rules)**: Retained page-top `mt` on overflowing list items (`exam3_normal` p.39), added page-top `+8 px` offset and `_mark_page_non_empty()` on overflowing uncollapsed tables (`exam3_normal` p.41), and added page-break support in `add_hr` (`exam3_small` p.25–26) (`tools/reports/stage_d/page_breaks.md`).
-  - **Stage E `[F]` (Ragged Text & Last-Glyph `1 px` Rounding)**: Split internal `<br/>` forced-break segments in `break_kp` (`in_forced_seg=True`), making `exam3_normal` p.48 (`24/24` lines), `exam3_normal` p.49 (`28/28` lines), and `exam3_small` p.31 (`33/33` lines) `100%` bitwise identical (`tools/reports/stage_e/e1_ragged.md`); completed 5-corpus last-glyph `1 px` rounding census (`tools/reports/stage_e/e2_last_glyph.md`); wrote `tools/reports/REPORT_RHYTHM.md`.
+- **Current Version**: `1.11.5` (target tag: `v1.11.5`)
+- **Hash Equivalence vs `v1.11.4`**: `YES` — `100%` identical per-page pixel and layout SHA-256 across all corpora (`probe`, `exam1`, `exam2`, `exam3_normal`, `exam3_small`, `e3_compact`, `e3_large`, `tables_images`, `ti_compact`, `ti_large`, `synthetic`, and `sizes_00..sizes_07`).
+- **Environment Pin**: Python `3.11.x`, HarfBuzz `6.0.0` (exact pin enforced in `Family.__init__` per `docs/environment.md`), FreeType `2.12.1`, Pillow `10.2.0`, NumPy `1.26.x`.
 
-## 5-Corpus Metrics at `rhythm-1.9.0`
-- **`probe` (`42 px, pitch 57`)**: `37/86` exact pages | `2,703/2,863` pos lines | `2,705/2,863` PI lines | `2` displaced | `476,566` diff px
-- **`exam1` (`45 px, pitch 68`)**: `42/70` exact pages | `1,405/1,568` pos lines (`+3`) | `1,411/1,568` PI lines | `6` displaced | `1,577,125` diff px (`-16,039`)
-- **`exam2` (`42 px, pitch 57`)**: `35/65` exact pages | `1,322/1,529` pos lines | `1,343/1,529` PI lines | `21` displaced | `1,140,913` diff px
-- **`exam3_normal` (`45 px, pitch 68`)**: `42/82` exact pages (`+4`) | `1,835/2,027` pos lines (`+95`) | `1,847/2,027` PI lines (`+59`) | `12` displaced | `965,580` diff px (`-1,927,480`)
-- **`exam3_small` (`34 px, pitch 51`)**: `16/54` exact pages (`+6`) | `1,430/1,651` pos lines (`+439`) | `1,455/1,651` PI lines (`+39`) | `25` displaced | `1,114,849` diff px (`-4,424,172`)
-- **Total across all 5 corpora**: `172/357` exact pages (`+10`), `8,695/9,638` pos lines (`+537`), `8,761/9,638` PI lines (`+98`), `5,275,033` diff px (`-6,367,691`, `-54.7%`).
+## Baseline `1.11.5` Reference Metrics (`tools/reports/baseline_1.11.5.json`)
 
-## NEXT (Resume Instructions for Next Session — Stage F)
-- **STOP POINT REACHED**: Tag `rhythm-1.9.0` is complete and awaits owner review before Stage F (`Contents Page`).
-- **Exact Commands to Verify & Resume at Stage F**:
-  ```bash
-  python3 tools/check_imports.py
-  python3 tools/test_harfbuzz_lock.py
-  python3 tools/test_parallel_raster.py
-  python3 tools/test_text_layer.py
-  python3 tools/corpus.py --only probe --no-determinism
-  python3 tools/corpus.py --only exam1 --no-determinism
-  python3 tools/corpus.py --only exam2 --no-determinism
-  python3 tools/corpus.py --only exam3_normal --no-determinism
-  python3 tools/corpus.py --only exam3_small --no-determinism
-  ```
+| Corpus / Series | Pages Compared | Bitwise-Identical | Pos Exact Lines | Pos-Indep Lines | Diff Pixels | Mean Pixel Match | Mean Ink IoU |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `probe` | 86 / 98 | 43 / 86 | 2753 / 2863 | 2755 / 2863 | 357,394 | 99.8216% | 0.9872 |
+| `exam1` | 70 / 70 | 50 / 70 | 1452 / 1568 | 1462 / 1568 | 1,506,804 | 99.0760% | 0.9566 |
+| `exam2` | 65 / 65 | 40 / 65 | 1395 / 1529 | 1416 / 1529 | 1,034,912 | 99.3165% | 0.9607 |
+| `exam3_normal` | 82 / 82 | 60 / 82 | 1899 / 2027 | 1927 / 2027 | 708,015 | 99.6294% | 0.9658 |
+| `exam3_small` | 54 / 54 | 32 / 54 | 1518 / 1651 | 1543 / 1651 | 845,237 | 99.3281% | 0.9505 |
+| `e3_compact` | 56 / 56 | 33 / 56 | 1490 / 1713 | 1531 / 1713 | 2,086,061 | 98.4009% | 0.9180 |
+| `e3_large` | 124 / 124 | 87 / 124 | 2341 / 2652 | 2392 / 2652 | 2,667,605 | 99.0765% | 0.9206 |
+| `tables_images` | 44 / 44 | 4 / 44 | 299 / 894 | 521 / 894 | 8,503,517 | 91.7039% | 0.5836 |
+| `ti_compact` | 35 / 35 | 3 / 35 | 280 / 733 | 452 / 733 | 6,723,947 | 91.7533% | 0.6481 |
+| `ti_large` | 57 / 57 | 3 / 57 | 286 / 1086 | 586 / 1086 | 10,400,325 | 92.1675% | 0.4855 |
+| `sizes_00` (`34/51`) | 54 / 54 | 32 / 54 | 1518 / 1651 | 1543 / 1651 | 845,237 | 99.3281% | 0.9505 |
+| `sizes_01..03, 05..07` | 0 / 513 | golden verified | N/A | N/A | N/A | N/A | N/A |
+| `sizes_04` (`45/68`) | 82 / 82 | 60 / 82 | 1899 / 2027 | 1927 / 2027 | 708,015 | 99.6294% | 0.9658 |
+| `synthetic` | 0 / 3 | golden 3/3 | N/A | N/A | N/A | N/A | N/A |
 
+## Resume & Verification Commands
+```bash
+# Run all 25 clean-clone verification gates (imports, HarfBuzz lock, text layer, parallel raster, boundary, bugfixes, goldens)
+python3 tools/run_gates.py
 
-## Stage F `[F]` (Contents Page `nav` / p.2) & Stage G `[P]` (Boundary Hardening) — Completed (`boundary-1.9.1`)
-- **DONE**:
-  - **Stage F `[F]` (`commits 1677882`, `08889f2`)**:
-    - Measured `<ol><li>` horizontal text indent (`ol_indent_em = 2.1054` across all 3 geometries `(34,51)`, `(42,57)`, `(45,68)`) and Skia subpixel antialiased link underline geometry (`role="link_underline"`, `base_thk = float(round(0.065 * sz_px))`, `y_off_top = base_thk + 0.02612 * sz_px + 0.00245 * pt_px - 0.5855`, `thk_fl = base_thk - 0.00015 * sz_px + 0.00013 * pt_px - 0.00165`, rendered with `min(cov_x, cov_y)` subpixel edge coverage in `kindle_render/raster.py`).
-    - Achieved **`0` diff pixels (`100%` bitwise identity)** on **ALL 5 Contents pages (`p.2`)** across all 5 corpora (`probe` p.2 `27/27`, `exam1` p.2 `21/21`, `exam2` p.2 `27/27`, `exam3_normal` p.2 `18/18`, `exam3_small` p.2 `18/18`) plus `+101` positional-exact lines on body `<ol>` pages (`exam2` p.7 and `exam2` p.12 also became `100%` bitwise identical).
-    - Total across all 5 corpora (`357` compared pages): **`179 / 357` bitwise-identical pages** (`+17` over `1.8.0-rc1`, `+7` over `rhythm-1.9.0`), **`8,913 / 9,638` positional-exact lines** (`+755` over `1.8.0-rc1`, `+218` over `rhythm-1.9.0`), and **`4,888,301` total diff pixels** (`-58.0%` reduction from `11,642,724`). Zero regressions on any corpus.
-  - **Stage G `[P]` (`commit 8bc97c9`)**:
-    - Added full IR deserialization (`PositionedDocument.from_dict`, `PositionedPage.from_dict`, `_cmd_from_dict`) and schema/coordinate invariant validation (`validate_ir_page`, `validate_ir_document`) in `kindle_render/ir.py`.
-    - Added `tools/test_boundary.py` and verified `0` validation errors, `369/369` pages `layout_sha256` round-trip equality, and `25/25` sampled pages `100%` pixel SHA-256 round-trip equality across all 5 corpora (`tools/reports/stage_g/boundary_hardening.json`, `tools/reports/stage_g/boundary_hardening.md`).
-- **NEXT**:
-  - **Stage H `[F]` (Re-scoped Round 1 Fidelity Items)**:
-    1. `<mark>` highlight preservation in `kindle_render/epub.py:_collapse` (`bg=getattr(r, "bg", None)`) and `<mark>` box geometry in `kindle_render/page.py:draw_line`.
-    2. `ul_indent_em` subpixel `em` measurement across `(34,51)`, `(42,57)`, `(45,68)` and `dl/dt/dd` / `figure` / `cover` p.1 block rules.
-    3. Inline monospace `<code>`/`<kbd>`, `sub`/`sup`, drop caps (`.dc::first-letter` / `.ini::first-letter`), hyphenation apostrophes, and complex scripts.
-    4. Subpixel `32/64` tie-breaking in justified line last-word placement (`(start26 + off26) & 63 == 32`).
-- **EXACT COMMANDS TO RESUME**:
-  ```bash
-  python3 tools/check_imports.py
-  python3 tools/test_harfbuzz_lock.py
-  python3 tools/test_boundary.py
-  python3 tools/test_parallel_raster.py
-  python3 tools/test_text_layer.py
-  python3 tools/corpus.py --only probe --skip-existing
-  ```
+# Run cross-process PYTHONHASHSEED determinism check
+python3 tools/test_determinism.py
 
+# Score a single corpus against device captures (writes to git-ignored tools/reports_local/)
+python3 tools/corpus.py --only exam3_normal
+```
 
-## Stage H `[F]` — Shaping, Tokenization, `<mark>` Highlights & `float32` Justified Pen Accumulation — Completed (`v1.10.0`)
-- **DONE**:
-  - **Stage H1 (`commit 8f2c6f6`)**: Preserved `bg` in `epub.py:_collapse`, added vulgar eighth/third fractions in `fonts.py`, added leading ellipsis `…` splitting and cross-box GPOS kerning across `hyphen`/`endash`/`emdash`/`slash` in `layout.py:build_items` (`+9` exact pages, `0` regressions).
-  - **Stage H2 (`commit c428322`)**: Implemented `float32` justified-line last-word pen accumulation in `layout.py:layout_line` and `page.py` for `(start26 + off26) & 63 == 32` tie-breaking (`222 / 357` exact pages, `9,013 / 9,638` pos lines, `4,611,304` total diff px across all 5 corpora; `0` lost exact pages).
-  - **Goldens & Gates (`commit 91b5736`)**: Updated all 5 corpus goldens; all gates `G1`–`G6` passed (`check_imports.py`, `test_harfbuzz_lock.py`, `test_parallel_raster.py`, `test_text_layer.py`, `test_boundary.py`).
-- **NEXT**:
-  - Evaluate `v1.10.0` against held-out `exam4` when available; remaining items (`ul_indent_em`, `cover` p.1, `dl/dt/dd`, complex scripts) are tracked in `BACKLOG.md`.
-- **CURRENT COMMIT / TAG**: `v1.10.0` (`round1-1.10.0`)
-
-## `v1.10.1` — `<mark>` Highlight Bounds (`hhea.ascent` + `floor(pitch/1.2)`)
-- Updated `page.py:draw_line` (`commit 812c24a`), `-2,244` diff px on `exam2` p.40 (`4,609,060` total diff px across all 5 corpora), all gates `G1`–`G6` passed.
-
-## `v1.11.0` — Accepted Baseline (Compact Tight-Regime Threshold, Engine Audit Fixes, 6-Corpus Generalization)
-- Added `Config.extra_lead_px()` (`raw > 0.5` tolerance for integer-rounded `pitch_px()`), multi-page table splitting, scaled-run/inline-image overflow check, heading widow/orphan protection, unbounded `break_kp` DP window, `floor(x+0.5)` pitch rounding (`pitch_ratio = 1.5`), and 6th corpus `tables_images` (`commit 374787e`, tag `v1.11.0`).
-
-## `v1.11.1` — Task A: Heading-Block Bottom-Margin Calibration (`heading_block_v1`)
-- Replaced `h1` `mb_base_em = 0.66` + `0.10 * extra_lead` with the unified `vem_px` slope `0.654 * b.scale * vem_px + 1` (`mb_lead_k = 0.0` for `h1`, matching the `+1 px` `extra_top` rounding offset on `mt`).
-- Eliminated the `-1 px` `<h1> -> <p>` residual on Compact (`39/53`: `58 -> 59 px`) and the `+2 px` `<h1> -> <p>` residual on Large (`50/82`: `92 -> 90 px`) while keeping `34/51` (`57 px`), `42/57` (`63 px`), and `45/68` (`75 px`) 100% invariant (`lost = 0` on all datasets; `0` golden changes; `ti_compact` `-557,931` diff px, `+53` pos lines; `ti_large` `2 -> 3/57` exact pages, `-401,634` diff px, `+18` pos lines).
-
-## `v1.11.2` — Task C3: Cross-Run GPOS Kerning Across Unspaced Inline Span Boundaries (`e07_inline`)
-- In `kindle_render/layout.py:build_items`, extended cross-Box GPOS kerning to directly adjacent `Box` items (`isinstance(items[idx + 1], Box) and not n1[0].isupper()`) sharing the same `Face`, so inline span boundaries inside an unspaced word (e.g. `<u>underlined words</u>,`, `<s>struck words</s>,`, `<span class="red">red words</span>,`, `<span class="blue">blue words</span>,`) apply the exact same OpenType GPOS kerning (`-20 FUnits` on `s` + `comma`) as single-run shaping.
-- Reduced `e3_std` (`e07_inline` p42–47) diff by `-49,313 px` (`762,672 -> 713,359`) and `e3_small` (`e07_inline` p27–30) diff by `-30,263 px` (`879,278 -> 849,015`) with `lost = 0` and `0` pages with more diff across all datasets.
-
-## `v1.11.4` — Task C4: Untruncated `float32` First-Line `text-indent` Subpixel Tie-Breaking
-- Passed the fractional 26.6 subpixel remainder `indent_frac26 = (indent_em * size_px * 64.0) - indent26` (which is `+0.2` at `34 px` and `39 px` for `text-indent: 1.2em`) into `layout_line` for the `sub == 31` (`m_glues == 1`) `float32` pen accumulation check.
-- Gained `+3` exact pages on `e3_small` (`29 -> 32/54`: `p4`, `p37`, `p40`), `+4` position-exact lines (`1514 -> 1518/1651`), and `-828` diff px (`849,015 -> 848,187`) with `lost = 0` and `0` pages with more diff across all datasets.
-
-## NEXT (Post-`v1.11.4` Resume Instructions)
-- **Full 9-Dataset Metrics Summary (`v1.11.0` -> `v1.11.4`, `lost = 0` everywhere)**:
-  - `exam1` (`45/68`): `50 -> 50/70` exact | `1,516,617 -> 1,516,617` diff px | `1452 -> 1452/1568` pos lines
-  - `exam2` (`42/57`): `40 -> 40/65` exact | `1,034,912 -> 1,034,912` diff px | `1395 -> 1395/1529` pos lines
-  - `e3_std` (`45/68`): `60 -> 60/82` exact | `762,672 -> 713,359` diff px (`-49,313`) | `1899 -> 1899/2027` pos lines
-  - `e3_small` (`34/51`): `29 -> 32/54` exact (`+3`) | `879,278 -> 848,187` diff px (`-31,091`) | `1514 -> 1518/1651` pos lines (`+4`)
-  - `e3_compact` (`39/53`): `10 -> 33/56` exact (`+23`) | `4,584,783 -> 2,082,738` diff px (`-2,502,045`) | `1063 -> 1490/1713` pos lines (`+427`)
-  - `e3_large` (`50/82`): `78 -> 87/124` exact (`+9`) | `4,573,722 -> 2,673,432` diff px (`-1,900,290`) | `2128 -> 2341/2652` pos lines (`+213`)
-  - `ti_std` (`45/68`): `4 -> 4/44` exact | `8,503,517 -> 8,503,517` diff px | `299 -> 299/894` pos lines
-  - `ti_compact` (`39/53`): `3 -> 3/35` exact | `7,290,083 -> 6,723,947` diff px (`-566,136`) | `210 -> 280/733` pos lines (`+70`)
-  - `ti_large` (`50/82`): `2 -> 3/57` exact (`+1`) | `10,801,959 -> 10,400,325` diff px (`-401,634`) | `268 -> 286/1086` pos lines (`+18`)
-  - `probe` (`42/57`): `43 -> 43/86` exact | `389,959 -> 389,959` diff px | `2753 -> 2753/2863` pos lines
-- **What Remains**:
-  - Falsify/replace the `UNPROVEN` table/image hypotheses in `docs/hypotheses/unproven_v1_11_0.md` using out-of-sample `tables_images` captures at `42 px`.
-  - Remaining Task C5 structural items (`e06_structure` nested list/dl/table spacing, `e08_verse` poetry hanging wrap, `e04`/`e05` DE/FR compound hyphenation) and `link_underline` subpixel offset on `Compact`/`Large` `nav` (`p2`).
-- **Exact Commands to Verify & Resume**:
-  ```bash
-  python3 tools/check_imports.py
-  python3 tools/test_harfbuzz_lock.py
-  python3 tools/test_boundary.py
-  python3 tools/test_text_layer.py
-  python3 tools/test_parallel_raster.py
-  python3 tools/test_bugfixes.py
-  python3 tools/score_all.py --out current.json
-  ```
-
-### v1.11.4 — Reviewer Candidate Evaluation & Incorporation (`Candidate D`)
-- **Kept (`Candidate D`)**: `ul_nested_indent_em = 2.0000`, `bullet == '•'` first-item `mt = int(round(...))`, and `gap -= 1` for indented non-list blocks (`b.left_em > 0.0`) after `<h1>` under `extra_lead == 0.0` (`MEASURED`).
-  - `probe` (`42/57`): `43/86` exact, mean match `99.8054% -> 99.8217%` (`-32,565` diff px; p87 `97.9045% -> 99.3024%`, `29/29` bands at `shift = 0`).
-  - `exam1` (`45/68`): `50/70` exact, mean match `99.0700% -> 99.0760%` (`-9,813` diff px on p45–46).
-  - `exam3_normal` (`45/68`): `60/82` exact, mean match `99.6266% -> 99.6294%` (`-5,344` diff px on p39).
-  - `exam3_small` (`34/51`): `32/54` exact, mean match `99.3257% -> 99.3281%` (`-2,950` diff px on p25).
-  - `e3_large` (`50/82`): `87/124` exact, mean match `99.0745% -> 99.0766%` (`-5,827` diff px on p57).
-- **Rejected (`Candidates A, B, C`)**: Logged in `BACKLOG.md` and `tools/reports/incorporate/REPORT.md` with full measurements.
+## Blockers / Unverified Items on Sandbox VM
+- **HarfBuzz `8.3.0` cross-version check (`H3`)**: Only `libharfbuzz.so.0.60000.0` (`6.0.0`) is installed in this offline sandbox VM (`uharfbuzz` unavailable, no network/pip); exact `6.0.0` pin policy is enforced and documented in `docs/environment.md`.
+- **Remote `engine` branch & full `955 MB` `.git` history (`H7`)**: No `git remote` is configured in the sandbox clone (`25 MiB` `.git`), so the remote `engine` branch could not be inspected.
+- **Missing intermediate size captures**: `exam/v3/size_01..03_Bookerly` and `size_05..07_Bookerly` captures are not present on the VM; `sizes_01..03, 05..07` are rendered and golden-hashed (`tools/golden/sizes_01..07.json`).

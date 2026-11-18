@@ -13,6 +13,15 @@
 
 # Changelog
 
+## [1.11.5] - 2026-11-18 — Port-Ready Baseline (Zero Pixel Change)
+
+### Changed
+- **Clean-Clone Reproducibility (`H1`)**: Updated `tools/profiles.json` and `tools/corpus.py` to resolve EPUBs and capture folders directly under `exam/` (ignoring `*_table_N.png` and `size_08..11`), removed `/tmp/work` from `tools/test_boundary.py`, routed tool outputs to git-ignored `tools/reports_local/` (preserving `tools/reports/manifest.json` unless `--write-manifest` is passed), and added `tools/run_gates.py` (`25/25` gates passing from a fresh clone).
+- **Goldens & Baseline Metrics (`H2`)**: Updated all `tools/golden/*.json` (`engine_version: "1.11.5"`), added goldens for `sizes_00..07`, `e3_compact`, `e3_large`, `ti_compact`, `ti_large`, and generated `tools/reports/baseline_1.11.5.{json,md}` with `100%` pixel/layout hash equivalence to `v1.11.4`.
+- **HarfBuzz Policy (`H3`)**: Enforced `verify_harfbuzz(cfg.allow_unshaped)` uniformly in `Family.__init__`, exposed `--allow-unshaped` in `kindle_render/cli.py`, and documented the `6.0.0` exact-pin policy in `docs/environment.md`.
+- **Numerics & Determinism (`H4`)**: Documented all `f32`/`f64`/`int` rounding, resampling, and Unicode dependencies in `docs/numerics_inventory.md` and added `tools/test_determinism.py` (`PYTHONHASHSEED=1` vs `42`).
+- **Calibration, Docs & Repo Weight (`H5`–`H7`)**: Updated `ARCHITECTURE_NOTES.md`, `BACKLOG.md`, `STATUS.md`, `README.md`, `CHANGELOG.md`, `docs/ASSETS.md`, and `docs/repo_weight.md`.
+
 ## [1.11.4] - 2026-11-18
 
 ### Changed
@@ -48,6 +57,11 @@
 - Added `tools/score_dir.py` for scoring capture folders across arbitrary viewport geometries (`Standard`, `Compact`, `Large`) and `tools/test_bugfixes.py` regression suite.
 - Generalized cross-theme block image viewport scaling (`sc = maxw / 512.0`), HTML `width`/`height` attributes, CSS `px`/`%` widths, RGBA white alpha-compositing, tall-image page-remainder fitting, multi-image inline `<p>` runs, and inline image scaling (`size26 / 1024.0`).
 - Generalized cross-theme collapsed table layout: `row_pad = int(0.28 * size_px)`, `row_ys[-1]` bottom rule placement, chromeless table detection (`has_chrome`), multi-page row-chunk splitting with per-page bottom rule + popup icon and top continuation rule (`y = 167..170`), unbreakable single-word `<th>` headers, and rich cell rendering (`<b>`, `<i>`, `<a>`, `<ul><li>`, `<img/>`).
+
+## [1.10.2] - 2026-11-17
+
+### Added
+- **Compact `extra_lead_px()` Fix & 6th Corpus (`tables_images`)**: Added `Config.extra_lead_px()` with `0.5 px` integer-pitch rounding tolerance (fixing Compact `39/53` heading regime selection), registered `tables_images` as the 6th corpus, and generalized cross-theme image and collapsed table layout.
 
 ## [1.10.1] - 2026-11-16 (`v1.10.1` — Mark Highlight Vertical Bounds)
 - **Highlight Box Bounds (`kindle_render/page.py:draw_line`)**: Updated `<mark>` background rectangle vertical bounds to use `hhea.ascent` (`0.900 * size_px` above baseline) and `floor(pitch / 1.2)` line box height (`-2,244` diff pixels on `exam2` p.40; zero regressions across all 5 corpora).
