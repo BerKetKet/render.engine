@@ -201,7 +201,9 @@ def main():
         assert (dir_only_tl / "document.json").is_file()
         print("[text-layer:CLI] `kindle_render text` and `kindle_render epub --text-layer` verified=True")
 
-    out_report = REPO_ROOT / "tools" / "reports" / "text_layer_tests.json"
+    out_dir = REPO_ROOT / "tools" / "reports_local"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_report = out_dir / "text_layer_tests.json"
     out_report.write_text(json.dumps(results, indent=2))
     if not all_ok:
         sys.exit(1)

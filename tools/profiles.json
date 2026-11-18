@@ -1,5 +1,6 @@
 {
   "search_paths": [
+    "exam",
     "corpora",
     ".",
     ".."
@@ -36,7 +37,9 @@
       ]
     },
     "exam1": {
-      "epub": "kindle_exam_v1.epub",
+      "epub": "exam/v1/kindle_exam_v1.epub",
+      "captures_dir": "exam/v1/exam_v1_screenshots",
+      "capture_pattern": "exam_screen_{i}.png",
       "captures_zip": "exam_screen.zip",
       "config": {
         "size26": 2880,
@@ -60,7 +63,9 @@
       ]
     },
     "exam2": {
-      "epub": "kindle_exam_v2.epub",
+      "epub": "exam/v2/kindle_exam_v2.epub",
+      "captures_dir": "exam/v2/exam_v2_screenshots",
+      "capture_pattern": "exam_screen_{i}.png",
       "captures_zip": "exam_v2.zip",
       "config": {
         "size26": 2688,
@@ -84,15 +89,27 @@
       ]
     },
     "exam3_normal": {
-      "epub": "kindle_exam_v3.epub",
+      "epub": "exam/v3/kindle_exam_v3.epub",
+      "captures_dir": "exam/v3/size_04_Bookerly",
+      "capture_pattern": "page_{i:03d}.png",
       "captures_zip": "exam_v3_screenshots.zip",
       "max_pages": 82,
       "ignore_captures": [],
+      "capture_page_ranges": [
+        [
+          1,
+          82
+        ]
+      ],
       "valid_capture_ranges": [
         [
           1,
           82
         ]
+      ],
+      "window_y": [
+        83,
+        2240
       ],
       "config": {
         "size26": 2880,
@@ -104,15 +121,27 @@
       }
     },
     "exam3_small": {
-      "epub": "kindle_exam_v3.epub",
+      "epub": "exam/v3/kindle_exam_v3.epub",
+      "captures_dir": "exam/v3/size_00_Bookerly",
+      "capture_pattern": "page_{i:03d}.png",
       "captures_zip": "exam_v3_screenshots_smallfont.zip",
       "max_pages": 54,
       "ignore_captures": [],
+      "capture_page_ranges": [
+        [
+          1,
+          54
+        ]
+      ],
       "valid_capture_ranges": [
         [
           1,
           54
         ]
+      ],
+      "window_y": [
+        83,
+        2240
       ],
       "config": {
         "size26": 2176,
@@ -123,8 +152,62 @@
         "page_bottom": 2203
       }
     },
+    "e3_compact": {
+      "epub": "exam/v3/kindle_exam_v3.epub",
+      "captures_dir": "exam/v3/theme_Compact",
+      "capture_pattern": "page_{i:03d}.png",
+      "max_pages": 56,
+      "ignore_captures": [],
+      "capture_page_ranges": [
+        [
+          1,
+          56
+        ]
+      ],
+      "window_y": [
+        83,
+        2240
+      ],
+      "geometry_evidence": "exam/v3/theme_Compact/page_010.png: first_ink_x=39, last_ink_x=1040, median_dy=53.0",
+      "config": {
+        "size26": 2496,
+        "x0": 39,
+        "right": 1041,
+        "pitch": 53,
+        "top": 168,
+        "page_bottom": 2203
+      }
+    },
+    "e3_large": {
+      "epub": "exam/v3/kindle_exam_v3.epub",
+      "captures_dir": "exam/v3/theme_Large",
+      "capture_pattern": "page_{i:03d}.png",
+      "max_pages": 124,
+      "ignore_captures": [],
+      "capture_page_ranges": [
+        [
+          1,
+          124
+        ]
+      ],
+      "window_y": [
+        83,
+        2240
+      ],
+      "geometry_evidence": "exam/v3/theme_Large/page_010.png: first_ink_x=131, last_ink_x=948, median_dy=82.0",
+      "config": {
+        "size26": 3200,
+        "x0": 131,
+        "right": 949,
+        "pitch": 82,
+        "top": 168,
+        "page_bottom": 2203
+      }
+    },
     "tables_images": {
-      "epub": "kindle_tables_images_exam.epub",
+      "epub": "exam/tables_images_exam/kindle_tables_images_exam.epub",
+      "captures_dir": "exam/tables_images_exam/theme_Standard",
+      "capture_pattern": "page_{i:03d}.png",
       "captures_zip": "tables_images_standard_captures.zip",
       "max_pages": 44,
       "ignore_captures": [],
@@ -149,6 +232,214 @@
         "x0": 79,
         "right": 1001,
         "pitch": 68,
+        "top": 168,
+        "page_bottom": 2203
+      }
+    },
+    "ti_compact": {
+      "epub": "exam/tables_images_exam/kindle_tables_images_exam.epub",
+      "captures_dir": "exam/tables_images_exam/theme_Compact",
+      "capture_pattern": "page_{i:03d}.png",
+      "max_pages": 35,
+      "ignore_captures": [],
+      "capture_page_ranges": [
+        [
+          1,
+          35
+        ]
+      ],
+      "window_y": [
+        83,
+        2240
+      ],
+      "config": {
+        "size26": 2496,
+        "x0": 39,
+        "right": 1041,
+        "pitch": 53,
+        "top": 168,
+        "page_bottom": 2203
+      }
+    },
+    "ti_large": {
+      "epub": "exam/tables_images_exam/kindle_tables_images_exam.epub",
+      "captures_dir": "exam/tables_images_exam/theme_Large",
+      "capture_pattern": "page_{i:03d}.png",
+      "max_pages": 57,
+      "ignore_captures": [],
+      "capture_page_ranges": [
+        [
+          1,
+          57
+        ]
+      ],
+      "window_y": [
+        83,
+        2240
+      ],
+      "config": {
+        "size26": 3200,
+        "x0": 131,
+        "right": 949,
+        "pitch": 82,
+        "top": 168,
+        "page_bottom": 2203
+      }
+    },
+    "sizes_00": {
+      "epub": "exam/v3/kindle_exam_v3.epub",
+      "max_pages": 54,
+      "ignore_captures": [],
+      "capture_page_ranges": [
+        [
+          1,
+          54
+        ]
+      ],
+      "window_y": [
+        83,
+        2240
+      ],
+      "config": {
+        "size26": 2176,
+        "x0": 79,
+        "right": 1001,
+        "pitch": 51,
+        "top": 168,
+        "page_bottom": 2203
+      },
+      "captures_dir": "exam/v3/size_00_Bookerly",
+      "capture_pattern": "page_{i:03d}.png"
+    },
+    "sizes_01": {
+      "epub": "exam/v3/kindle_exam_v3.epub",
+      "max_pages": 59,
+      "ignore_captures": [],
+      "capture_page_ranges": [],
+      "window_y": [
+        83,
+        2240
+      ],
+      "config": {
+        "size26": 2368,
+        "x0": 79,
+        "right": 1001,
+        "pitch": 56,
+        "top": 168,
+        "page_bottom": 2203
+      }
+    },
+    "sizes_02": {
+      "epub": "exam/v3/kindle_exam_v3.epub",
+      "max_pages": 69,
+      "ignore_captures": [],
+      "capture_page_ranges": [],
+      "window_y": [
+        83,
+        2240
+      ],
+      "config": {
+        "size26": 2496,
+        "x0": 79,
+        "right": 1001,
+        "pitch": 59,
+        "top": 168,
+        "page_bottom": 2203
+      }
+    },
+    "sizes_03": {
+      "epub": "exam/v3/kindle_exam_v3.epub",
+      "max_pages": 73,
+      "ignore_captures": [],
+      "capture_page_ranges": [],
+      "window_y": [
+        83,
+        2240
+      ],
+      "config": {
+        "size26": 2688,
+        "x0": 79,
+        "right": 1001,
+        "pitch": 63,
+        "top": 168,
+        "page_bottom": 2203
+      }
+    },
+    "sizes_04": {
+      "epub": "exam/v3/kindle_exam_v3.epub",
+      "max_pages": 82,
+      "ignore_captures": [],
+      "capture_page_ranges": [
+        [
+          1,
+          82
+        ]
+      ],
+      "window_y": [
+        83,
+        2240
+      ],
+      "config": {
+        "size26": 2880,
+        "x0": 79,
+        "right": 1001,
+        "pitch": 68,
+        "top": 168,
+        "page_bottom": 2203
+      },
+      "captures_dir": "exam/v3/size_04_Bookerly",
+      "capture_pattern": "page_{i:03d}.png"
+    },
+    "sizes_05": {
+      "epub": "exam/v3/kindle_exam_v3.epub",
+      "max_pages": 89,
+      "ignore_captures": [],
+      "capture_page_ranges": [],
+      "window_y": [
+        83,
+        2240
+      ],
+      "config": {
+        "size26": 3008,
+        "x0": 79,
+        "right": 1001,
+        "pitch": 71,
+        "top": 168,
+        "page_bottom": 2203
+      }
+    },
+    "sizes_06": {
+      "epub": "exam/v3/kindle_exam_v3.epub",
+      "max_pages": 101,
+      "ignore_captures": [],
+      "capture_page_ranges": [],
+      "window_y": [
+        83,
+        2240
+      ],
+      "config": {
+        "size26": 3200,
+        "x0": 79,
+        "right": 1001,
+        "pitch": 76,
+        "top": 168,
+        "page_bottom": 2203
+      }
+    },
+    "sizes_07": {
+      "epub": "exam/v3/kindle_exam_v3.epub",
+      "max_pages": 122,
+      "ignore_captures": [],
+      "capture_page_ranges": [],
+      "window_y": [
+        83,
+        2240
+      ],
+      "config": {
+        "size26": 3520,
+        "x0": 79,
+        "right": 1001,
+        "pitch": 83,
         "top": 168,
         "page_bottom": 2203
       }

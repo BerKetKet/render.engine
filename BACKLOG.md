@@ -51,3 +51,15 @@ Per the prep handoff rules, no fidelity tuning was performed after freezing the 
   - Switches `h5`/`h6` `mt_lead_k` and `mb_lead_k` slopes between `size_00_Bookerly` (`34/51`, `pitch/size = 1.5000`) and `size_04_Bookerly` (`45/68`, `pitch/size = 1.5111`) / `theme_Large` (`50/82`, `pitch/size = 1.6400`) (`MEASURED`). Boundary rests on `34/51` vs `45/68`; must be checked across `size_01..03, 05..07`.
 - **`D(ii)` Interaction on `e3_compact` p32 (`e08_verse`, `39/53`)**:
   - Under `extra_lead == 0.0`, `gap -= 1` on `b.heading == 0 and prev_h == 1 and b.left_em > 0.0 and list_level == 0` brings `probe` p87 `<blockquote>` and `<pre>` (`band 2..9`) to `0 px` residual (`-32,565` diff px), while shifting `e3_compact` p32 (`e08_verse`, where `<h1>` already has a `-1 px` residual under Compact `39/53`) from `-1 px` to `-2 px` (`+7,825` diff px). Once the Compact `h1` `-1 px` top-margin residual is resolved, `e3_compact` p32 will align automatically (`HYPOTHESIS`).
+
+
+## 9. v1.11.5 Port-Ready Housekeeping Notes
+
+### Largest Remaining Fidelity Gap: `tables_images` (`4/44` Exact, `91.7039%` Mean Match)
+- **Measured at `v1.11.4` / `v1.11.5`**: `tables_images` (`45/68`, `Standard`) has `4/44` bitwise-identical pages (`91.7039%` mean pixel match, `8,503,517` diff px, `0.5836` mean ink IoU, `299/894` pos-exact lines).
+- **Non-exact pages (`40` pages)**: `[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33, 34, 35, 36, 37, 39, 40, 42, 43, 44]`.
+- **Root causes (logged for future work, untouched in `v1.11.5`)**: Table cell vertical padding/line-height, multi-page table chunking, and image/caption vertical spacing.
+
+### Geometry-Keyed Conditionals & Tooling Cleanup Candidates
+- **`c.pitch_px() < 55` (`page.py:870`)** and **`c.size_px() == 42.0` / `!= 42.0` (`page.py:1021, 1215, 1434`)**: Legacy geometry-keyed branches in `add_table` that should be unified into a physical table-padding model when `tables_images` is worked on.
+- **Standalone / legacy scripts in `tools/`**: `tools/score_dir.py` was already removed; `tools/rhythm.py`, `tools/compare_reports.py`, `tools/score_all.py`, `tools/ab_diff.py`, `tools/block_residuals.py`, and `tools/fit_geometry.py` remain useful diagnostic utilities and are retained untouched.

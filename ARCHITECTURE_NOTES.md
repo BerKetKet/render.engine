@@ -185,3 +185,19 @@ Every calibration constant, lookup table, and conditional formula in `kindle_ren
 - **Round-Trip IR Deserialization (`from_dict` / `from_json`)**: `PositionedDocument.from_dict`, `PositionedPage.from_dict`, and `_cmd_from_dict` reconstruct all IR commands (`GlyphCommand`, `RectCommand`, `RuleCommand` including subpixel `link_underline` coordinates, `RingBulletCommand`, and `ImageCommand` via `image_store`) from canonical JSON/dict representations while preserving identical `layout_sha256()` digests across all 369 rendered pages.
 - **IR Schema & Coordinate Invariant Validation (`validate_ir_page` / `validate_ir_document`)**: Validates schema version (`1.0`), positive page dimensions, monotonic page numbering, valid command discriminators, non-negative bounds (`x1 >= x0`, `y1 >= y0`), RGB channels in `[0, 255]`, and finite subpixel coordinates.
 - **Boundary Test Suite (`tools/test_boundary.py`)**: Enforces `check_imports()`, zero IR validation errors, 100% `layout_sha256()` round-trip preservation on all 369 pages across all 5 corpora, and 100% pixel SHA-256 identity when rasterizing deserialized IR pages.
+
+
+## v1.11.5 Calibration & Conditional Inventory (Pitch / Size / Margin-Keyed)
+
+| Location | Constant / Conditional | Value / Expression | Evidence Corpus / Page | Origin Tag |
+| :--- | :--- | :--- | :--- | :--- |
+| `config.py:151` | `extra_lead_px()` | `raw = pitch_px() - (19/14)*size_px(); raw if raw > 0.5 else 0.0` | `probe`/`exam2` (`42/57`), `Compact` (`39/53`), `34/51`, `45/68`, `50/82` | `measured` |
+| `config.py:130` | `ul_nested_indent_em` | `2.0000` | `probe` p87, `exam1` p45–46, `e3_std` p39, `e3_small` p25, `e3_compact` p26, `e3_large` p57 | `measured` |
+| `page.py:392, 553` | `eff_body_pitch` | `max(float(std_body_pitch), (68.0/45.0)*c.size_px())` | `e3_small` (`34/51`) vs `45/68`, `50/82` | `fitted` |
+| `page.py:547` | `is_tall_lead` | `std_body_pitch < 3 * (std_body_pitch - c.size_px())` | `e3_small` (`34/51`) vs `45/68` (`h5`/`h6`) | `fitted` |
+| `page.py:562` | Post-`h1` list gap | `std_body_pitch < (68.0/45.0)*c.size_px()` (`gap -= 1`) | `e3_small` (`34/51`) p25 | `fitted` |
+| `page.py:545-551` | `h1..h6` margins | `mt_base_em=(0.66,0.81,0.963,1.32,1.64,2.29)`, `mb_base_em=(0.654,0.822,0.963,1.32,1.64,2.30)` | `probe`, `exam1`, `exam2`, `e3_std`, `e3_small`, `e3_compact`, `e3_large` | `measured` |
+| `page.py:554, 571` | `D(i)` & `D(ii)` | `bullet=='•'` `round(mt)` and `left_em>0` post-`h1` `gap-=1` (`extra_lead==0.0`) | `probe` p87 (`29/29` bands at `shift=0`) | `measured` |
+| `page.py:870` | Table `mt_tbl` after `hr` | `c.pitch_px() < 55` | `exam2` (`42/57`), `ti_compact` (`39/53`) | `fitted` |
+| `page.py:1021, 1215, 1434` | Collapsed table `size_px() != 42.0` / `== 42.0` | `line_p`, `row_h`, `prev_mb` guards | `exam2` (`42/57`) vs `tables_images` (`45/68`, `39/53`, `50/82`) | `fitted` |
+| `page.py:1475` | Cross-theme block image scale | `sc = maxw / 512.0` (`~1.80` at `maxw=922`) | `tables_images` (`45/68`, `39/53`, `50/82`), `exam2` | `measured` |

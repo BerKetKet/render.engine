@@ -1,4 +1,4 @@
-# `kindle_render` v1.9.0 — Mathematical EPUB Layout, Structured Text Layer & Rasterization Engine
+# `kindle_render` v1.11.5 — Mathematical EPUB Layout, Structured Text Layer & Rasterization Engine
 
 `kindle_render` is a deterministic, self-contained Python EPUB layout, pagination, structured text-layer extraction, and glyph rasterization engine operating in 26.6 fixed-point coordinates (`1 px = 64 units`).
 
@@ -24,6 +24,11 @@ first_page_img.save("page_001.png")
 # 3. Extract structured text layer (lines -> words -> glyph clusters with bounding boxes)
 page_text = build_page_text_layer(ir_doc.pages[0])
 print(page_text["logical_text"])
+```
+
+### Verification Gates (Clean Clone)
+```bash
+python3 tools/run_gates.py
 ```
 
 ### Command-Line Interface

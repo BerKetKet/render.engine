@@ -82,6 +82,18 @@ def resolve_corpus_file(filename: str, search_paths: List[str]) -> Path:
     raise FileNotFoundError(f"Could not locate corpus file '{filename}' in {search_paths}")
 
 
+def resolve_corpus_dir(dirname: str, search_paths: List[str]) -> Path:
+    p = Path(dirname)
+    if p.is_dir():
+        return p.resolve()
+    for sp in search_paths:
+        cand_dir = Path(sp) if os.path.isabs(sp) else (REPO_ROOT / sp)
+        cand = cand_dir / dirname
+        if cand.is_dir():
+            return cand.resolve()
+    raise FileNotFoundError(f"Could not locate corpus directory '{dirname}' in {search_paths}")
+
+
 def build_manifest(profiles_data: dict, selected_corpora: List[str], epub_overrides: Dict[str, str], allow_unshaped: bool = False) -> dict:
     pkg_dir = REPO_ROOT / "kindle_render"
     fonts_dir = pkg_dir / "fonts"
@@ -109,11 +121,18 @@ def build_manifest(profiles_data: dict, selected_corpora: List[str], epub_overri
             corpus_hashes[f"{cname}:epub:{ep_p.name}"] = sha256_file(ep_p)
         except FileNotFoundError:
             corpus_hashes[f"{cname}:epub:{ep_name}"] = "missing"
-        try:
-            cz_p = resolve_corpus_file(cprof["captures_zip"], search_paths)
-            corpus_hashes[f"{cname}:captures:{cz_p.name}"] = sha256_file(cz_p)
-        except FileNotFoundError:
-            corpus_hashes[f"{cname}:captures:{cprof['captures_zip']}"] = "missing"
+        if cprof.get("captures_dir"):
+            try:
+                cd_p = resolve_corpus_dir(cprof["captures_dir"], search_paths)
+                corpus_hashes[f"{cname}:captures_dir"] = str(cd_p.relative_to(REPO_ROOT)) if cd_p.is_relative_to(REPO_ROOT) else str(cd_p)
+            except FileNotFoundError:
+                corpus_hashes[f"{cname}:captures_dir"] = "missing"
+        elif cprof.get("captures_zip"):
+            try:
+                cz_p = resolve_corpus_file(cprof["captures_zip"], search_paths)
+                corpus_hashes[f"{cname}:captures:{cz_p.name}"] = sha256_file(cz_p)
+            except FileNotFoundError:
+                corpus_hashes[f"{cname}:captures:{cprof['captures_zip']}"] = "missing"
 
     pil_feats = {}
     for k in ["jpg", "zlib", "freetype2", "harfbuzz", "raqm", "fribidi", "webp", "libtiff", "littlecms2", "jpg_2000"]:
@@ -213,15 +232,52 @@ def compare_page_to_capture(
             if np.array_equal(cap_slice, O[by0:by1 + 1, :]):
                 pos_indep += 1
 
+    win_px = int(O_win.size)
+    match_pct = 100.0 * (1.0 - diff_pixels / win_px) if win_px > 0 else 100.0
+    o_ink = O_win < 128
+    r_ink = R_win < 128
+    inter = int(np.sum(o_ink & r_ink))
+    union = int(np.sum(o_ink | r_ink))
+    ink_iou = (inter / union) if union > 0 else 1.0
+
     return {
         "exact_page": exact_page,
         "diff_pixels": diff_pixels,
+        "match_pct": match_pct,
+        "ink_iou": ink_iou,
         "capture_lines": len(cap_bands),
         "render_lines": len(ren_bands),
         "pos_exact_lines": pos_exact,
         "pos_indep_lines": pos_indep,
         "displaced_lines": pos_indep - pos_exact,
     }
+
+
+def load_captures_from_dir(
+    cap_dir: Path,
+    pattern: str,
+    ignore_list: List[str],
+    valid_ranges: List[List[int]],
+    max_pages: int = 200,
+) -> Dict[int, Image.Image]:
+    valid_pages = set()
+    for r0, r1 in valid_ranges:
+        for p in range(r0, r1 + 1):
+            valid_pages.add(p)
+
+    captures = {}
+    ignore_set = set(ignore_list)
+    limit = max(valid_pages) if valid_pages else max_pages
+    for pno in range(1, limit + 1):
+        if valid_pages and pno not in valid_pages:
+            continue
+        bn = pattern.format(i=pno)
+        if bn in ignore_set or "_table_" in bn:
+            continue
+        fp = cap_dir / bn
+        if fp.is_file():
+            captures[pno] = Image.open(fp).convert("L")
+    return captures
 
 
 def load_captures_from_zip(zip_path: Path, ignore_list: List[str], valid_ranges: List[List[int]]) -> Dict[int, Image.Image]:
@@ -299,10 +355,10 @@ def run_single_corpus(
     check_determinism: bool,
     epub_override: Optional[str] = None,
     out_dir: Optional[Path] = None,
+    golden_only: bool = False,
 ) -> Tuple[dict, bool]:
     ep_name = epub_override or cprof["epub"]
     epub_path = resolve_corpus_file(ep_name, search_paths)
-    cap_zip_path = resolve_corpus_file(cprof["captures_zip"], search_paths)
 
     max_p = pages_limit if pages_limit is not None else cprof.get("max_pages", 100)
     imgs, meta = render_corpus_once(epub_path, cprof["config"], max_p)
@@ -321,11 +377,32 @@ def run_single_corpus(
         for idx, im in enumerate(imgs, start=1):
             im.save(out_dir / f"page_{idx:03d}.png")
 
-    captures = load_captures_from_zip(
-        cap_zip_path,
-        cprof.get("ignore_captures", []),
-        cprof.get("capture_page_ranges", []),
-    )
+    captures = {}
+    cap_source = "none"
+    if not golden_only and cprof.get("captures_dir"):
+        try:
+            cap_dir = resolve_corpus_dir(cprof["captures_dir"], search_paths)
+            captures = load_captures_from_dir(
+                cap_dir,
+                cprof.get("capture_pattern", "page_{i:03d}.png"),
+                cprof.get("ignore_captures", []),
+                cprof.get("capture_page_ranges", []),
+                max_pages=max_p,
+            )
+            cap_source = str(cap_dir.name)
+        except FileNotFoundError:
+            pass
+    if not golden_only and not captures and cprof.get("captures_zip"):
+        try:
+            cap_zip_path = resolve_corpus_file(cprof["captures_zip"], search_paths)
+            captures = load_captures_from_zip(
+                cap_zip_path,
+                cprof.get("ignore_captures", []),
+                cprof.get("capture_page_ranges", []),
+            )
+            cap_source = str(cap_zip_path.name)
+        except FileNotFoundError:
+            pass
     y0, y1 = cprof.get("window_y", [83, 2240])
 
     page_chapters = meta.get("page_chapters", [])
@@ -381,6 +458,8 @@ def run_single_corpus(
     totals = {
         "exact_pages": sum(1 for p in cmp_all if p["exact_page"]),
         "diff_pixels": sum(p["diff_pixels"] for p in cmp_all),
+        "mean_match_pct": (sum(p["match_pct"] for p in cmp_all) / len(cmp_all)) if cmp_all else None,
+        "mean_ink_iou": (sum(p["ink_iou"] for p in cmp_all) / len(cmp_all)) if cmp_all else None,
         "capture_lines": sum(p["capture_lines"] for p in cmp_all),
         "render_lines": sum(p["render_lines"] for p in cmp_all),
         "pos_exact_lines": sum(p["pos_exact_lines"] for p in cmp_all),
@@ -449,7 +528,7 @@ def run_single_corpus(
     summary = {
         "corpus": cname,
         "epub": str(epub_path.name),
-        "captures_zip": str(cap_zip_path.name),
+        "captures_zip": cap_source,
         "rendered_pages": len(imgs),
         "compared_pages": len(cmp_all),
         "deterministic": deterministic,
@@ -532,7 +611,9 @@ def run_synthetic_suite(prof_cfg: dict, update_golden: bool, check_golden: bool,
 
 def main():
     ap = argparse.ArgumentParser(description="Corpus runner and golden verifier for kindle_render.")
-    ap.add_argument("--only", choices=["probe", "exam1", "exam2", "exam3_normal", "exam3_small", "tables_images", "ferryman_small", "synthetic"], help="Run only a single corpus")
+    ap.add_argument("--only", type=str, default=None, help="Run only a single corpus (key in tools/profiles.json or synthetic)")
+    ap.add_argument("--write-manifest", action="store_true", help="Explicitly overwrite tracked tools/reports/manifest.json")
+    ap.add_argument("--golden-only", action="store_true", help="Skip capture comparison; verify determinism and golden hashes only")
     ap.add_argument("--allow-unshaped", action="store_true", help="Debug flag: allow fallback shaper if HarfBuzz is unavailable")
     ap.add_argument("--pages", type=int, default=None, help="Render at most N pages")
     ap.add_argument("--update-golden", action="store_true", help="Explicitly write tools/golden/<corpus>.json")
@@ -577,10 +658,15 @@ def main():
     epub_overrides = {args.only: args.epub} if (args.only and args.epub) else {}
 
     manifest = build_manifest(profiles_data, selected, epub_overrides, allow_unshaped=getattr(args, "allow_unshaped", False))
-    reports_dir = REPO_ROOT / "tools" / "reports"
+    reports_dir = REPO_ROOT / "tools" / "reports_local"
     reports_dir.mkdir(parents=True, exist_ok=True)
     with open(reports_dir / "manifest.json", "w") as mf:
         json.dump(manifest, mf, indent=2)
+    if args.write_manifest:
+        tracked_reports = REPO_ROOT / "tools" / "reports"
+        tracked_reports.mkdir(parents=True, exist_ok=True)
+        with open(tracked_reports / "manifest.json", "w") as mf:
+            json.dump(manifest, mf, indent=2)
 
     all_passed = True
     corpus_results = {}
@@ -617,6 +703,7 @@ def main():
             check_determinism=(not args.no_determinism),
             epub_override=epub_overrides.get(cname),
             out_dir=c_out_dir,
+            golden_only=args.golden_only,
         )
         with open(per_corpus_json, "w") as rf:
             json.dump(res, rf, indent=2)

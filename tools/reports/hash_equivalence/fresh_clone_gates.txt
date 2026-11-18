@@ -1,0 +1,26 @@
+[GATE] check_imports            PASS  [G4 import-graph] passed=True errors=0
+[GATE] test_harfbuzz_lock       PASS  [test_harfbuzz_lock] loaded=True version=6.0.0 locked=6.0.0 missing_loud_fail=True version_mismatch_loud_fail=True PASSED
+[GATE] test_text_layer          PASS  [Phase 2.5 text layer tests (a)-(d)] ALL PASSED
+[GATE] test_parallel_raster     PASS  [Phase 2.4 parallel rasterization] ALL PASSED
+[GATE] test_boundary            PASS  [Stage G boundary hardening] ALL PASSED
+[GATE] test_bugfixes            PASS  ALL BUGFIX TESTS PASSED
+[GATE] golden:synthetic         PASS  [synthetic] pages=3 golden_passed=True layout_golden_passed=True
+[GATE] golden:probe             PASS  [probe] pages=98 golden_passed=True layout_golden_passed=True
+[GATE] golden:exam1             PASS  [exam1] pages=70 golden_passed=True layout_golden_passed=True
+[GATE] golden:exam2             PASS  [exam2] pages=65 golden_passed=True layout_golden_passed=True
+[GATE] golden:exam3_normal      PASS  [exam3_normal] pages=82 golden_passed=True layout_golden_passed=True
+[GATE] golden:exam3_small       PASS  [exam3_small] pages=54 golden_passed=True layout_golden_passed=True
+[GATE] golden:e3_compact        PASS  [e3_compact] pages=56 golden_passed=True layout_golden_passed=True
+[GATE] golden:e3_large          PASS  [e3_large] pages=124 golden_passed=True layout_golden_passed=True
+[GATE] golden:tables_images     PASS  [tables_images] pages=44 golden_passed=True layout_golden_passed=True
+[GATE] golden:ti_compact        PASS  [ti_compact] pages=35 golden_passed=True layout_golden_passed=True
+[GATE] golden:ti_large          PASS  [ti_large] pages=57 golden_passed=True layout_golden_passed=True
+[GATE] golden:sizes_00          PASS  [sizes_00] pages=54 golden_passed=True layout_golden_passed=True
+[GATE] golden:sizes_01          PASS  [sizes_01] pages=59 golden_passed=True layout_golden_passed=True
+[GATE] golden:sizes_02          PASS  [sizes_02] pages=69 golden_passed=True layout_golden_passed=True
+[GATE] golden:sizes_03          PASS  [sizes_03] pages=73 golden_passed=True layout_golden_passed=True
+[GATE] golden:sizes_04          PASS  [sizes_04] pages=82 golden_passed=True layout_golden_passed=True
+[GATE] golden:sizes_05          PASS  [sizes_05] pages=89 golden_passed=True layout_golden_passed=True
+[GATE] golden:sizes_06          PASS  [sizes_06] pages=101 golden_passed=True layout_golden_passed=True
+[GATE] golden:sizes_07          PASS  [sizes_07] pages=122 golden_passed=True layout_golden_passed=True
+SUMMARY: 25/25 gates PASSED

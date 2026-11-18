@@ -26,6 +26,7 @@ def _add_epub_args(p):
     p.add_argument("--boldness", type=int, default=0, choices=range(0, 6), help="boldness slider level (0-5)")
     p.add_argument("--palette", choices=list(PALETTES.keys()), default="exact", help="calibrated luminance color palette")
     p.add_argument("--fallback-raster", action="store_true", help="do not use FreeType")
+    p.add_argument("--allow-unshaped", action="store_true", help="allow missing or non-locked HarfBuzz (debug only)")
 
 
 def main(argv=None):
@@ -57,6 +58,7 @@ def main(argv=None):
     l.add_argument("--boldness", type=int, default=0, choices=range(0, 6), help="boldness slider level (0-5)")
     l.add_argument("--palette", choices=list(PALETTES.keys()), default="exact", help="calibrated luminance color palette")
     l.add_argument("--fallback-raster", action="store_true")
+    l.add_argument("--allow-unshaped", action="store_true", help="allow missing or non-locked HarfBuzz (debug only)")
 
     # compare command
     c = sub.add_parser("compare", help="compare reference and output PNG")
@@ -78,7 +80,8 @@ def main(argv=None):
     cfg = Config(
         fonts_dir=a.fonts,
         exact_raster=not a.fallback_raster,
-        boldness_level=getattr(a, "boldness", 0)
+        boldness_level=getattr(a, "boldness", 0),
+        allow_unshaped=bool(getattr(a, "allow_unshaped", False)),
     )
     if getattr(a, "size26", 0) > 0:
         cfg.size26 = a.size26
