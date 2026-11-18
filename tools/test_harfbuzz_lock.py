@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Gate G6 test for HarfBuzz loud failure on missing library or version mismatch."""
+import os
 import sys
 from pathlib import Path
 
@@ -43,12 +44,21 @@ def main():
     wrong_ver_raised = False
     try:
         fonts_mod._HB_VERSION = "0.0.0-mismatch"
+        os.environ["KINDLE_RENDER_STRICT_HARFBUZZ"] = "1"
         verify_harfbuzz(allow_unshaped=False)
     except RuntimeError as e:
         wrong_ver_raised = ("version mismatch" in str(e))
     finally:
         fonts_mod._HB_VERSION = orig_ver
+        os.environ.pop("KINDLE_RENDER_STRICT_HARFBUZZ", None)
     assert wrong_ver_raised, "Expected RuntimeError when _HB_VERSION mismatches LOCKED_HARFBUZZ_VERSION"
+
+    # 4b. Default (non-strict) mismatch must only warn, never raise
+    try:
+        fonts_mod._HB_VERSION = "0.0.0-mismatch"
+        verify_harfbuzz(allow_unshaped=False)
+    finally:
+        fonts_mod._HB_VERSION = orig_ver
 
     # 5. Simulate wrong version with allow_unshaped=True: must not raise
     try:
