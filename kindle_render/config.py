@@ -42,7 +42,7 @@ class Config:
 
     # ---------------- vertical rhythm ----------------
     pitch: int = 0                    # Explicit body line pitch in px (0 = use round(pitch_ratio * size_px()))
-    pitch_ratio: float = 57 / 42      # Default ratio when pitch == 0
+    pitch_ratio: float = 1.5          # Default ratio when pitch == 0 (e.g. 34px -> 51px)
     typo_ascender: float = 0.802      # Bookerly OS/2 sTypoAscender (+802 FUnits)
     body_cap_height: float = 0.693
     display_cap_height: float = 0.762
@@ -71,6 +71,7 @@ class Config:
     # ---------------- paragraph layer & justification ----------------
     justify: bool = True
     breaker: str = "kp"
+    max_kp_items: int = 1000
     ragged_greedy: bool = False       # Unified Knuth-Plass across both justified and ragged text
     space_stretch: float = 0.75
     space_shrink: float = 101 / 577.0 # Unified dynamic shrink ratio (101 units at 577-unit space)
@@ -111,8 +112,6 @@ class Config:
 
     # Headings
     heading_scale: Tuple[float, ...] = (2.0, 1.5, 1.17, 1.0, 0.83, 0.67)
-    heading_margin_top_em: Tuple[float, ...] = (0.67, 0.82, 0.96, 1.33, 1.67, 2.33)
-    heading_margin_bottom_em: Tuple[float, ...] = (0.67, 0.84, 1.0, 1.33, 1.67, 2.35)
     heading_top_extra_px: int = 1
     heading_right_margin_em: float = 0.0
     margin_at_page_top: bool = True
@@ -147,9 +146,13 @@ class Config:
     def pitch_px(self) -> int:
         if self.pitch > 0:
             return self.pitch
-        sz = self.size_px()
-        ratio = 1.5 if sz <= 36.0 else self.pitch_ratio
-        return int(math.floor(ratio * sz + 0.5))
+        return int(math.floor(self.pitch_ratio * self.size_px() + 0.5))
+
+    def extra_lead_px(self) -> float:
+        # pitch_px() is integer-rounded, so |error| <= 0.5; below that the
+        # geometry is the tight regime. Matches the existing +0.5 in the has_extra_lead test.
+        raw = self.pitch_px() - (19.0 / 14.0) * self.size_px()
+        return raw if raw > 0.5 else 0.0
 
     def vem_px(self) -> float:
         """Dynamic vertical CSS em unit derived from body line pitch (std_pitch / 1.2)."""

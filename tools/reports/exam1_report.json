@@ -12,12 +12,12 @@
   "chapter_errors": [],
   "totals": {
     "exact_pages": 50,
-    "diff_pixels": 1516670,
+    "diff_pixels": 1516617,
     "capture_lines": 1568,
     "render_lines": 1567,
     "pos_exact_lines": 1452,
-    "pos_indep_lines": 1459,
-    "displaced_lines": 7
+    "pos_indep_lines": 1460,
+    "displaced_lines": 8
   },
   "chapters": [
     {
@@ -195,12 +195,12 @@
       "rendered_pages": 5,
       "compared_pages": 5,
       "exact_pages": 0,
-      "diff_pixels": 978214,
+      "diff_pixels": 978161,
       "capture_lines": 76,
       "render_lines": 76,
       "pos_exact_lines": 20,
-      "pos_indep_lines": 27,
-      "displaced_lines": 7
+      "pos_indep_lines": 28,
+      "displaced_lines": 8
     },
     {
       "chapter": "e12_scripts",
@@ -893,16 +893,16 @@
     "47": {
       "page": 47,
       "chapter": "e11_blocks",
-      "sha256": "dbffa8bd966f82f06f6bef9103a5179f6adde8f04737b71428ed34c6094a60f9",
+      "sha256": "e7a1412c8b4b2e5c3cb4d5a5fedf387d6fd7c75fff3c7d21f40443f328867e59",
       "has_capture": true,
-      "layout_sha256": "891fb4cbc53696b2ccc6bc497317bf6bb03395260bffe88a7b9b98549009a2ac",
+      "layout_sha256": "230148fffefd5db4b116750fb884e3ebd149630eeda4bd29405d564f5de10a3b",
       "exact_page": false,
-      "diff_pixels": 126930,
+      "diff_pixels": 126877,
       "capture_lines": 19,
       "render_lines": 19,
       "pos_exact_lines": 4,
-      "pos_indep_lines": 5,
-      "displaced_lines": 1
+      "pos_indep_lines": 6,
+      "displaced_lines": 2
     },
     "48": {
       "page": 48,

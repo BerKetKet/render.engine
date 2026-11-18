@@ -33,8 +33,11 @@ class Block:
     mb_em: float = 0.0
     image: Optional[Image.Image] = None
     img_width_pct: Optional[float] = None
+    img_css_w: Optional[float] = None
+    img_css_h: Optional[float] = None
     is_cover: bool = False
     table_rows: list = field(default_factory=list)
+    table_cell_meta: dict = field(default_factory=dict)
     table_caption: Optional[str] = None
     pre_lines: List[str] = field(default_factory=list)
     bullet: Optional[str] = None
@@ -42,6 +45,7 @@ class Block:
     list_level: int = 0
     page_break_before: bool = False
     heading: int = 0
+    is_dd: bool = False
     next_is_heading: bool = False
     first_in_doc: bool = False
     first_after_heading: bool = False
@@ -403,7 +407,8 @@ def _doc_blocks(z, href, html, cfg):
                 im = _load_img(z, href, ch)
                 if im is not None:
                     parent_txt = el.get_text().strip() if el else ""
-                    if (in_phrasing and parent_txt) or props.get("display") == "inline":
+                    n_imgs_in_el = len(el.find_all("img")) if el else 0
+                    if (in_phrasing and (parent_txt or n_imgs_in_el > 1)) or props.get("display") == "inline":
                         buf.append(Run("", bold, italic, image=im))
                     else:
                         flush(**(parent_kw or {}))
@@ -411,13 +416,39 @@ def _doc_blocks(z, href, html, cfg):
                             parent_kw["bullet"] = None
                             parent_kw["ol_number"] = None
                         w_pct = None
-                        if props.get("width") and "%" in props.get("width", ""):
+                        css_w = None
+                        css_h = None
+                        w_prop = props.get("width", "").strip()
+                        if w_prop and "%" in w_prop:
                             try:
-                                w_pct = float(props["width"].replace("%", "").strip()) / 100.0
+                                w_pct = float(w_prop.replace("%", "").strip()) / 100.0
                             except ValueError:
                                 w_pct = None
+                        elif w_prop:
+                            try:
+                                css_w = float(re.sub(r"[^0-9.]+", "", w_prop))
+                            except ValueError:
+                                css_w = None
+                        if css_w is None and ch.get("width"):
+                            w_attr = str(ch.get("width")).strip()
+                            if "%" in w_attr:
+                                try:
+                                    w_pct = float(w_attr.replace("%", "").strip()) / 100.0
+                                except ValueError:
+                                    pass
+                            else:
+                                try:
+                                    css_w = float(re.sub(r"[^0-9.]+", "", w_attr))
+                                except ValueError:
+                                    pass
+                        h_prop = props.get("height", "").strip() or str(ch.get("height") or "").strip()
+                        if h_prop and "%" not in h_prop:
+                            try:
+                                css_h = float(re.sub(r"[^0-9.]+", "", h_prop))
+                            except ValueError:
+                                css_h = None
                         has_col_css = any(sel == "table" and p.get("border-collapse") == "collapse" for sel, p in rules)
-                        out.append(Block(kind="image", image=im, img_width_pct=w_pct, align="center", left_em=inh_left, right_em=inh_right, border_collapse=has_col_css))
+                        out.append(Block(kind="image", image=im, img_width_pct=w_pct, img_css_w=css_w, img_css_h=css_h, align="center", left_em=inh_left, right_em=inh_right, border_collapse=has_col_css))
                 continue
             if nm == "hr":
                 flush(**(parent_kw or {}))
@@ -444,9 +475,11 @@ def _doc_blocks(z, href, html, cfg):
                 cap_el = ch.find("caption")
                 cap_txt = cap_el.get_text().strip() if cap_el else None
                 rows = []
+                cell_meta = {}
                 for tr in ch.find_all("tr"):
                     row = []
-                    for cell in tr.find_all(["th", "td"]):
+                    ri_cur = len(rows)
+                    for ci_raw, cell in enumerate(tr.find_all(["th", "td"])):
                         c_props = _style(cell, rules)
                         is_h = (cell.name.lower() == "th")
                         c_align = c_props.get("text-align") or ("center" if is_h else "left")
@@ -458,12 +491,28 @@ def _doc_blocks(z, href, html, cfg):
                             rs = max(1, int(cell.get("rowspan", 1)))
                         except (ValueError, TypeError):
                             rs = 1
-                        row.append((cell.get_text().strip(), is_h, c_align, cs, rs))
+                        lis = [li.get_text().strip() for li in cell.find_all("li")]
+                        img_tag = cell.find("img")
+                        cell_im = _load_img(z, href, img_tag) if img_tag is not None else None
+                        has_b = cell.find(["b", "strong"]) is not None
+                        has_i = cell.find(["i", "em"]) is not None
+                        a_tag = cell.find("a")
+                        link_h = a_tag.get("href") if a_tag is not None else None
+                        if lis or cell_im is not None or has_b or has_i or link_h:
+                            cell_meta[(ri_cur, ci_raw)] = {
+                                "lis": lis,
+                                "image": cell_im,
+                                "bold": has_b,
+                                "italic": has_i,
+                                "link_href": link_h,
+                            }
+                        txt_cell = " ".join(lis) if lis else cell.get_text().strip()
+                        row.append((txt_cell, is_h, c_align, cs, rs))
                     if row:
                         rows.append(row)
                 if rows:
                     is_col_tbl = (props.get("border-collapse") == "collapse") or any(sel == "table" and p.get("border-collapse") == "collapse" for sel, p in rules)
-                    out.append(Block(kind="table", table_rows=rows, table_caption=cap_txt, border_collapse=is_col_tbl))
+                    out.append(Block(kind="table", table_rows=rows, table_cell_meta=cell_meta, table_caption=cap_txt, border_collapse=is_col_tbl))
                 continue
 
             if nm in BLOCK_TAGS:
@@ -528,8 +577,8 @@ def _doc_blocks(z, href, html, cfg):
                     kw.update(
                         scale=scale_val,
                         display=use_disp,
-                        mt_em=kw["mt_em"] if kw["mt_em"] else cfg.heading_margin_top_em[lvl],
-                        mb_em=kw["mb_em"] if kw["mb_em"] else cfg.heading_margin_bottom_em[lvl],
+                        mt_em=kw["mt_em"] if kw["mt_em"] else (0.67, 0.82, 0.96, 1.33, 1.67, 2.33)[lvl],
+                        mb_em=kw["mb_em"] if kw["mb_em"] else (0.67, 0.84, 1.0, 1.33, 1.67, 2.35)[lvl],
                         heading=int(nm[1])
                     )
                     if kw["align"] is None:
@@ -542,6 +591,7 @@ def _doc_blocks(z, href, html, cfg):
                     kw["mb_em"] = max(kw["mb_em"], 1.0)
                 is_multi_dd_dl = bool(el and el.name == "dl" and len(el.find_all("dd", recursive=False)) > len(el.find_all("dt", recursive=False)))
                 if nm == "dd":
+                    kw["is_dd"] = True
                     kw["left_em"] += (1.0 if is_multi_dd_dl else (cfg.blockquote_margin_ratio * (cfg.right - cfg.x0)) / cfg.size_px())
                     if not is_multi_dd_dl:
                         kw["mb_em"] = max(kw["mb_em"], 1.0)
@@ -683,6 +733,11 @@ def _load_img(z, href, tag):
         return None
     p = posixpath.normpath(posixpath.join(posixpath.dirname(href), src))
     try:
-        return Image.open(io.BytesIO(z.read(p))).convert("RGB")
+        raw_im = Image.open(io.BytesIO(z.read(p)))
+        if raw_im.mode in ("RGBA", "LA") or (raw_im.mode == "P" and "transparency" in raw_im.info):
+            rgba = raw_im.convert("RGBA")
+            bg = Image.new("RGBA", rgba.size, (255, 255, 255, 255))
+            return Image.alpha_composite(bg, rgba).convert("RGB")
+        return raw_im.convert("RGB")
     except Exception:
         return None

@@ -13,11 +13,13 @@
 
 # Changelog
 
-## [1.10.2] - 2026-11-16 (`v1.10.2` — Pagination, Overflow, Config & De-Overfitting Fixes)
-- **Tall Table Splitting (`kindle_render/page.py:add_table`)**: Split tables taller than one page cleanly between rows across page boundaries without overflowing `page_bottom` (`tools/test_bugfixes.py`).
-- **Dynamic Line-Pitch Room Check (`kindle_render/page.py:add_text_block`)**: Computed `room` and `take` using each line actual `cur_pitch_fl` (accounting for scaled runs and tall inline images) rather than constant block `pitch_fl`.
-- **Half-Up Rounding & Compact Default Pitch (`kindle_render/config.py:pitch_px`, `kindle_render/page.py`)**: Used `math.floor(x + 0.5)` in `pitch_px()` and defaulted `pitch == 0` at `size_px <= 36` to `1.5 * size_px` (`51` px at `34` px), plus corrected `base_root_em_px()` docstring (`28.8125 px`).
-- **Removed `_skia_bilerp_rgb` Special-Case (`kindle_render/page.py`)**: Replaced `1000->1080` and `1500->1620` hardcoding with general `W_in / W_out` and `H_in / H_out` scaling (`exam3_normal` and `exam3_small` covers `-357` diff px each).
+## [1.11.0] - 2026-11-18
+### Added
+- Registered `tables_images` (`kindle_tables_images_exam.epub` + `tables_images_standard_captures.zip`) as the 6th corpus in `tools/profiles.json` and `tools/corpus.py`.
+- Added `Config.extra_lead_px()` helper with `0.5px` integer-pitch rounding tolerance so Compact (`39px/pitch 53`) remains in the tight-spacing regime.
+- Added `tools/score_dir.py` for scoring capture folders across arbitrary viewport geometries (`Standard`, `Compact`, `Large`) and `tools/test_bugfixes.py` regression suite.
+- Generalized cross-theme block image viewport scaling (`sc = maxw / 512.0`), HTML `width`/`height` attributes, CSS `px`/`%` widths, RGBA white alpha-compositing, tall-image page-remainder fitting, multi-image inline `<p>` runs, and inline image scaling (`size26 / 1024.0`).
+- Generalized cross-theme collapsed table layout: `row_pad = int(0.28 * size_px)`, `row_ys[-1]` bottom rule placement, chromeless table detection (`has_chrome`), multi-page row-chunk splitting with per-page bottom rule + popup icon and top continuation rule (`y = 167..170`), unbreakable single-word `<th>` headers, and rich cell rendering (`<b>`, `<i>`, `<a>`, `<ul><li>`, `<img/>`).
 
 ## [1.10.1] - 2026-11-16 (`v1.10.1` — Mark Highlight Vertical Bounds)
 - **Highlight Box Bounds (`kindle_render/page.py:draw_line`)**: Updated `<mark>` background rectangle vertical bounds to use `hhea.ascent` (`0.900 * size_px` above baseline) and `floor(pitch / 1.2)` line box height (`-2,244` diff pixels on `exam2` p.40; zero regressions across all 5 corpora).
