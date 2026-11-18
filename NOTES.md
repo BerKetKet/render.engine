@@ -2,9 +2,9 @@
 
 ## Current State
 - **Working Directory**: `/home/bgg/projects/render.engine`
-- **Module**: `kindle_render` v1.11.0
+- **Module**: `kindle_render` v1.11.3
 - **Git Branch**: `engine`
-- **Latest Tag**: `v1.11.0`
+- **Latest Tag**: `v1.11.3`
 - **Python Runtime**: Python 3.13, FreeType 2.13+, HarfBuzz (Docker lock: 6.0.0, host CachyOS: 15.1.0)
 
 ## Scope
@@ -30,6 +30,11 @@
    - **v1.10.1 (`v1.10.1`)**: Refined `<mark>` highlight box bounds using Bookerly `hhea.ascent` (0.900em) and `floor(pitch/1.2)`.
    - **v1.10.2 (`v1.10.2`)**: Tall table splitting across pages without overflowing `page_bottom`, dynamic line-pitch room check in `page.py`, `pitch_px()` half-up rounding, and general `_skia_bilerp_rgb` scaling.
    - **v1.11.0 (`v1.11.0`)**: Registered `tables_images` as the 6th corpus in `tools/profiles.json` and `tools/corpus.py`, added `Config.extra_lead_px()` tolerance helper, `tools/score_dir.py` cross-viewport scoring harness, generalized cross-theme block and inline image viewport scaling, and generalized cross-theme collapsed and chromeless multi-page table layout with rich cell content rendering.
+   - **v1.11.3 (`v1.11.3`)**: Integrated releases 1.11.1 through 1.11.3 from `kindle_render_1.11.3.zip`:
+     - **v1.11.1 (Task A)**: Unified `<h1>` bottom-margin calibration across Compact (`39/53`) and Large (`50/82`) via pitch-scaled vertical-em formula (`docs/hypotheses/heading_block_v1.md`), eliminating residual offsets on Compact (`58 -> 59 px`) and Large (`92 -> 90 px`).
+     - **v1.11.2 (Task C3)**: Extended cross-Box OpenType GPOS kerning in `build_items` across unspaced inline span boundaries (`<u>`, `<s>`, `<span>`) sharing the same `Face` (`e07_inline`).
+     - **v1.11.3 (Task C4)**: Untruncated `float32` first-line `text-indent` subpixel remainder (`indent_frac26 = (indent_em * size_px * 64.0) - indent26`) in `layout_line` for `sub == 31` tie-breaking (`+3` exact pages on `exam3_small`).
+     - Added analysis tools & diagnostic documents: `tools/score_all.py`, `tools/fit_geometry.py`, `tools/block_residuals.py`, `tools/ab_diff.py`, `docs/audit_v1_11_0.md`, `docs/diagnosis_task_c.md`, `docs/hypotheses/unproven_v1_11_0.md`, and crops.
 
 ## What is Broken / Open Issues
 - **HarfBuzz Host vs Lock**: Host runtime HarfBuzz on CachyOS is `15.1.0`, whereas reproducibility lock in `requirements.lock` targets `6.0.0` (Docker container required for exact shaping reproduction).
@@ -38,4 +43,4 @@
 
 ## Next Steps
 - Evaluate against held-out `exam4` when available.
-- Push release `v1.11.0` and updated branches (`main`, `engine`) and tags to GitHub.
+- Push release `v1.11.3` and updated branches (`main`, `engine`) and tags to GitHub.

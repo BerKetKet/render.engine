@@ -1,15 +1,15 @@
-# kindle_render v1.10.2 — Unified Plan Final Report (Stages A–H)
+# kindle_render v1.10.0 — Unified Plan Final Report (Stages A–H)
 
-## 1. 5-Corpus Progression Summary (`1.8.0-rc1` -> `rhythm-1.9.0` -> `boundary-1.9.1` -> `v1.10.2`)
+## 1. 5-Corpus Progression Summary (`1.8.0-rc1` -> `rhythm-1.9.0` -> `boundary-1.9.1` -> `v1.10.0`)
 
-| Corpus | Geometry (`size_px, pitch`) | `1.8.0-rc1` Exact Pages | `rhythm-1.9.0` Exact Pages | `boundary-1.9.1` Exact Pages | **`v1.10.2` Exact Pages** | `1.8.0-rc1` Pos Lines | **`v1.10.2` Pos Lines** | `1.8.0-rc1` Diff Px | **`v1.10.2` Diff Px** |
+| Corpus | Geometry (`size_px, pitch`) | `1.8.0-rc1` Exact Pages | `rhythm-1.9.0` Exact Pages | `boundary-1.9.1` Exact Pages | **`v1.10.0` Exact Pages** | `1.8.0-rc1` Pos Lines | **`v1.10.0` Pos Lines** | `1.8.0-rc1` Diff Px | **`v1.10.0` Diff Px** |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|
 | `probe` | `42 px, pitch 57` | `37 / 86` | `37 / 86` | `38 / 86` | **`43 / 86`** (`+6`) | `2,703 / 2,863` | **`2,753 / 2,863`** (`+50`) | `476,566` | **`415,528`** (`-12.8%`) |
 | `exam1` | `45 px, pitch 68` | `42 / 70` | `42 / 70` | `43 / 70` | **`50 / 70`** (`+8`) | `1,402 / 1,568` | **`1,452 / 1,568`** (`+50`) | `1,593,164` | **`1,516,670`** (`-4.8%`) |
-| `exam2` | `42 px, pitch 57` | `35 / 65` | `35 / 65` | `38 / 65` | **`40 / 65`** (`+5`) | `1,322 / 1,529` | **`1,395 / 1,529`** (`+73`) | `1,140,913` | **`1,034,912`** (`-9.1%`) |
+| `exam2` | `42 px, pitch 57` | `35 / 65` | `35 / 65` | `38 / 65` | **`40 / 65`** (`+5`) | `1,322 / 1,529` | **`1,395 / 1,529`** (`+73`) | `1,140,913` | **`1,037,156`** (`-9.1%`) |
 | `exam3_normal` | `45 px, pitch 68` | `38 / 82` | `42 / 82` | `43 / 82` | **`60 / 82`** (`+22`) | `1,740 / 2,027` | **`1,899 / 2,027`** (`+159`) | `2,893,060` | **`762,672`** (`-73.6%`) |
 | `exam3_small` | `34 px, pitch 51` | `10 / 54` | `16 / 54` | `17 / 54` | **`29 / 54`** (`+19`) | `991 / 1,651` | **`1,514 / 1,651`** (`+523`) | `5,539,021` | **`879,278`** (`-84.1%`) |
-| **TOTAL (All 5)** | **357 compared** | **`162 / 357`** | **`172 / 357`** | **`179 / 357`** | **`222 / 357` (`+60`)** | **`8,158 / 9,638`** | **`9,013 / 9,638` (`+855`)** | **`11,642,724`** | **`4,609,066` (`-60.4%`)** |
+| **TOTAL (All 5)** | **357 compared** | **`162 / 357`** | **`172 / 357`** | **`179 / 357`** | **`222 / 357` (`+60`)** | **`8,158 / 9,638`** | **`9,013 / 9,638` (`+855`)** | **`11,642,724`** | **`4,611,304` (`-60.4%`)** |
 
 ## 2. Stage-by-Stage Implemented Changes (`A`–`H`)
 - **Stage A `[P]` (Hygiene)**: Locked `libharfbuzz.so` (`6.0.0`) in `kindle_render/fonts.py`, added `NO-GOLDEN` reporting in `tools/corpus.py`, verified `max_device_ink_y <= 2203`, and built `tools/rhythm.py`.
@@ -30,15 +30,3 @@
 - `G4` (`tools/check_imports.py`): `passed=True errors=0`.
 - `G5` (`tools/test_parallel_raster.py`, `tools/test_text_layer.py`, `tools/test_boundary.py`): `ALL PASSED`.
 - `G6` (`tools/test_harfbuzz_lock.py`): `loaded=True version=6.0.0 locked=6.0.0 PASSED`.
-
-### Stage H3 & H4 (`v1.10.1` -> `v1.10.2` — Decompiled Metrics & 8-Item Bug-Fix Sweep)
-- **Stage H3 (`v1.10.1`)**: Updated `<mark>` highlight vertical bounds in `kindle_render/page.py:draw_line` to use Bookerly `hhea.ascent` (`0.900 * size_px`) and `floor(pitch / 1.2)` height (`-2,244` diff px on `exam2` p.40, `12/13 -> 13/13` pos-exact lines, `0` regressions).
-- **Stage H4 (`v1.10.2` Bug-Fix Sweep & Housekeeping)**:
-  1. Tall table pagination across pages (`kindle_render/page.py:add_table`).
-  2. Dynamic scaled-run and inline-image `room` check (`kindle_render/page.py:add_text_block`).
-  3. Multi-line heading split (`not b.heading`) verified against `exam1` p.7–8 (`10/10` exact pages) and documented in `BACKLOG.md`.
-  4. `n_items > 1000` greedy fallback in `break_kp` verified against `exam1 e13_pagination` (`14/18` exact pages) and documented in `BACKLOG.md`.
-  5. Half-up rounding (`math.floor(x + 0.5)`) in `Config.pitch_px()`.
-  6. `Config.pitch_px()` default for `size_px=34, pitch=0` returning `51` (`round_half_up(34 * 1.5) = 51`).
-  7. Fixed `base_root_em_px` docstring (`28.8125`) and updated `BACKLOG.md` apostrophe hyphenation entry.
-  8. Removed hardcoded `1000->1080` and `1500->1620` checks from `_skia_bilerp_rgb`.

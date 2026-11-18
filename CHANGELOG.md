@@ -13,6 +13,27 @@
 
 # Changelog
 
+## [1.11.3] - 2026-11-18
+
+### Fixed
+- **Task C4 — Untruncated `float32` first-line `text-indent` subpixel tie-breaking**:
+  - Preserved the fractional 26.6 subpixel remainder `indent_frac26 = (indent_em * size_px * 64.0) - indent26` (`+0.2` at `34 px` and `39 px` for `1.2em` indent) in `kindle_render/page.py` and `kindle_render/layout.py:layout_line` when evaluating `sub == 31` after the first space on line 0.
+  - Gains `+3` exact pages on `e3_small` (`29 -> 32/54`: `p4`, `p37`, `p40`) and `+4` position-exact lines (`1514 -> 1518/1651`) with `lost = 0` across all datasets.
+
+## [1.11.2] - 2026-11-18
+
+### Fixed
+- **Task C3 (`e07_inline`) — Cross-run OpenType GPOS kerning across unspaced inline span boundaries**:
+  - Extended cross-Box GPOS kerning in `kindle_render/layout.py:build_items` to directly adjacent `Box` items (`isinstance(items[idx + 1], Box) and not n1[0].isupper()`) sharing the same `Face`.
+  - Reduces `e3_std` diff by `-49,313 px` (`762,672 -> 713,359`) and `e3_small` diff by `-30,263 px` (`879,278 -> 849,015`) with `lost = 0` across all datasets.
+
+## [1.11.1] - 2026-11-18
+
+### Fixed
+- **Task A (`heading_block_v1`) — Unified `<h1>` bottom-margin calibration across Compact (`39/53`) and Large (`50/82`)**:
+  - Pre-registered in `docs/hypotheses/heading_block_v1.md` and replaced the ad-hoc `0.10 * extra_lead` `h1` bottom-margin slope (`0.66 * b.scale * vem_px + 0.10 * extra_lead`) with the unified pitch-scaled vertical-em formula `int(round(0.654 * b.scale * vem_px)) + 1` (`mb_lead_k = 0.0` for `h1`, matching the `+1 px` boundary rounding offset on `mt`).
+  - Preserves exact `h1` bottom margins on `34/51` (`57 px`), `42/57` (`63 px`), and `45/68` (`75 px`) with `0` golden changes across all 8 corpus suites, while fixing Compact (`39/53`: `58 -> 59 px`, `-557,931` diff px, `+53` pos lines on `ti_compact`) and Large (`50/82`: `92 -> 90 px`, `2 -> 3/57` exact pages, `-401,634` diff px, `+18` pos lines on `ti_large`) with `lost = 0` across all datasets.
+
 ## [1.11.0] - 2026-11-18
 ### Added
 - Registered `tables_images` (`kindle_tables_images_exam.epub` + `tables_images_standard_captures.zip`) as the 6th corpus in `tools/profiles.json` and `tools/corpus.py`.

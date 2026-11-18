@@ -1,8 +1,8 @@
 # `kindle_render` Status Log (`STATUS.md`)
 
 ## Current Version & Milestone
-- **Version**: `1.9.0` (`kindle_render/__init__.py`)
-- **Tag**: `rhythm-1.9.0`
+- **Version**: `1.11.2` (`kindle_render/__init__.py`)
+- **Tag**: `v1.11.1`
 - **Completed**:
   - **Stage A `[P]` (Hygiene, tag `1.8.0-rc1`)**: HarfBuzz `6.0.0` version lock & loud failure (`kindle_render/fonts.py`, `tools/test_harfbuzz_lock.py`); `NO-GOLDEN` reporting + `exam3_normal` & `exam3_small` baseline goldens + `page_bottom` check (`tools/reports/stage_a/page_bottom_verification.json`); `tools/rhythm.py` `unaligned` pair filter across all 5 corpora (`tools/reports/rhythm/coverage.json`, `coverage.md`, `base.json`); complete grep-backed spacing inventory (`tools/reports/rhythm/inventory.md`).
   - **Stage B `[P]` (Hypothesis Registry)**: Read-only `docs/hypotheses/kindle_formulae_v0.md` (`SHA-256: 5e24606c502f14c3de8d77536cdb74f5eb00eaa0d6bc4e87d78807b34a692c81`), pure evaluators in `tools/hypotheses/evaluate.py`, and 5-corpus evaluation in `tools/reports/hypotheses/registry.json` & `reconcile.md`.
@@ -69,8 +69,46 @@
   - Evaluate `v1.10.0` against held-out `exam4` when available; remaining items (`ul_indent_em`, `cover` p.1, `dl/dt/dd`, complex scripts) are tracked in `BACKLOG.md`.
 - **CURRENT COMMIT / TAG**: `v1.10.0` (`round1-1.10.0`)
 
-## `v1.11.0` — `<mark>` Highlight Bounds (`hhea.ascent` + `floor(pitch/1.2)`)
+## `v1.10.1` — `<mark>` Highlight Bounds (`hhea.ascent` + `floor(pitch/1.2)`)
 - Updated `page.py:draw_line` (`commit 812c24a`), `-2,244` diff px on `exam2` p.40 (`4,609,060` total diff px across all 5 corpora), all gates `G1`–`G6` passed.
 
-## `v1.10.2` — Bug Fixes & Hardening
-- Fixed tall table splitting, dynamic scaled-run `room` check, `Config(size26=2176, pitch=0).pitch_px() == 51`, `_skia_bilerp_rgb` hardcoding, and `base_root_em_px` docstring; verified `tools/test_bugfixes.py` and all gates `G1`–`G6`.
+## `v1.11.0` — Accepted Baseline (Compact Tight-Regime Threshold, Engine Audit Fixes, 6-Corpus Generalization)
+- Added `Config.extra_lead_px()` (`raw > 0.5` tolerance for integer-rounded `pitch_px()`), multi-page table splitting, scaled-run/inline-image overflow check, heading widow/orphan protection, unbounded `break_kp` DP window, `floor(x+0.5)` pitch rounding (`pitch_ratio = 1.5`), and 6th corpus `tables_images` (`commit 374787e`, tag `v1.11.0`).
+
+## `v1.11.1` — Task A: Heading-Block Bottom-Margin Calibration (`heading_block_v1`)
+- Replaced `h1` `mb_base_em = 0.66` + `0.10 * extra_lead` with the unified `vem_px` slope `0.654 * b.scale * vem_px + 1` (`mb_lead_k = 0.0` for `h1`, matching the `+1 px` `extra_top` rounding offset on `mt`).
+- Eliminated the `-1 px` `<h1> -> <p>` residual on Compact (`39/53`: `58 -> 59 px`) and the `+2 px` `<h1> -> <p>` residual on Large (`50/82`: `92 -> 90 px`) while keeping `34/51` (`57 px`), `42/57` (`63 px`), and `45/68` (`75 px`) 100% invariant (`lost = 0` on all datasets; `0` golden changes; `ti_compact` `-557,931` diff px, `+53` pos lines; `ti_large` `2 -> 3/57` exact pages, `-401,634` diff px, `+18` pos lines).
+
+## `v1.11.2` — Task C3: Cross-Run GPOS Kerning Across Unspaced Inline Span Boundaries (`e07_inline`)
+- In `kindle_render/layout.py:build_items`, extended cross-Box GPOS kerning to directly adjacent `Box` items (`isinstance(items[idx + 1], Box) and not n1[0].isupper()`) sharing the same `Face`, so inline span boundaries inside an unspaced word (e.g. `<u>underlined words</u>,`, `<s>struck words</s>,`, `<span class="red">red words</span>,`, `<span class="blue">blue words</span>,`) apply the exact same OpenType GPOS kerning (`-20 FUnits` on `s` + `comma`) as single-run shaping.
+- Reduced `e3_std` (`e07_inline` p42–47) diff by `-49,313 px` (`762,672 -> 713,359`) and `e3_small` (`e07_inline` p27–30) diff by `-30,263 px` (`879,278 -> 849,015`) with `lost = 0` and `0` pages with more diff across all datasets.
+
+## `v1.11.3` — Task C4: Untruncated `float32` First-Line `text-indent` Subpixel Tie-Breaking
+- Passed the fractional 26.6 subpixel remainder `indent_frac26 = (indent_em * size_px * 64.0) - indent26` (which is `+0.2` at `34 px` and `39 px` for `text-indent: 1.2em`) into `layout_line` for the `sub == 31` (`m_glues == 1`) `float32` pen accumulation check.
+- Gained `+3` exact pages on `e3_small` (`29 -> 32/54`: `p4`, `p37`, `p40`), `+4` position-exact lines (`1514 -> 1518/1651`), and `-828` diff px (`849,015 -> 848,187`) with `lost = 0` and `0` pages with more diff across all datasets.
+
+## NEXT (Post-`v1.11.3` Resume Instructions)
+- **Full 9-Dataset Metrics Summary (`v1.11.0` -> `v1.11.3`, `lost = 0` everywhere)**:
+  - `exam1` (`45/68`): `50 -> 50/70` exact | `1,516,617 -> 1,516,617` diff px | `1452 -> 1452/1568` pos lines
+  - `exam2` (`42/57`): `40 -> 40/65` exact | `1,034,912 -> 1,034,912` diff px | `1395 -> 1395/1529` pos lines
+  - `e3_std` (`45/68`): `60 -> 60/82` exact | `762,672 -> 713,359` diff px (`-49,313`) | `1899 -> 1899/2027` pos lines
+  - `e3_small` (`34/51`): `29 -> 32/54` exact (`+3`) | `879,278 -> 848,187` diff px (`-31,091`) | `1514 -> 1518/1651` pos lines (`+4`)
+  - `e3_compact` (`39/53`): `10 -> 33/56` exact (`+23`) | `4,584,783 -> 2,082,738` diff px (`-2,502,045`) | `1063 -> 1490/1713` pos lines (`+427`)
+  - `e3_large` (`50/82`): `78 -> 87/124` exact (`+9`) | `4,573,722 -> 2,673,432` diff px (`-1,900,290`) | `2128 -> 2341/2652` pos lines (`+213`)
+  - `ti_std` (`45/68`): `4 -> 4/44` exact | `8,503,517 -> 8,503,517` diff px | `299 -> 299/894` pos lines
+  - `ti_compact` (`39/53`): `3 -> 3/35` exact | `7,290,083 -> 6,723,947` diff px (`-566,136`) | `210 -> 280/733` pos lines (`+70`)
+  - `ti_large` (`50/82`): `2 -> 3/57` exact (`+1`) | `10,801,959 -> 10,400,325` diff px (`-401,634`) | `268 -> 286/1086` pos lines (`+18`)
+  - `probe` (`42/57`): `43 -> 43/86` exact | `389,959 -> 389,959` diff px | `2753 -> 2753/2863` pos lines
+- **What Remains**:
+  - Falsify/replace the `UNPROVEN` table/image hypotheses in `docs/hypotheses/unproven_v1_11_0.md` using out-of-sample `tables_images` captures at `42 px`.
+  - Remaining Task C5 structural items (`e06_structure` nested list/dl/table spacing, `e08_verse` poetry hanging wrap, `e04`/`e05` DE/FR compound hyphenation) and `link_underline` subpixel offset on `Compact`/`Large` `nav` (`p2`).
+- **Exact Commands to Verify & Resume**:
+  ```bash
+  python3 tools/check_imports.py
+  python3 tools/test_harfbuzz_lock.py
+  python3 tools/test_boundary.py
+  python3 tools/test_text_layer.py
+  python3 tools/test_parallel_raster.py
+  python3 tools/test_bugfixes.py
+  python3 tools/score_all.py --out current.json
+  ```

@@ -523,10 +523,11 @@ class Pager:
         justify = (b.align == "justify") or (b.align is None and c.justify and not ragged)
         placed = []
 
+        indent_frac26 = ((indent_em * size_px * 64.0) - indent26) if indent_em > 0 else 0.0
         for i, (seg, hy) in enumerate(lines):
             last = (i == len(lines) - 1)
             line_base_x26 = c.x0 * 64 + int(round(left_px * 64)) + ((drop_adv26 + drop_gap26) if (drop_letter and i < drop_lines) else (indent26 if i == 0 else 0))
-            pl, nat, hang_left = layout_line(seg, hy, line_w(i), justify, last, c, base_x26=(line_base_x26 if b.align not in ("center", "right") else None))
+            pl, nat, hang_left = layout_line(seg, hy, line_w(i), justify, last, c, base_x26=(line_base_x26 if b.align not in ("center", "right") else None), indent_frac26=(indent_frac26 if (i == 0 and not drop_letter) else 0.0))
             off26 = -hang_left
             if drop_letter and i < drop_lines:
                 off26 += drop_adv26 + drop_gap26
@@ -542,12 +543,12 @@ class Pager:
         if b.heading:
             h_idx = b.heading - 1
             mt_base_em = (0.66, 0.81, 0.963, 1.32, 1.64, 2.29)[h_idx]
-            mb_base_em = (0.66, 0.822, 0.963, 1.32, 1.64, 2.30)[h_idx]
+            mb_base_em = (0.654, 0.822, 0.963, 1.32, 1.64, 2.30)[h_idx]
             is_tall_lead = std_body_pitch < 3 * (std_body_pitch - c.size_px())
             mt_lead_k = (0.10 if h_idx == 0 else (0.28 if h_idx == 1 else (0.25 if h_idx == 2 else ((0.05 if is_tall_lead else 0.25) if h_idx == 4 else (0.25 if (h_idx == 5 and is_tall_lead) else 0.0)))))
-            mb_lead_k = (0.10 if h_idx in (0, 3) else (0.05 if h_idx == 1 else (0.40 if h_idx == 2 else ((0.12 if is_tall_lead else 0.35) if h_idx == 4 else 0.28))))
+            mb_lead_k = (0.0 if h_idx == 0 else (0.10 if h_idx == 3 else (0.05 if h_idx == 1 else (0.40 if h_idx == 2 else ((0.12 if is_tall_lead else 0.35) if h_idx == 4 else 0.28)))))
             mt = int(round(mt_base_em * b.scale * vem_px + mt_lead_k * extra_lead))
-            mb_est = int(round(mb_base_em * b.scale * vem_px + mb_lead_k * extra_lead))
+            mb_est = int(round(mb_base_em * b.scale * vem_px + mb_lead_k * extra_lead)) + (1 if h_idx == 0 else 0)
         else:
             eff_vem = (max(float(std_body_pitch), (68.0 / 45.0) * c.size_px()) if extra_lead > 0.0 else float(std_body_pitch)) / 1.2
             mt = (int(b.mt_em * eff_vem * b.scale + 0.25) if (getattr(b, 'list_level', 0) > 0 and extra_lead > 0.0) else (int(round(b.mt_em * vem_px * b.scale)) if (getattr(b, 'list_level', 0) > 0 and getattr(b, 'border_collapse', False) and (getattr(b, 'bullet', None) == '\u2022' or (getattr(b, 'ol_number', None) and b.ol_number[0].isupper()))) else int(b.mt_em * vem_px * b.scale + 1e-6))) if b.mt_em else 0
@@ -556,6 +557,8 @@ class Pager:
         prev_h = getattr(self, "prev_heading", 0)
         if b.heading == 1 and prev_h == 0 and not self.page_empty:
             gap += 1
+        elif b.heading == 1 and prev_h == 1 and not self.page_empty:
+            gap = int(round((self.prev_mb + mt) / 2.0 + 0.1))
         elif b.heading == 0 and prev_h == 1 and getattr(b, "list_level", 0) > 0 and extra_lead > 0.0 and std_body_pitch < (68.0 / 45.0) * c.size_px():
             gap -= 1
         if extra_lead == 0.0:
