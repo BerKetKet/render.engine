@@ -2,9 +2,9 @@
 
 ## Current State
 - **Working Directory**: `/home/bgg/projects/render.engine`
-- **Module**: `kindle_render` v1.10.2
+- **Module**: `kindle_render` v1.11.0
 - **Git Branch**: `main`
-- **Latest Tag**: `v1.10.2`
+- **Latest Tag**: `v1.11.0`
 - **Python Runtime**: Python 3.13, FreeType 2.13+, HarfBuzz (Docker lock: 6.0.0, host CachyOS: 15.1.0)
 
 ## What is Verified
@@ -37,6 +37,7 @@
    - **Stage H (`v1.10.0` / `round1-1.10.0`)**: Preserved `bg` in `epub.py`, fractions in `fonts.py`, ellipsis splitting, cross-box GPOS kerning, and `float32` justified-line last-word pen accumulation (222/357 exact pages).
    - **v1.10.1 (`v1.10.1`)**: Refined `<mark>` highlight box bounds using Bookerly `hhea.ascent` (0.900em) and `floor(pitch/1.2)`.
    - **v1.10.2 (`v1.10.2`)**: Tall table splitting across pages without overflowing `page_bottom`, dynamic line-pitch room check in `page.py`, `pitch_px()` half-up rounding, and general `_skia_bilerp_rgb` scaling.
+   - **v1.11.0 (`v1.11.0`)**: Registered `tables_images` as the 6th corpus in `tools/profiles.json` and `tools/corpus.py`, added `Config.extra_lead_px()` tolerance helper, `tools/score_dir.py` cross-viewport scoring harness, generalized cross-theme block and inline image viewport scaling, and generalized cross-theme collapsed and chromeless multi-page table layout with rich cell content rendering.
 
 ## What is Broken / Open Issues
 - **HarfBuzz Host vs Lock**: Host runtime HarfBuzz on CachyOS is `15.1.0`, whereas reproducibility lock in `requirements.lock` targets `6.0.0` (Docker container required for exact shaping reproduction).
@@ -45,4 +46,4 @@
 
 ## Next Steps
 - Evaluate against held-out `exam4` when available.
-- Push release `v1.10.2` and new tags to GitHub.
+- Push release `v1.11.0` and updated branches (`main`, `engine`) and tags to GitHub.

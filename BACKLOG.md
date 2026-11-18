@@ -15,8 +15,6 @@ Per the prep handoff rules, no fidelity tuning was performed after freezing the 
    - Investigate device fixed-point space remainder distribution on justified lines to eliminate the 1 px right offset on the final word (`probe` pages 6–9, 16–18, 22–24, 28–30).
 2. **`pitch = 68` Heading Ladder Transitions (`page.py:add_text_block`)**:
    - Measure and port the `std_body_pitch == 57` heading transition rules (`h1->h2`, `h2->h2`, `p->h1`, `h3->p`, multi-line `h2/h3` pitch) to the `45 px / pitch 68` preset (`exam1` E09 pages 34–38).
-3. **Hyphenation of Apostrophe Words & Long-Word Tie-Breaking (`layout.py:build_items`, `hyphen.py`)**:
-   - Split or strip apostrophes (`'` / `’`) before querying `LiangHyphenator.hyphenate_word`, and investigate remaining break-point differences in `exam2` X11 (pages 32–33) and X16 (pages 51, 52, 55, 62–64).
 4. **Inline `<mark>` Highlight, Inline `<code>` Scale & Thai Segmentation (`epub.py`, `layout.py`, `page.py`)**:
    - Render `<mark>` background highlight rectangles (`exam2` X13 page 41).
    - Measure inline `<code>` advance scaling inside serif paragraphs (`exam2` X13 page 40).

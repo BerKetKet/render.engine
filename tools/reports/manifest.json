@@ -1,5 +1,5 @@
 {
-  "engine_version": "1.10.1",
+  "engine_version": "1.10.2",
   "git_commit": "3938782694f9388ebc749e8ae7709eb6f4850a41",
   "python_version": "3.11.2",
   "os_arch": "Linux-6.12.105+-x86_64",
@@ -60,7 +60,7 @@
     "kindle_render/hyph_taml.bin": "d7e876b9f1e14bbd8f8872ea67ce77645e8adcddba6f0dc691ea4b52b156daee"
   },
   "corpus_files_sha256": {
-    "exam3_small:epub:kindle_exam_v3.epub": "2985a659b18576a1412eabd3bc93ce19b77b09852a30159d003310407b8458f9",
-    "exam3_small:captures:exam_v3_screenshots_smallfont.zip": "63ed6f5a7d14949f321dae993914022e7ab516753755547b4d1165886243874f"
+    "exam1:epub:kindle_exam_v1.epub": "dcb38806168f8cc721a282b4a036ea7a49417be993afebdb5bce8f5c7d87c319",
+    "exam1:captures:exam_screen.zip": "c13ffdac76fefa3810c32bfb8c685d4fd7d29de211c2394f467194e8fcf92e6b"
   }
 }

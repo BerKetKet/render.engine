@@ -532,7 +532,7 @@ def run_synthetic_suite(prof_cfg: dict, update_golden: bool, check_golden: bool,
 
 def main():
     ap = argparse.ArgumentParser(description="Corpus runner and golden verifier for kindle_render.")
-    ap.add_argument("--only", choices=["probe", "exam1", "exam2", "exam3_normal", "exam3_small", "ferryman_small", "synthetic"], help="Run only a single corpus")
+    ap.add_argument("--only", choices=["probe", "exam1", "exam2", "exam3_normal", "exam3_small", "tables_images", "ferryman_small", "synthetic"], help="Run only a single corpus")
     ap.add_argument("--allow-unshaped", action="store_true", help="Debug flag: allow fallback shaper if HarfBuzz is unavailable")
     ap.add_argument("--pages", type=int, default=None, help="Render at most N pages")
     ap.add_argument("--update-golden", action="store_true", help="Explicitly write tools/golden/<corpus>.json")

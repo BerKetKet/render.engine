@@ -122,6 +122,36 @@
         "top": 168,
         "page_bottom": 2203
       }
+    },
+    "tables_images": {
+      "epub": "kindle_tables_images_exam.epub",
+      "captures_zip": "tables_images_standard_captures.zip",
+      "max_pages": 44,
+      "ignore_captures": [],
+      "valid_capture_ranges": [
+        [
+          1,
+          44
+        ]
+      ],
+      "capture_page_ranges": [
+        [
+          1,
+          44
+        ]
+      ],
+      "window_y": [
+        83,
+        2240
+      ],
+      "config": {
+        "size26": 2880,
+        "x0": 79,
+        "right": 1001,
+        "pitch": 68,
+        "top": 168,
+        "page_bottom": 2203
+      }
     }
   }
 }
