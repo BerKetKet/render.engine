@@ -13,6 +13,10 @@
 
 # Changelog
 
+## [1.11.6] - 2026-11-18
+### Fixed
+- HarfBuzz version lock no longer blocks rendering: a different runtime version (for example 8.3.0) runs; non-verified versions warn once on stderr. `KINDLE_RENDER_STRICT_HARFBUZZ=1` restores the hard error (oracle/CI). Missing library is still an error. Zero pixel change.
+
 ## [1.11.5] - 2026-11-18 — Port-Ready Baseline (Zero Pixel Change)
 
 ### Changed

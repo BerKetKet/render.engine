@@ -20,6 +20,9 @@ def _read_locked_harfbuzz_version() -> str:
 
 
 LOCKED_HARFBUZZ_VERSION = _read_locked_harfbuzz_version()
+# Versions whose output was measured byte-identical to the locked one on all corpora (owner-observed 8.3.0; re-verify with tools/ab_diff.py).
+VERIFIED_IDENTICAL_HARFBUZZ = {LOCKED_HARFBUZZ_VERSION, "8.3.0"}
+_hb_warned = []
 _hb_lib_path = ctypes.util.find_library("harfbuzz") or "/usr/lib/x86_64-linux-gnu/libharfbuzz.so.0"
 _hb_load_error = None
 try:
@@ -42,11 +45,17 @@ def verify_harfbuzz(allow_unshaped: bool = False) -> None:
             f"Pass --allow-unshaped only for debugging."
         )
     if _HB_VERSION != LOCKED_HARFBUZZ_VERSION:
-        raise RuntimeError(
+        strict = os.environ.get("KINDLE_RENDER_STRICT_HARFBUZZ", "") not in ("", "0")
+        msg = (
             f"HarfBuzz version mismatch: runtime loaded {_HB_VERSION!r} from {_hb_lib_path!r}, "
-            f"expected {LOCKED_HARFBUZZ_VERSION!r} per requirements.lock. "
-            f"Pass --allow-unshaped only for debugging."
+            f"locked version is {LOCKED_HARFBUZZ_VERSION!r} per requirements.lock."
         )
+        if strict:
+            raise RuntimeError(msg + " (KINDLE_RENDER_STRICT_HARFBUZZ is set; unset it or pass --allow-unshaped.)")
+        if _HB_VERSION not in VERIFIED_IDENTICAL_HARFBUZZ and not _hb_warned:
+            _hb_warned.append(True)
+            import sys
+            print("kindle_render: warning: " + msg + " Output not verified identical for this version.", file=sys.stderr)
 
 
 def get_harfbuzz_info() -> dict:

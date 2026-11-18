@@ -2,9 +2,9 @@
 
 ## Current State
 - **Working Directory**: `/home/bgg/projects/render.engine`
-- **Module**: `kindle_render` v1.11.5
-- **Git Branch**: `main`
-- **Latest Tag**: `v1.11.5`
+- **Module**: `kindle_render` v1.11.6
+- **Git Branch**: `rust-port`
+- **Latest Tag**: `v1.11.6`
 - **Python Runtime**: Python 3.13, FreeType 2.13+, HarfBuzz (Docker lock: 6.0.0, host CachyOS: 15.1.0)
 
 ## What is Verified
@@ -53,12 +53,16 @@
      - Goldens & baseline metrics (`H2`): Updated all goldens to `engine_version: "1.11.5"`, added goldens for `sizes_00..07`, `e3_compact`, `e3_large`, `ti_compact`, `ti_large`, and baseline hash equivalence reports (`baseline_1.11.5.json`, `baseline_1.11.5.md`).
      - HarfBuzz policy (`H3`): Enforced `verify_harfbuzz(cfg.allow_unshaped)` in `Family.__init__` with `--allow-unshaped` in `kindle_render/cli.py` and exact-pin policy documentation in `docs/environment.md`.
      - Added numerics inventory (`docs/numerics_inventory.md`), determinism tests (`tools/test_determinism.py`), and asset/weight documentation (`docs/ASSETS.md`, `docs/repo_weight.md`).
+   - **v1.11.6 (`v1.11.6`)**: Integrated `overlay_hb_fix.zip` (HarfBuzz Non-Blocking Policy):
+     - HarfBuzz version mismatch no longer blocks rendering; non-pinned versions (e.g., 8.3.0, 15.1.0) run with a one-time stderr warning instead of throwing `RuntimeError`.
+     - Strict mode preserved for CI/oracle via `KINDLE_RENDER_STRICT_HARFBUZZ=1`.
+     - Updated `kindle_render/__init__.py` to `1.11.6`, updated `tools/test_harfbuzz_lock.py`, `docs/environment.md`, `CHANGELOG.md`, `STATUS.md`. Zero pixel change.
 
 ## What is Broken / Open Issues
-- **HarfBuzz Host vs Lock**: Host runtime HarfBuzz on CachyOS is `15.1.0`, whereas reproducibility lock in `requirements.lock` targets `6.0.0` (Docker container required for exact shaping reproduction).
+- **HarfBuzz Host vs Lock**: Runtime warning emitted on host CachyOS (HarfBuzz `15.1.0`); strict mode disabled by default per v1.11.6 policy.
 - **Remaining Fixtures**: Master probe fixtures (`master_probe_v1.epub`, etc.) remain untracked per `DATA_PROVENANCE.md` until added.
 - **Backlog Items**: Remaining items (`ul_indent_em`, `cover` p.1, `dl/dt/dd`, complex scripts) tracked in `BACKLOG.md`.
 
 ## Next Steps
 - Evaluate against held-out `exam4` when available.
-- Push release `v1.11.5` and updated branches (`main`, `engine`) and tags to GitHub.
+- Push release `v1.11.6` and updated branches (`main`, `engine`, `rust-port`) and tags to GitHub.

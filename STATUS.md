@@ -1,6 +1,6 @@
-# `kindle_render` Project Status — `v1.11.5` (Port-Ready Baseline)
+# `kindle_render` Project Status — `v1.11.6` (Port-Ready Baseline)
 
-- **Current Version**: `1.11.5` (target tag: `v1.11.5`)
+- **Current Version**: `1.11.6` (target tag: `v1.11.6`; HarfBuzz lock is now warn-only, see docs/environment.md)
 - **Hash Equivalence vs `v1.11.4`**: `YES` — `100%` identical per-page pixel and layout SHA-256 across all corpora (`probe`, `exam1`, `exam2`, `exam3_normal`, `exam3_small`, `e3_compact`, `e3_large`, `tables_images`, `ti_compact`, `ti_large`, `synthetic`, and `sizes_00..sizes_07`).
 - **Environment Pin**: Python `3.11.x`, HarfBuzz `6.0.0` (exact pin enforced in `Family.__init__` per `docs/environment.md`), FreeType `2.12.1`, Pillow `10.2.0`, NumPy `1.26.x`.
 
