@@ -29,3 +29,25 @@ Per the prep handoff rules, no fidelity tuning was performed after freezing the 
 
 - **`epub.py:_collapse` Drops `run.bg` on `<mark>` Runs (`epub.py:668`)**:
   - `_collapse(runs)` constructs `r_copy = Run(...)` without passing `bg=getattr(r, 'bg', None)`, causing `<mark>` background highlights parsed in `walk()` (`new_inline["bg"] = (255, 255, 0)`) to be silently dropped before `build_items`. Preserved in v1.7.0 per zero-pixel-change rule (`exam2` p.40 and `synthetic` p.3 depend on this).
+
+
+## 8. v1.11.4 Candidate Evaluation — Rejected Candidates & Pitch-Ratio Threshold Audit
+
+### Rejected Reviewer Candidates (Measured on `v1.11.3`)
+- **Candidate A (`REJECT`, `MEASURED`) — Downscaled image (`s < 1.0`) `ceil` rounding in `page.py:add_image`**:
+  - Replacing `round(nat_w * s)` / `round(nat_h * s)` with `ceil(...)` when `s < 1.0` improved `exam2` p36 (`88.7311% -> 92.8332%`, `+4.1021 pt`, `-95,562` diff px) only by accidentally compensating for an upstream `-2 px` vertical offset on that page (`HYPOTHESIS`), while regressing **20 pages across 7 corpora** (`+620,664` net diff pixels): `exam1` p48 (`-1.6427 pt`), `exam3_normal` p58 (`99.6133% -> 95.6930%`, `-3.9203 pt`, `+91,325` diff px), `exam3_small` p36 (`-0.1136 pt`), `e3_large` p84 (`99.6020% -> 96.9735%`, `-2.6285 pt`, `+61,233` diff px), `tables_images` p25 (`-0.5881 pt`), 7 pages of `ti_compact` (`+70,146` diff px), and 9 pages of `ti_large` (`+512,053` diff px, up to `-4.1301 pt` on p41) (`MEASURED`).
+  - Direct device image bounding-box measurements confirm the device uses `round`, not `ceil`: `e3_std` p58 (`258.16 -> 258 px`), `e3_large` p84 (`229.04 -> 229 px`), `ti_large` 3:2 images (`545.33 -> 545 px` across 9 pages), and `ti_large` p41 (`136.33 -> 136 px`) (`MEASURED`).
+- **Candidate B (`REJECT`, `MEASURED`) — Apostrophe word splitting in `hyphen.py:hyphenate_word`**:
+  - `0` changed pixels (`0.0000%` delta) across all 10 capture datasets and `synthetic` (`MEASURED`). `kindle_render/layout.py:441-447` (`build_items`) already separates leading apostrophe prefixes (`1 <= a_idx <= 6`) into `lead_punct` and passes the purely alphabetic right-hand word to `hyphenate_word`.
+- **Candidate C (`REJECT`, `MEASURED`) — Line-breaking tolerance ladder `tol * 8` in `layout.py:make_lines`**:
+  - `0` changed pixels (`0.0000%` delta) across all 10 capture datasets and `synthetic` (`MEASURED`). Every paragraph in all 6 EPUB corpora breaks within `(tol, tol * 2, tol * 4)`.
+
+### `1.11.x` Pitch-vs-Size Ratio Thresholds in `page.py` Resting on One Active Geometry (Requires 8-Size Series `size_01..03, 05..07` Verification)
+- **`eff_body_pitch = max(float(std_body_pitch), (68.0 / 45.0) * c.size_px())` (`page.py:392, 553`)**:
+  - Active when `extra_lead > 0.0` and `std_body_pitch / size_px < 68/45` (`1.5111`). Currently rests on `size_00_Bookerly` (`34/51`, ratio `1.5000`) vs `size_04_Bookerly` (`45/68`, ratio `1.5111`) and `theme_Large` (`50/82`, ratio `1.6400`) (`MEASURED`). Must be verified on `size_01..03` and `size_05..07` once those capture sets are uploaded.
+- **`elif std_body_pitch < (68.0 / 45.0) * c.size_px(): gap -= 1` (`page.py:562`)**:
+  - Post-`h1` list gap `-1 px` adjustment in the `extra_lead > 0.0` regime. Active branch (`< 68/45`) rests on `size_00_Bookerly` (`34/51`, p25 `e04_blocks`) (`MEASURED`). Must be checked on `size_01..03, 05..07`.
+- **`is_tall_lead = std_body_pitch < 3 * (std_body_pitch - c.size_px())` (`page.py:547`, equivalent to `std_body_pitch > 1.5 * c.size_px()`)**:
+  - Switches `h5`/`h6` `mt_lead_k` and `mb_lead_k` slopes between `size_00_Bookerly` (`34/51`, `pitch/size = 1.5000`) and `size_04_Bookerly` (`45/68`, `pitch/size = 1.5111`) / `theme_Large` (`50/82`, `pitch/size = 1.6400`) (`MEASURED`). Boundary rests on `34/51` vs `45/68`; must be checked across `size_01..03, 05..07`.
+- **`D(ii)` Interaction on `e3_compact` p32 (`e08_verse`, `39/53`)**:
+  - Under `extra_lead == 0.0`, `gap -= 1` on `b.heading == 0 and prev_h == 1 and b.left_em > 0.0 and list_level == 0` brings `probe` p87 `<blockquote>` and `<pre>` (`band 2..9`) to `0 px` residual (`-32,565` diff px), while shifting `e3_compact` p32 (`e08_verse`, where `<h1>` already has a `-1 px` residual under Compact `39/53`) from `-1 px` to `-2 px` (`+7,825` diff px). Once the Compact `h1` `-1 px` top-margin residual is resolved, `e3_compact` p32 will align automatically (`HYPOTHESIS`).

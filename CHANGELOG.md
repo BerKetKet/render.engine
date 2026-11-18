@@ -13,6 +13,13 @@
 
 # Changelog
 
+## [1.11.4] - 2026-11-18
+
+### Changed
+- **Nested `<ul>` Indentation (`config.py`, `epub.py`)**: Restored `ul_nested_indent_em` from `1.9762` to the exact CSS `2.0000` em (`MEASURED`), improving nested unordered list alignment across all 6 tested geometries (`probe` p87, `exam1` p45–46, `exam3_normal` p39, `exam3_small` p25, `e3_compact` p26, `e3_large` p57) with zero lost exact pages (`-48,597` diff pixels across Step-1 corpora).
+- **Tight-Regime Block & Bullet Spacing (`page.py`)**: In the `extra_lead == 0.0` regime, rounded first-item bullet top margin `mt = int(round(b.mt_em * vem_px * b.scale))` for `bullet == '•'` (`D(i)`) and applied `gap -= 1` to indented non-list blocks (`b.left_em > 0.0 and list_level == 0`) directly following `<h1>` (`D(ii)`), bringing `probe` p87 `<blockquote>` and `<pre>` (`bands 2..9`) from `+1 px` shift to `0 px` (`29/29` bands at `shift = 0`, `probe` p87 pixel match `97.9045% -> 99.3024%`, `+1.3979 pt`) (`MEASURED`).
+- **Candidate Evaluation & Pitch-Ratio Audit (`tools/reports/incorporate/REPORT.md`, `BACKLOG.md`)**: Evaluated Reviewer Candidates A, B, C, and D against device captures (`tools/reports/incorporate/base_1.11.3.json`), rejecting Candidate A (downscale `ceil` rounding, `+620,664` diff px regression across 20 pages), Candidate B (`0` diff px; apostrophes already split in `layout.py:441-447`), and Candidate C (`0` diff px; `tol*8` never reached), and documented all `1.11.x` pitch-vs-size ratio thresholds in `page.py`.
+
 ## [1.11.3] - 2026-11-18
 
 ### Fixed

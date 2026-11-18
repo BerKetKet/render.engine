@@ -83,12 +83,12 @@
 - In `kindle_render/layout.py:build_items`, extended cross-Box GPOS kerning to directly adjacent `Box` items (`isinstance(items[idx + 1], Box) and not n1[0].isupper()`) sharing the same `Face`, so inline span boundaries inside an unspaced word (e.g. `<u>underlined words</u>,`, `<s>struck words</s>,`, `<span class="red">red words</span>,`, `<span class="blue">blue words</span>,`) apply the exact same OpenType GPOS kerning (`-20 FUnits` on `s` + `comma`) as single-run shaping.
 - Reduced `e3_std` (`e07_inline` p42–47) diff by `-49,313 px` (`762,672 -> 713,359`) and `e3_small` (`e07_inline` p27–30) diff by `-30,263 px` (`879,278 -> 849,015`) with `lost = 0` and `0` pages with more diff across all datasets.
 
-## `v1.11.3` — Task C4: Untruncated `float32` First-Line `text-indent` Subpixel Tie-Breaking
+## `v1.11.4` — Task C4: Untruncated `float32` First-Line `text-indent` Subpixel Tie-Breaking
 - Passed the fractional 26.6 subpixel remainder `indent_frac26 = (indent_em * size_px * 64.0) - indent26` (which is `+0.2` at `34 px` and `39 px` for `text-indent: 1.2em`) into `layout_line` for the `sub == 31` (`m_glues == 1`) `float32` pen accumulation check.
 - Gained `+3` exact pages on `e3_small` (`29 -> 32/54`: `p4`, `p37`, `p40`), `+4` position-exact lines (`1514 -> 1518/1651`), and `-828` diff px (`849,015 -> 848,187`) with `lost = 0` and `0` pages with more diff across all datasets.
 
-## NEXT (Post-`v1.11.3` Resume Instructions)
-- **Full 9-Dataset Metrics Summary (`v1.11.0` -> `v1.11.3`, `lost = 0` everywhere)**:
+## NEXT (Post-`v1.11.4` Resume Instructions)
+- **Full 9-Dataset Metrics Summary (`v1.11.0` -> `v1.11.4`, `lost = 0` everywhere)**:
   - `exam1` (`45/68`): `50 -> 50/70` exact | `1,516,617 -> 1,516,617` diff px | `1452 -> 1452/1568` pos lines
   - `exam2` (`42/57`): `40 -> 40/65` exact | `1,034,912 -> 1,034,912` diff px | `1395 -> 1395/1529` pos lines
   - `e3_std` (`45/68`): `60 -> 60/82` exact | `762,672 -> 713,359` diff px (`-49,313`) | `1899 -> 1899/2027` pos lines
@@ -112,3 +112,12 @@
   python3 tools/test_bugfixes.py
   python3 tools/score_all.py --out current.json
   ```
+
+### v1.11.4 — Reviewer Candidate Evaluation & Incorporation (`Candidate D`)
+- **Kept (`Candidate D`)**: `ul_nested_indent_em = 2.0000`, `bullet == '•'` first-item `mt = int(round(...))`, and `gap -= 1` for indented non-list blocks (`b.left_em > 0.0`) after `<h1>` under `extra_lead == 0.0` (`MEASURED`).
+  - `probe` (`42/57`): `43/86` exact, mean match `99.8054% -> 99.8217%` (`-32,565` diff px; p87 `97.9045% -> 99.3024%`, `29/29` bands at `shift = 0`).
+  - `exam1` (`45/68`): `50/70` exact, mean match `99.0700% -> 99.0760%` (`-9,813` diff px on p45–46).
+  - `exam3_normal` (`45/68`): `60/82` exact, mean match `99.6266% -> 99.6294%` (`-5,344` diff px on p39).
+  - `exam3_small` (`34/51`): `32/54` exact, mean match `99.3257% -> 99.3281%` (`-2,950` diff px on p25).
+  - `e3_large` (`50/82`): `87/124` exact, mean match `99.0745% -> 99.0766%` (`-5,827` diff px on p57).
+- **Rejected (`Candidates A, B, C`)**: Logged in `BACKLOG.md` and `tools/reports/incorporate/REPORT.md` with full measurements.
