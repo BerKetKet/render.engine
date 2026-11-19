@@ -585,7 +585,7 @@ class Pager:
                 gap -= 1
 
         if b.heading and not self.page_empty and (not getattr(b, "next_is_heading", False) or len(lines) == 1):
-            if ((not getattr(b, "next_is_heading", False) and not b.mt_em and len(lines) == 2 and self.y + gap + 2 * pitch_fl > c.page_bottom)
+            if ((not getattr(b, "next_is_heading", False) and len(lines) >= 2 and self.y + gap + c.widow_orphan * pitch_fl > c.page_bottom)
                     or (self.y + gap + len(lines) * pitch_fl <= c.page_bottom
                         and self.y + gap + len(lines) * pitch_fl + mb_est + std_body_pitch > c.page_bottom)):
                 self.new_page()
