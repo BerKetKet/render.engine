@@ -27,6 +27,13 @@ from .ir import (
 def _rhu(x: float) -> int:
     return int(math.floor(x + 0.5))
 
+
+def _dashed_rule_phase(length: int, on_px: int = 11, off_px: int = 5) -> int:
+    period = on_px + off_px
+    n_per = int(round(length / float(period)))
+    d0 = (length - n_per * period + on_px) // 2
+    return (on_px - d0) % period
+
 def _skia_bilerp_rgb(im: Image.Image, W_out: int, H_out: int, x0: float = -0.009802, sx: float = 0.0, y0: float = -0.041117, sy: float = 0.0) -> np.ndarray:
     arr = np.array(im.convert("RGB"), dtype=np.float64)
     H_in, W_in = arr.shape[:2]
@@ -1252,66 +1259,119 @@ class Pager:
             col_l_pad.append(lp)
             col_r_pad.append(rp)
 
-        # Partition rows [0..nrows) into page chunks when a table splits across pages
+        # Partition rows into page chunks with line-level (mid-row) splitting when needed
+        def _slice_h(ri_s: int, l0_s: int, l1_s: int) -> int:
+            n_tot = row_max_lines[ri_s]
+            if l0_s == 0 and l1_s == n_tot:
+                return row_hs[ri_s]
+            k_s = l1_s - l0_s
+            if l0_s == 0:
+                return top_pad + k_s * wrap_line_p + (row_pad // 2)
+            if l1_s == n_tot:
+                return k_s * wrap_line_p + max(0, row_pad - top_pad)
+            return k_s * wrap_line_p
+
         row_chunks = []
         r_cur = 0
+        l_cur = 0
         sim_y = self.y
+        limit_y = (c.page_bottom - chrome_h) if has_chrome else c.page_bottom
         while r_cur < nrows:
-            limit_y = (c.page_bottom - chrome_h) if has_chrome else c.page_bottom
-            r_end = r_cur
+            cur_slices = []
             acc_h = 0
-            while r_end < nrows:
-                if sim_y + acc_h + row_hs[r_end] > limit_y and r_end > r_cur:
-                    break
-                acc_h += row_hs[r_end]
-                r_end += 1
-            if r_end == r_cur:
-                r_end = r_cur + 1
-            row_chunks.append((r_cur, r_end))
-            r_cur = r_end
+            while r_cur < nrows:
+                n_tot = row_max_lines[r_cur]
+                rem_h_chunk = _slice_h(r_cur, l_cur, n_tot)
+                if sim_y + acc_h + rem_h_chunk <= limit_y:
+                    cur_slices.append((r_cur, l_cur, n_tot))
+                    acc_h += rem_h_chunk
+                    r_cur += 1
+                    l_cur = 0
+                    continue
+                # Row does not fit whole; attempt line-level split if eligible
+                wo = max(2, c.widow_orphan)
+                can_split = (has_chrome and not has_spans and (n_tot - l_cur) >= 2 * wo)
+                if can_split:
+                    best_k = 0
+                    for k_try in range(wo, n_tot - l_cur - wo + 1):
+                        if sim_y + acc_h + _slice_h(r_cur, l_cur, l_cur + k_try) <= limit_y:
+                            best_k = k_try
+                        else:
+                            break
+                    if best_k >= wo:
+                        cur_slices.append((r_cur, l_cur, l_cur + best_k))
+                        acc_h += _slice_h(r_cur, l_cur, l_cur + best_k)
+                        l_cur += best_k
+                        break
+                if not cur_slices:
+                    # Force progress if even a single row/line exceeds page height
+                    cur_slices.append((r_cur, l_cur, n_tot))
+                    r_cur += 1
+                    l_cur = 0
+                break
+            row_chunks.append(cur_slices)
             sim_y = c.top
 
         rx0 = c.x0
         rx1 = min(c.right, c.x0 + table_w + 1)
 
-        for chunk_idx, (r0, r1) in enumerate(row_chunks):
+        for chunk_idx, chunk_slices in enumerate(row_chunks):
             if chunk_idx > 0:
                 self.new_page()
                 self._ensure_block_meta_on_page(block_idx, b, kind_override="table", table_rows_meta=table_rows_meta)
                 if has_chrome:
+                    d_ph = _dashed_rule_phase(rx1 - rx0)
                     self.cur_ir_page.commands.append(RuleCommand(
-                        x0=rx0, y0=c.top - 1, x1=rx1, y1=c.top + 2, color=(0, 0, 0), role="table_rule"
+                        x0=rx0, y0=c.top - 1, x1=rx1, y1=c.top, color=(234, 234, 234), role="table_rule", dash=(11, 5), dash_phase=d_ph
+                    ))
+                    self.cur_ir_page.commands.append(RuleCommand(
+                        x0=rx0, y0=c.top, x1=rx1, y1=c.top + 2, color=(0, 0, 0), role="table_rule", dash=(11, 5), dash_phase=d_ph
+                    ))
+                    self.cur_ir_page.commands.append(RuleCommand(
+                        x0=rx0, y0=c.top + 2, x1=rx1, y1=c.top + 3, color=(21, 21, 21), role="table_rule", dash=(11, 5), dash_phase=d_ph
                     ))
                     self._mark_page_non_empty()
 
             row_ys = [self.y]
-            for rh in row_hs[r0:r1]:
-                row_ys.append(row_ys[-1] + rh)
+            slice_map = {}
+            for s_idx, (s_ri, s_l0, s_l1) in enumerate(chunk_slices):
+                slice_map[s_ri] = (s_idx, s_l0, s_l1)
+                row_ys.append(row_ys[-1] + _slice_h(s_ri, s_l0, s_l1))
 
             last_base = self.y
             for ri, ci, lines_c, is_h, align, cs, rs, face in wrapped_cells:
-                if not (r0 <= ri < r1):
+                if ri not in slice_map:
                     continue
-                local_ri = ri - r0
-                local_rs = min(rs, r1 - ri)
-                y_top = row_ys[local_ri] + top_pad
+                local_ri, sl0, sl1 = slice_map[ri]
+                local_rs = min(rs, len(chunk_slices) - local_ri)
+                if sl0 > 0:
+                    if len(lines_c) <= sl0:
+                        continue
+                    draw_lines_c = lines_c[sl0:min(len(lines_c), sl1)]
+                else:
+                    draw_lines_c = lines_c[:min(len(lines_c), sl1)]
+                is_partial_top = (sl0 == 0 and sl1 < row_max_lines[ri])
+                is_partial_cont = (sl0 > 0)
+                y_top = row_ys[local_ri] + (0 if is_partial_cont else top_pad)
                 y_bot = row_ys[local_ri + local_rs]
                 span_h = y_bot - row_ys[local_ri]
-                n_l = len(lines_c)
+                n_l = len(draw_lines_c)
                 block_h = line_p + (n_l - 1) * wrap_line_p if n_l > 1 else line_p
+                eff_row_pad = (row_pad // 2) if is_partial_top else (max(0, row_pad - top_pad) if (is_partial_cont and sl1 == row_max_lines[ri]) else (0 if is_partial_cont else row_pad))
                 if local_rs > 1:
                     first_base = self.baseline_in(row_ys[local_ri] + top_pad, line_p, tbl_size26)
-                    last_sp_base = self.baseline_in(row_ys[local_ri + local_rs - 1] + top_pad + (row_max_lines[ri + local_rs - 1] - 1) * line_p, line_p, tbl_size26)
+                    last_sp_ri = chunk_slices[local_ri + local_rs - 1][0]
+                    last_sp_base = self.baseline_in(row_ys[local_ri + local_rs - 1] + top_pad + (row_max_lines[last_sp_ri] - 1) * line_p, line_p, tbl_size26)
                     if has_spans:
                         last_sp_base += 1
                     mid_base = (first_base + last_sp_base) // 2
                     y_start = None
                 else:
                     mid_base = None
-                    y_start = y_top + max(0, (span_h - row_pad - block_h) // 2)
+                    y_start = y_top + max(0, (span_h - eff_row_pad - block_h) // 2)
                 x_left = col_xs[ci]
                 x_right = col_xs[ci + cs]
-                for li, (ltxt, ends_with_synth_hy) in enumerate(lines_c):
+                for li, (ltxt, ends_with_synth_hy) in enumerate(draw_lines_c):
                     cur_line_idx = self._line_counter
                     self._line_counter += 1
                     if mid_base is not None:
@@ -1408,19 +1468,22 @@ class Pager:
                     frac = rule_y_float - self.y
                     g_top = int(round(255.0 * frac))
                     g_bot = 255 - g_top
+                    is_split_bot = (chunk_idx < len(row_chunks) - 1)
+                    d_pat = (11, 5) if is_split_bot else None
+                    d_ph = _dashed_rule_phase(rx1 - rx0) if is_split_bot else 0
                     if 0 < g_top < 255:
                         self.cur_ir_page.commands.append(RuleCommand(
-                            x0=rx0, y0=self.y, x1=rx1, y1=self.y + 1, color=(g_top, g_top, g_top), role="table_rule"
+                            x0=rx0, y0=self.y, x1=rx1, y1=self.y + 1, color=(g_top, g_top, g_top), role="table_rule", dash=d_pat, dash_phase=d_ph
                         ))
                         self.cur_ir_page.commands.append(RuleCommand(
-                            x0=rx0, y0=self.y + 1, x1=rx1, y1=self.y + 3, color=(0, 0, 0), role="table_rule"
+                            x0=rx0, y0=self.y + 1, x1=rx1, y1=self.y + 3, color=(0, 0, 0), role="table_rule", dash=d_pat, dash_phase=d_ph
                         ))
                         self.cur_ir_page.commands.append(RuleCommand(
-                            x0=rx0, y0=self.y + 3, x1=rx1, y1=self.y + 4, color=(g_bot, g_bot, g_bot), role="table_rule"
+                            x0=rx0, y0=self.y + 3, x1=rx1, y1=self.y + 4, color=(g_bot, g_bot, g_bot), role="table_rule", dash=d_pat, dash_phase=d_ph
                         ))
                     else:
                         self.cur_ir_page.commands.append(RuleCommand(
-                            x0=rx0, y0=self.y, x1=rx1, y1=self.y + 4, color=(0, 0, 0), role="table_rule"
+                            x0=rx0, y0=self.y, x1=rx1, y1=self.y + 4, color=(0, 0, 0), role="table_rule", dash=d_pat, dash_phase=d_ph
                         ))
                     icon_rgb = _render_table_icon_rgb(frac)
                     ih, iw = icon_rgb.shape[:2]
@@ -1472,18 +1535,19 @@ class Pager:
         nat_w = base_w * sc
         nat_h = base_h * sc
         w_pct = getattr(b, "img_width_pct", None)
+        cx = (lx + rx) / 2.0
         if w_pct is not None and w_pct > 0:
             target_w = max(1, int(round(maxw * w_pct)))
             target_h = max(1, int(round(im.height * (target_w / float(im.width)))))
             if target_h > maxh:
                 target_w = max(1, int(round(target_w * (maxh / float(target_h)))))
                 target_h = maxh
+            w_fl, h_fl = float(target_w), float(target_h)
         else:
             s = min(1.0, maxw / nat_w, maxh / nat_h)
             w_fl = nat_w * s
             h_fl = nat_h * s
             if maxw != 922 or getattr(b, "img_css_w", None) is not None:
-                cx = (lx + rx) / 2.0
                 x0_sn = int(math.floor(cx - w_fl / 2.0 + 0.5))
                 x1_sn = int(math.floor(cx + w_fl / 2.0 + 0.5))
                 target_w = max(1, x1_sn - x0_sn)
@@ -1495,8 +1559,10 @@ class Pager:
         mt_px = int(round(max(self.prev_mb, getattr(b, "mt_em", 0.0) * vem_px))) if not self.page_empty else 0
         rem_h = c.page_bottom - (self.y + mt_px)
         if not self.page_empty and not b.page_break_before and target_h > rem_h and rem_h >= 1000 and target_h < 1500:
-            scale_rem = rem_h / float(target_h)
-            target_w = max(1, int(math.floor(target_w * scale_rem + 0.5)))
+            w_fl2 = w_fl * (rem_h / h_fl)
+            x0_sn = int(math.floor(cx - w_fl2 / 2.0 + 0.5))
+            x1_sn = int(math.floor(cx + w_fl2 / 2.0 + 0.5))
+            target_w = max(1, x1_sn - x0_sn)
             target_h = max(1, rem_h)
         im = im.resize((target_w, target_h), Image.BILINEAR)
 

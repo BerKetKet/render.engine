@@ -129,11 +129,13 @@ class RuleCommand:
     color: Tuple[int, int, int]
     role: str = "rule"
     link_href: Optional[str] = None
+    dash: Optional[Tuple[int, int]] = None
+    dash_phase: int = 0
     kind: str = "rule"
 
     def to_dict(self) -> Dict[str, Any]:
         is_fl = (self.role == "link_underline")
-        return {
+        out = {
             "kind": "rule",
             "role": self.role,
             "x0": round(float(self.x0), 6) if is_fl else int(self.x0),
@@ -143,6 +145,10 @@ class RuleCommand:
             "color": list(self.color),
             "link_href": self.link_href,
         }
+        if self.dash is not None:
+            out["dash"] = [int(self.dash[0]), int(self.dash[1])]
+            out["dash_phase"] = int(self.dash_phase)
+        return out
 
 
 @dataclass
@@ -343,6 +349,7 @@ def _cmd_from_dict(d: Dict[str, Any], image_store: Optional[Dict[str, np.ndarray
     if k == "rule":
         role = str(d.get("role", "rule"))
         is_fl = (role == "link_underline")
+        dash_val = d.get("dash")
         return RuleCommand(
             x0=float(d["x0"]) if is_fl else int(d["x0"]),
             y0=float(d["y0"]) if is_fl else int(d["y0"]),
@@ -351,6 +358,8 @@ def _cmd_from_dict(d: Dict[str, Any], image_store: Optional[Dict[str, np.ndarray
             color=tuple(int(c) for c in d["color"]),
             role=role,
             link_href=d.get("link_href"),
+            dash=(int(dash_val[0]), int(dash_val[1])) if dash_val is not None else None,
+            dash_phase=int(d.get("dash_phase", 0)),
         )
     if k == "ring_bullet":
         return RingBulletCommand(
