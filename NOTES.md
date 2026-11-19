@@ -2,9 +2,9 @@
 
 ## Current State
 - **Working Directory**: `/home/bgg/projects/render.engine`
-- **Module**: `kindle_render` v1.11.6
+- **Module**: `kindle_render` v1.11.7
 - **Git Branch**: `engine`
-- **Latest Tag**: `v1.11.6`
+- **Latest Tag**: `v1.11.7`
 - **Python Runtime**: Python 3.13, FreeType 2.13+, HarfBuzz (Docker lock: 6.0.0, host CachyOS: 15.1.0)
 
 ## Scope
@@ -52,6 +52,12 @@
      - Added dashed split rules (11/5 centered phase, 3px AA) to `RuleCommand` in `ir.py`, `raster.py`, and `page.py`.
      - Float-dimension image remainder fit with `maxw != 922` guard retained for `exam1` p49.
      - Reduced 3-theme tables/images diff by `-64,032` pixels (`25,627,789 -> 25,563,757`). All golden suites pass.
+   - **v1.11.7 (`v1.11.7`)**: Integrated `overlay_h1.zip` (Heading Keep-Together & H1/H2/H3 Investigation):
+     - Relaxed heading page-break keep-together rule in `kindle_render/page.py:add_text_block` from `not b.mt_em and len(lines) == 2 and self.y + gap + 2 * pitch_fl > c.page_bottom` to `len(lines) >= 2 and self.y + gap + c.widow_orphan * pitch_fl > c.page_bottom`.
+     - Eliminates orphan 1-line heading splits on `sizes_02` (`-557,767` diff px), `sizes_06` (`-1,508,004` diff px, `93.7172% -> 94.3645%`), and `e3_compact` (`-233,081` diff px, `98.4009% -> 98.5796%`), with `0` lost exact pages and `0` regressions across all other corpora (`-2,298,852` diff px total).
+     - Linked `size_01..03` and `size_05..07` capture directories in `tools/profiles.json` for full 8-size Bookerly scoring.
+     - Documented pre-registered hypotheses in `docs/hypotheses/headings_v1.md`, H3 long-word measurements in `tools/reports/headings/h3_longwords.md`, and H2/H3 wrap residuals in `BACKLOG.md`.
+     - Updated goldens for `e3_compact.json`, `sizes_02.json`, and `sizes_06.json`.
 
 ## What is Broken / Open Issues
 - **HarfBuzz Host vs Lock**: Runtime warning emitted on host CachyOS (HarfBuzz `15.1.0`); strict mode disabled by default per v1.11.6 policy.
@@ -60,4 +66,4 @@
 
 ## Next Steps
 - Evaluate against held-out `exam4` when available.
-- Push release `v1.11.6` and updated branches (`main`, `engine`, `rust-port`) and tags to GitHub.
+- Track incoming updates or porting tasks for Rust implementation.
