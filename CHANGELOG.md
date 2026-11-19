@@ -13,6 +13,13 @@
 
 # Changelog
 
+## [1.11.7] - 2026-11-19 — Heading Widow/Orphan Keep-Together (H1) & H2/H3 Investigation
+
+### Fixed
+- **Heading Keep-Together (`H1`, `kindle_render/page.py:add_text_block`)**: Relaxed the heading page-break rule from `not b.mt_em and len(lines) == 2 and self.y + gap + 2 * pitch_fl > c.page_bottom` to `len(lines) >= 2 and self.y + gap + c.widow_orphan * pitch_fl > c.page_bottom`. Eliminates orphan 1-line heading splits on `sizes_02` (`-557,767` diff px), `sizes_06` (`-1,508,004` diff px, `93.7172% -> 94.3645%`), and `e3_compact` (`-233,081` diff px, `98.4009% -> 98.5796%`) while preserving the device's `2 + 2` 4-line heading split on `sizes_05` p39->40 (`-2,298,852` diff px total, `0` lost exact pages, `0` regressions on all other corpora).
+- **8-Size Capture Profiles (`tools/profiles.json`)**: Linked `exam/v3/size_01..03_Bookerly` and `size_05..07_Bookerly` capture directories for full 8-size scoring.
+- **Pre-Registered Hypotheses & Investigations**: Recorded H1/H2/H3 in `docs/hypotheses/headings_v1.md`, H3 long-word measurements in `tools/reports/headings/h3_longwords.md`, and H2/H3 residuals in `BACKLOG.md`.
+
 ## [1.11.6] - 2026-11-18
 ### Fixed
 - HarfBuzz version lock no longer blocks rendering: a different runtime version (for example 8.3.0) runs; non-verified versions warn once on stderr. `KINDLE_RENDER_STRICT_HARFBUZZ=1` restores the hard error (oracle/CI). Missing library is still an error. Zero pixel change.
