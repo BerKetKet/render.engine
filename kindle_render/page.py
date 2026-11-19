@@ -1056,7 +1056,11 @@ class Pager:
                 return 75.5
             if col_align[ci] == "right":
                 return 36.5 if ci == ncols - 1 else 49.0
-            return 64.0 if ci == 0 else 49.0
+            if ci == 0:
+                return 64.0
+            if ci == ncols - 1 and tot_1x > avail_w:
+                return 61.0
+            return 49.0
 
         max_w = [0.0] * ncols
         min_w = [0.0] * ncols
@@ -1254,7 +1258,7 @@ class Pager:
                 lp = (17.0 if is_h else 1.0) if ci == 0 else 24.5
                 rp = 36.5 if ci == ncols - 1 else 24.5
             else:
-                lp = 36.5 if ci == 0 else 24.5
+                lp = 36.5 if ci == 0 else (13.5 if (ci == ncols - 1 and tot_1x > avail_w and col_align[ci] != "right") else 24.5)
                 rp = 36.5 if ci == ncols - 1 else 24.5
             col_l_pad.append(lp)
             col_r_pad.append(rp)
