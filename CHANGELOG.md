@@ -13,6 +13,11 @@
 
 # Changelog
 
+## [1.11.8] - 2026-11-19 — Group A: Full-Width Wrapping Table Column Padding
+
+### Fixed
+- **Group A (`kindle_render/page.py:add_table`)**: For full-width wrapping collapsed tables (`tot_1x > avail_w`, `sc_tbl > 0.75`, `not has_spans`), aligned last-column allocation (`_col_pad2 = 61.0`) and left-aligned final-column inner left padding (`13.5`) across all three themes. Aligns `Table 5.1` (`Row / Detail / Amount`) `Amount` column within `1–3 px` of device captures on Standard, Compact, and Large, reducing 3-theme total diff by **`-95,707` px** (`25,563,757 -> 25,468,050`: Standard `-88,120`, Compact `-4,462`, Large `-3,125`) with `0` lost exact pages, unchanged page counts (`44/35/57`), and `15/15` regression goldens passing.
+
 ## [1.11.7] - 2026-11-19 — Heading Widow/Orphan Keep-Together (H1) & H2/H3 Investigation
 
 ### Fixed

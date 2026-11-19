@@ -2,9 +2,9 @@
 
 ## Current State
 - **Working Directory**: `/home/bgg/projects/render.engine`
-- **Module**: `kindle_render` v1.11.7
+- **Module**: `kindle_render` v1.11.8
 - **Git Branch**: `engine`
-- **Latest Tag**: `v1.11.7`
+- **Latest Tag**: `v1.11.8`
 - **Python Runtime**: Python 3.13, FreeType 2.13+, HarfBuzz (Docker lock: 6.0.0, host CachyOS: 15.1.0)
 
 ## Scope
@@ -58,6 +58,12 @@
      - Linked `size_01..03` and `size_05..07` capture directories in `tools/profiles.json` for full 8-size Bookerly scoring.
      - Documented pre-registered hypotheses in `docs/hypotheses/headings_v1.md`, H3 long-word measurements in `tools/reports/headings/h3_longwords.md`, and H2/H3 wrap residuals in `BACKLOG.md`.
      - Updated goldens for `e3_compact.json`, `sizes_02.json`, and `sizes_06.json`.
+   - **v1.11.8 (`v1.11.8`)**: Integrated `overlay_tables_A.zip` (Group A: Full-Width Wrapping Table Column Padding):
+     - In `kindle_render/page.py:add_table`: for full-width wrapping collapsed tables (`tot_1x > avail_w`), aligned last-column allocation (`_col_pad2 = 61.0`) and left-aligned final-column inner left padding (`13.5`) across all three themes.
+     - Aligns `Table 5.1` (`Row / Detail / Amount`) `Amount` column within `1–3 px` of device captures on Standard, Compact, and Large.
+     - Reduces 3-theme total diff by **`-95,707` px** (`25,563,757 -> 25,468,050`: Standard `-88,120`, Compact `-4,462`, Large `-3,125`) with `0` lost exact pages, unchanged page counts (`44/35/57`), and `15/15` regression goldens passing.
+     - Documented pre-registered hypotheses in `docs/hypotheses/tables_v2.md`.
+     - Updated goldens for `tables_images.json`, `ti_compact.json`, and `ti_large.json`.
 
 ## What is Broken / Open Issues
 - **HarfBuzz Host vs Lock**: Runtime warning emitted on host CachyOS (HarfBuzz `15.1.0`); strict mode disabled by default per v1.11.6 policy.
