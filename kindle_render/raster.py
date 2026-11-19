@@ -436,7 +436,17 @@ class Rasterizer:
                 x1 = min(W, int(cmd.x1))
                 y1 = min(H, int(cmd.y1))
                 if y1 > y0 and x1 > x0:
-                    canvas[y0:y1, x0:x1] = np.array(cmd.color, dtype=np.float32)
+                    col_arr = np.array(cmd.color, dtype=np.float32)
+                    dash = getattr(cmd, "dash", None) if k == "rule" else None
+                    if dash is not None:
+                        on_px, off_px = int(dash[0]), int(dash[1])
+                        period = max(1, on_px + off_px)
+                        phase = int(getattr(cmd, "dash_phase", 0))
+                        xs = (np.arange(x0, x1) - int(cmd.x0) + phase) % period
+                        mask = xs < on_px
+                        canvas[y0:y1, x0:x1][:, mask] = col_arr
+                    else:
+                        canvas[y0:y1, x0:x1] = col_arr
             elif k == "ring_bullet":
                 cx, cy, r = int(cmd.cx), int(cmd.cy), int(cmd.r)
                 col_arr = np.array(cmd.color, dtype=np.float32)

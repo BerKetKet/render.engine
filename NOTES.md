@@ -53,10 +53,13 @@
      - Goldens & baseline metrics (`H2`): Updated all goldens to `engine_version: "1.11.5"`, added goldens for `sizes_00..07`, `e3_compact`, `e3_large`, `ti_compact`, `ti_large`, and baseline hash equivalence reports (`baseline_1.11.5.json`, `baseline_1.11.5.md`).
      - HarfBuzz policy (`H3`): Enforced `verify_harfbuzz(cfg.allow_unshaped)` in `Family.__init__` with `--allow-unshaped` in `kindle_render/cli.py` and exact-pin policy documentation in `docs/environment.md`.
      - Added numerics inventory (`docs/numerics_inventory.md`), determinism tests (`tools/test_determinism.py`), and asset/weight documentation (`docs/ASSETS.md`, `docs/repo_weight.md`).
-   - **v1.11.6 (`v1.11.6`)**: Integrated `overlay_hb_fix.zip` (HarfBuzz Non-Blocking Policy):
+   - **v1.11.6 (`v1.11.6`)**: Integrated `overlay_hb_fix.zip` (HarfBuzz Non-Blocking Policy) and `overlay_tables_v1.11.6.zip` (Table & Image Split Refinements):
      - HarfBuzz version mismatch no longer blocks rendering; non-pinned versions (e.g., 8.3.0, 15.1.0) run with a one-time stderr warning instead of throwing `RuntimeError`.
      - Strict mode preserved for CI/oracle via `KINDLE_RENDER_STRICT_HARFBUZZ=1`.
-     - Updated `kindle_render/__init__.py` to `1.11.6`, updated `tools/test_harfbuzz_lock.py`, `docs/environment.md`, `CHANGELOG.md`, `STATUS.md`. Zero pixel change.
+     - Added mid-row table splitting at line level respecting widow/orphan=2 in `page.py`.
+     - Added dashed split rules (11/5 centered phase, 3px AA) to `RuleCommand` in `ir.py`, `raster.py`, and `page.py`.
+     - Float-dimension image remainder fit with `maxw != 922` guard retained for `exam1` p49.
+     - Reduced 3-theme tables/images diff by `-64,032` pixels (`25,627,789 -> 25,563,757`). All golden suites pass.
 
 ## What is Broken / Open Issues
 - **HarfBuzz Host vs Lock**: Runtime warning emitted on host CachyOS (HarfBuzz `15.1.0`); strict mode disabled by default per v1.11.6 policy.
