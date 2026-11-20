@@ -1025,12 +1025,12 @@ class Pager:
         reg = self.fam.face(False, False, tbl_size26)
         bld = self.fam.face(True, False, tbl_size26)
 
-        line_p = (int(round((tbl_size26 / 64.0) * 1.36)) if (is_col and sc_tbl <= 0.75 and c.size_px() != 42.0) else (int(round(std_pitch * sc_eff)) if sc_tbl < 1.0 else std_pitch))
+        line_p = int(round(std_pitch * sc_eff)) if sc_tbl < 1.0 else std_pitch
         if sc_tbl <= 0.75:
-            row_pad = 7
+            row_pad = 7 if (not is_col or c.size_px() == 42.0) else max(7, int(round(int(0.28 * c.size_px()) * sc_eff)))
             top_pad = 0
         elif sc_tbl < 1.0:
-            row_pad = 10 if is_col else 15
+            row_pad = (max(7, int(round(int(0.28 * c.size_px()) * sc_eff))) if c.size_px() != 42.0 else 10) if is_col else 15
             top_pad = 0
         else:
             row_pad = int(0.28 * c.size_px()) if is_col else min(16, int(0.25 * c.size_px() + 5.8))
