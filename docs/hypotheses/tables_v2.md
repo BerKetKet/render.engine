@@ -51,11 +51,48 @@
   - `ti_large`: `10,379,474 -> 10,365,702` (`-13,772` px, `3/57` exact, `57` pages).
   - **Total**: `25,468,050 -> 25,435,139` (**`-32,911`** px), `0` lost exact pages, `15/15` regression goldens PASS.
 
+
+
+## Step B — Table Mid-Row Split Policy (`orphan = 2, widow = 1`)
+- **Statement**: In `page.py:add_table`, the mid-row splitting rule currently enforces `orphan = 2, widow = 2` (`(n_tot - l_cur) >= 4` and `k_try in range(2, n_tot - l_cur - 1)`), which prevents 3-line rows from splitting `2 + 1` across page boundaries. The device enforces `orphan = 2` (never leaving a 1-line orphan at the bottom of a page, so Compact's 2-line rows stay whole at row boundaries) while allowing `widow = 1` (a 1-line continuation at the top of the next page, as seen on Large p21->22 `"trel lantern."` and p22->23 `"pewter."`).
+- **Evidence**: Device captures across all 3 themes: Large p21->22 splits 3-line row 10 as `2 + 1` (breaking `"kes-/trel"` across pages); Large p22->23 splits 3-line row 18 as `2 + 1` (`"pewter."`); Standard p15->16 splits 4-line row 1 as `2 + 2`; Compact p12->13 and p13->14 split at row boundaries (2-line rows cannot leave 1 orphan line).
+- **Prediction**: Changing the split guard from `(orphan=2, widow=2)` to `(orphan=2, widow=1)` (`(n_tot - l_cur) >= orphan + 1`, `k_try in range(orphan, n_tot - l_cur)`) will keep Compact's row-boundary splits intact, enable `2 + 1` mid-row splits on Large (and Standard 3-line rows), reduce 3-theme total diff below `25,435,139`, preserve page counts (`44/35/57`), lose `0` exact pages, and pass all `15/15` regression goldens.
+- **Pass/Fail Criterion**: `PASS` iff 3-theme total diff < `25,435,139`, `0` lost exact pages, page counts `44/35/57`, and `0` regression golden failures.
+
+
+
+### Step B Measured Result (`REVERTED` — `v1.11.9` code unchanged)
+- **Rule tested**: `orphan_min = 2, widow_min = 1` (`(n_tot - l_cur) >= 3`, `k_try in range(2, n_tot - l_cur)`).
+- **3-Theme Diff (`v1.11.9` baseline `25,435,139` -> Step B `25,504,377`, `+69,238` px, `tools/corpus.py` `totals.diff_pixels`, strict HB `6.0.0`)**:
+  - `ti_compact`: `6,697,823 -> 6,697,823` (**`+0`**, `3/35` exact, `35` pages; Compact preserves all row-boundary splits `p12: 2032` vs dev `2033`, `p13: 2103` vs dev `2109`).
+  - `ti_large`: `10,365,702 -> 10,354,872` (**`-10,830`** px, `3/57` exact, `57` pages; `p22: -15,613`, `p23: -7,290`, `p26: -29,397`, `p21: +3,706`, `p24: +33,219`, `p25: +4,545`).
+  - `tables_images` (Standard): `8,371,614 -> 8,451,682` (**`+80,068`** px, `4/44` exact, `44` pages; `p15: +11,052`, `p16: +9,209`, `p17: +11,446`, `p18: -16,726`, `p19: +39,942`, `p20: +25,145`).
+- **Why reverted**: Even though `orphan = 2, widow = 1` matches the device split policy on Compact (row boundaries) and Large (`2 + 1` splits on p21->22 and p22->23), on Standard p15 the preceding table ends `+21 px` too low (`y = 760` vs device `739`) and `Table 5.1`'s scaled row pitch (`Step D`) places the p15 split rule at `y = 2116` vs device `y = 2031` (`+85 px`), causing `+80,068` px of vertical misalignment across p15–p20. Reverted per Ground Rules; revisit after **Step D** aligns table row pitches.
+
 ---
 
 ## Group B — Scale of 4+ Column Tables & Row Pitch Inside Scaled Tables
 - **Statement**: Express `sc_tbl` for `ncols >= 4` as a cross-theme function of `avail_w`, min-content text widths, and font size, and align scaled-table `line_p` / `row_pad` with `scale * unscaled_pitch`, while keeping 2–3 column wrapping tables (`Name/Description`) at `1.0x`.
 - **Pass/Fail Criterion**: `PASS` iff 3-theme total diff improves, page counts do not worsen (`44/35/57`), `0` exact pages lost, and `0` regression golden failures.
+
+
+
+### Step D Measured Result (`v1.11.10` — `PASS` for Scaled Row Pitch & Padding; 4–9 Col Scale & 2-Col `1.0x` Logged)
+- **Rule implemented (`kindle_render/page.py:add_table`)**: Replaced the `1.36 * tbl_size_px` line pitch and hardcoded `row_pad = 7 / 10` on scaled collapsed tables (`sc_tbl < 1.0`, `c.size_px() != 42.0`) with the 0-parameter physical formula:
+  - `line_p = int(round(std_pitch * sc_eff))`
+  - `row_pad = max(7, int(round(int(0.28 * c.size_px()) * sc_eff)))`
+- **Scaled Row-Pitch Validation (`Engine 1.11.10` vs Device)**:
+  - Standard 6-col (`sc=0.70`): `48 + 8 = 56 px` vs device `57 px` (`-1 px`, down from `-7 px`).
+  - Large 4-col (`sc=0.65`): `53 + 9 = 62 px` vs device `64 px` (`-2 px`, down from `-15 px`).
+  - Large 5-col (`sc=0.55`): `45 + 8 = 53 px` vs device `54 px` (`-1 px`, down from `-10 px`).
+  - Compact 5-col (`sc=0.92`): `49 + 9 = 58 px` vs device `57 px` (`+1 px`).
+  - Table 5.1 (`Std / Cmp / Lrg`): `row_pad = 12 / 10 / 11 px` matching device `11.5 / 9 / 11.3 px`.
+- **3-Theme Diff (`v1.11.9 -> v1.11.10`, `tools/corpus.py` `totals.diff_pixels`, strict HB `6.0.0`)**:
+  - `tables_images`: `8,371,614 -> 8,284,292` (**`-87,322`** px, `4/44` exact, `44` pages).
+  - `ti_compact`: `6,697,823 -> 6,697,823` (`+0`, `3/35` exact, `35` pages).
+  - `ti_large`: `10,365,702 -> 10,372,427` (`+6,725` px, `3/57` exact, `57` pages; `p08: -28,484`, `p05: -18,363`, `p16: -18,285`, `p09: -10,795`, `p07: -7,042`, `p03: -6,567`, `p22: -5,235`, `p21: -5,049`; offset by `p10: +80,148` before 9-col scaling).
+  - **Total**: `25,435,139 -> 25,354,542` (**`-80,597`** px), `0` lost exact pages, `15/15` regression goldens PASS.
+- **Residuals Logged (`BACKLOG.md`)**: Changing 4–9 col `sc_tbl` or 2-col `Name/Description` (`1.0x`) independently shifts `t2_text` page counts (`44->43` / `+1` page -> `+15–28M` px cascade) because `Name/Description` (too short) and `Qtr1..Qtr9` (too tall due to negative `col_ws[-1]`) currently offset each other in `t2_text`; they must be solved jointly in **Step E(d)**.
 
 ---
 

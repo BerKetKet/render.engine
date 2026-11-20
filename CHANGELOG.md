@@ -13,6 +13,11 @@
 
 # Changelog
 
+## [1.11.10] - 2026-11-20 — Step D: Physical Scaled Table Row Pitch & Padding
+
+### Fixed
+- **Step D (`kindle_render/page.py:add_table`)**: Replaced the `1.36 * tbl_size_px` line pitch and hardcoded `row_pad = 7 / 10` in scaled collapsed tables (`sc_tbl < 1.0`, `c.size_px() != 42.0`) with the 0-parameter physical formula `line_p = int(round(std_pitch * sc_eff))` and `row_pad = max(7, int(round(int(0.28 * c.size_px()) * sc_eff)))`. Reduces 3-theme total diff by **`-80,597` px** (`25,435,139 -> 25,354,542`: Standard `-87,322`, Compact `0`, Large `+6,725`) with `0` lost exact pages, unchanged page counts (`44/35/57`), and `15/15` regression goldens passing.
+
 ## [1.11.9] - 2026-11-20 — Step A2: Em-Scaled Table Column Padding
 
 ### Changed
