@@ -2,9 +2,9 @@
 
 ## Current State
 - **Working Directory**: `/home/bgg/projects/render.engine`
-- **Module**: `kindle_render` v1.11.9
+- **Module**: `kindle_render` v1.11.10
 - **Git Branch**: `engine`
-- **Latest Tag**: `v1.11.9`
+- **Latest Tag**: `v1.11.10`
 - **Python Runtime**: Python 3.13, FreeType 2.13+, HarfBuzz (Docker lock: 6.0.0, host CachyOS: 15.1.0)
 
 ## Scope
@@ -70,6 +70,11 @@
      - Reduces 3-theme total diff by **`-32,911` px** (`25,468,050 -> 25,435,139`: Standard `-5,587`, Compact `-13,552`, Large `-13,772`) with `0` lost exact pages, unchanged page counts (`44/35/57`), and `15/15` regression goldens passing.
      - Documented Step A2 hypotheses and measured extents in `docs/hypotheses/tables_v2.md`.
      - Updated goldens for `tables_images.json`, `ti_compact.json`, and `ti_large.json`.
+   - **v1.11.10 (`v1.11.10`)**: Integrated `1.11.10_overlay_tables_D.zip` (Step D: Physical Scaled Table Row Pitch & Padding):
+     - In `kindle_render/page.py:add_table`: replaced artificial `1.36 * tbl_size_px` line pitch and hardcoded `row_pad = 7 / 10` for scaled collapsed tables (`sc_tbl < 1.0`, `c.size_px() != 42.0`) with the 0-parameter physical formula `line_p = int(round(std_pitch * sc_eff))` and `row_pad = max(7, int(round(int(0.28 * c.size_px()) * sc_eff)))`.
+     - Reduces 3-theme total diff by **`-80,597` px** (`25,435,139 -> 25,354,542`: Standard `-87,322`, Compact `0`, Large `+6,725`) with `0` lost exact pages, unchanged page counts (`44/35/57`), and `15/15` regression goldens passing.
+     - Documented Step B (reverted) and Step D hypotheses and measurements in `docs/hypotheses/tables_v2.md`.
+     - Updated goldens for `tables_images.json` and `ti_large.json`.
 
 ## What is Broken / Open Issues
 - **HarfBuzz Host vs Lock**: Runtime warning emitted on host CachyOS (HarfBuzz `15.1.0`); strict mode disabled by default per v1.11.6 policy.
