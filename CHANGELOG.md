@@ -13,6 +13,11 @@
 
 # Changelog
 
+## [1.11.9] - 2026-11-20 — Step A2: Em-Scaled Table Column Padding
+
+### Changed
+- **Step A2 (`kindle_render/page.py:add_table`)**: Replaced pixel literals (`64.0`, `61.0`, `49.0`, `36.5`, `24.5`, `13.5`) in `_col_pad2` and `col_l_pad`/`col_r_pad` for full-width wrapping collapsed tables (`tot_1x > avail_w`) with `em`-scaled expressions of `tbl_em = tbl_size26 / 64.0`. Aligns `Table 5.1` (`Row / Detail / Amount`) within `0–3 px` across Standard, Compact, and Large, reducing 3-theme total diff by **`-32,911` px** (`25,468,050 -> 25,435,139`: Standard `-5,587`, Compact `-13,552`, Large `-13,772`) with `0` lost exact pages, unchanged page counts (`44/35/57`), and `15/15` regression goldens passing.
+
 ## [1.11.8] - 2026-11-19 — Group A: Full-Width Wrapping Table Column Padding
 
 ### Fixed

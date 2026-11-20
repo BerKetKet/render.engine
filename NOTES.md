@@ -2,9 +2,9 @@
 
 ## Current State
 - **Working Directory**: `/home/bgg/projects/render.engine`
-- **Module**: `kindle_render` v1.11.8
+- **Module**: `kindle_render` v1.11.9
 - **Git Branch**: `main`
-- **Latest Tag**: `v1.11.8`
+- **Latest Tag**: `v1.11.9`
 - **Python Runtime**: Python 3.13, FreeType 2.13+, HarfBuzz (Docker lock: 6.0.0, host CachyOS: 15.1.0)
 
 ## What is Verified
@@ -71,6 +71,12 @@
      - Aligns `Table 5.1` (`Row / Detail / Amount`) `Amount` column within `1–3 px` of device captures on Standard, Compact, and Large.
      - Reduces 3-theme total diff by **`-95,707` px** (`25,563,757 -> 25,468,050`: Standard `-88,120`, Compact `-4,462`, Large `-3,125`) with `0` lost exact pages, unchanged page counts (`44/35/57`), and `15/15` regression goldens passing.
      - Documented pre-registered hypotheses in `docs/hypotheses/tables_v2.md`.
+     - Updated goldens for `tables_images.json`, `ti_compact.json`, and `ti_large.json`.
+   - **v1.11.9 (`v1.11.9`)**: Integrated `1.11.9_overlay_tables_A2.zip` (Step A2: Em-Scaled Table Column Padding):
+     - In `kindle_render/page.py:add_table`: replaced hardcoded pixel literals (`64.0`, `61.0`, `49.0`, `36.5`, `24.5`, `13.5`) in `_col_pad2` and `col_l_pad`/`col_r_pad` for full-width wrapping collapsed tables (`tot_1x > avail_w`) with `em`-scaled expressions of `tbl_em = tbl_size26 / 64.0`.
+     - Dynamically scales column padding with table font size, aligning `Table 5.1` (`Row / Detail / Amount`) within `0–3 px` of device captures across Standard, Compact, and Large.
+     - Reduces 3-theme total diff by **`-32,911` px** (`25,468,050 -> 25,435,139`: Standard `-5,587`, Compact `-13,552`, Large `-13,772`) with `0` lost exact pages, unchanged page counts (`44/35/57`), and `15/15` regression goldens passing.
+     - Documented Step A2 hypotheses and measured extents in `docs/hypotheses/tables_v2.md`.
      - Updated goldens for `tables_images.json`, `ti_compact.json`, and `ti_large.json`.
 
 ## What is Broken / Open Issues

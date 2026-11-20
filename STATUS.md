@@ -1,10 +1,10 @@
-# `kindle_render` Project Status — `v1.11.8` (Port-Ready Baseline)
+# `kindle_render` Project Status — `v1.11.9` (Port-Ready Baseline)
 
-- **Current Version**: `1.11.8` (target tag: `v1.11.8`; HarfBuzz lock is now warn-only, see docs/environment.md)
+- **Current Version**: `1.11.9` (target tag: `v1.11.9`; HarfBuzz lock is now warn-only, see docs/environment.md)
 - **Hash Equivalence vs `v1.11.4`**: `YES` — `100%` identical per-page pixel and layout SHA-256 across all corpora (`probe`, `exam1`, `exam2`, `exam3_normal`, `exam3_small`, `e3_compact`, `e3_large`, `tables_images`, `ti_compact`, `ti_large`, `synthetic`, and `sizes_00..sizes_07`).
 - **Environment Pin**: Python `3.11.x`, HarfBuzz `6.0.0` (exact pin enforced in `Family.__init__` per `docs/environment.md`), FreeType `2.12.1`, Pillow `10.2.0`, NumPy `1.26.x`.
 
-## Baseline `1.11.8` Reference Metrics (`tools/reports/baseline_1.11.8.json`)
+## Baseline `1.11.9` Reference Metrics (`tools/reports/baseline_1.11.9.json`)
 
 | Corpus / Series | Pages Compared | Bitwise-Identical | Pos Exact Lines | Pos-Indep Lines | Diff Pixels | Mean Pixel Match | Mean Ink IoU |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |

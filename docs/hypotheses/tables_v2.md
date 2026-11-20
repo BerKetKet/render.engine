@@ -29,6 +29,28 @@
   - `ti_large`: `10,382,599 -> 10,379,474` (**`-3,125`** px, `3/57` exact, `57` pages).
   - **Total**: `25,563,757 -> 25,468,050` (**`-95,707`** px), `0` lost exact pages, `15/15` regression goldens PASS, `test_bugfixes` & `test_determinism` PASS.
 
+
+
+## Step A2 — Em-Scaled Column Padding for Full-Width Wrapping Collapsed Tables
+- **Statement**: In `page.py:add_table`, the pixel literals in `_col_pad2` (`64.0`, `61.0`, `49.0`) and `col_l_pad`/`col_r_pad` (`36.5`, `24.5`, `13.5`) for full-width wrapping collapsed tables (`is_col and tot_1x > avail_w and sc_tbl > 0.75 and not has_spans`) are fixed at Standard's scaled table font size (`tbl_sz = 43.2 px`), causing `Row`/`Detail`/`Amount` horizontal offsets on Compact (`tbl_sz = 37.4 px`: `Detail` left `210` vs device `199`, `Amount` left `806` vs `809`) and Large (`tbl_sz = 40.5 px`: `Detail` left `309` vs device `303`). Expressing these paddings in `em` of `tbl_sz` (`pad2: 1.45*em` col 0, `1.41*em` last col, `1.13*em` interior; `lp: 0.84*em` col 0, `0.31*em` last col left-aligned, `0.56*em` interior; `rp: 0.84*em` last col, `0.56*em` interior) will eliminate the hardcoded pixel literals and align all three themes simultaneously.
+- **Evidence**: Measured `Table 5.1` ink x-segments at `v1.11.8`: Standard `[(118,140),(263,699),(743,843)]` vs dev `[(118,140),(261,698),(743,845)]`; Compact `[(81,120),(210,746),(806,894)]` vs dev `[(78,117),(199,766),(809,898)]`; Large `[(169,190),(309,636),(703,796)]` vs dev `[(167,188),(303,661),(704,798)]`.
+- **Prediction**: Replacing the pixel literals with `tbl_sz`-scaled `em` expressions on full-width wrapping collapsed tables will align `Row`, `Detail`, and `Amount` within `<= 3 px` across all 3 themes, reduce 3-theme total diff below `25,468,050`, preserve page counts (`44/35/57`), lose `0` exact pages, and pass `15/15` regression goldens.
+- **Pass/Fail Criterion**: `PASS` iff 3-theme total diff < `25,468,050`, `0` lost exact pages, page counts `44/35/57`, and `0` regression golden failures.
+
+
+
+### Step A2 Measured Result (`v1.11.9` — `PASS`)
+- **Rule**: Replaced hardcoded pixel literals in `_col_pad2` and `col_l_pad`/`col_r_pad` for full-width wrapping collapsed tables (`tot_1x > avail_w`) with `em` expressions of `tbl_em = tbl_size26 / 64.0`: `_col_pad2` = `1.45*em` (col 0), `1.41*em` (last col), `1.134*em` (interior), `0.845*em` (right-aligned last col); `col_l_pad` = `0.845*em` (col 0), `0.312*em` (left-aligned last col), `0.567*em` (interior); `col_r_pad` = `0.845*em` (last col), `0.567*em` (interior).
+- **Table 5.1 Column Ink Extents (`v1.11.9` vs Device)**:
+  - Standard p16: `Row 118..140` (`0 px`), `Detail 262..698` (`0–1 px`), `Amount 743..844` (`0–1 px`).
+  - Compact p13: `Row 76..115` (`-2 px`), `Detail 197..772` (`-2/+6 px`), `Amount 812..901` (`+3 px`).
+  - Large p21: `Row 166..187` (`-1 px`), `Detail 302..664` (`-1/+3 px`), `Amount 705..798` (`0–1 px`).
+- **3-Theme Diff (`v1.11.8 -> v1.11.9`, `tools/corpus.py` `totals.diff_pixels`, strict HB `6.0.0`)**:
+  - `tables_images`: `8,377,201 -> 8,371,614` (`-5,587` px, `4/44` exact, `44` pages).
+  - `ti_compact`: `6,711,375 -> 6,697,823` (`-13,552` px, `3/35` exact, `35` pages).
+  - `ti_large`: `10,379,474 -> 10,365,702` (`-13,772` px, `3/57` exact, `57` pages).
+  - **Total**: `25,468,050 -> 25,435,139` (**`-32,911`** px), `0` lost exact pages, `15/15` regression goldens PASS.
+
 ---
 
 ## Group B — Scale of 4+ Column Tables & Row Pitch Inside Scaled Tables
