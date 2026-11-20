@@ -1054,13 +1054,16 @@ class Pager:
                 return 55.0
             if has_spans:
                 return 75.5
+            tbl_em = tbl_size26 / 64.0
             if col_align[ci] == "right":
-                return 36.5 if ci == ncols - 1 else 49.0
-            if ci == 0:
-                return 64.0
-            if ci == ncols - 1 and tot_1x > avail_w:
-                return 61.0
-            return 49.0
+                return (0.845 * tbl_em if tot_1x > avail_w else 36.5) if ci == ncols - 1 else (1.134 * tbl_em if tot_1x > avail_w else 49.0)
+            if tot_1x > avail_w:
+                if ci == 0:
+                    return 1.45 * tbl_em
+                if ci == ncols - 1:
+                    return 1.41 * tbl_em
+                return 1.134 * tbl_em
+            return 64.0 if ci == 0 else 49.0
 
         max_w = [0.0] * ncols
         min_w = [0.0] * ncols
@@ -1258,8 +1261,13 @@ class Pager:
                 lp = (17.0 if is_h else 1.0) if ci == 0 else 24.5
                 rp = 36.5 if ci == ncols - 1 else 24.5
             else:
-                lp = 36.5 if ci == 0 else (13.5 if (ci == ncols - 1 and tot_1x > avail_w and col_align[ci] != "right") else 24.5)
-                rp = 36.5 if ci == ncols - 1 else 24.5
+                if tot_1x > avail_w:
+                    tbl_em = tbl_size26 / 64.0
+                    lp = (0.845 * tbl_em) if ci == 0 else ((0.312 * tbl_em) if (ci == ncols - 1 and col_align[ci] != "right") else (0.567 * tbl_em))
+                    rp = (0.845 * tbl_em) if ci == ncols - 1 else (0.567 * tbl_em)
+                else:
+                    lp = 36.5 if ci == 0 else 24.5
+                    rp = 36.5 if ci == ncols - 1 else 24.5
             col_l_pad.append(lp)
             col_r_pad.append(rp)
 
