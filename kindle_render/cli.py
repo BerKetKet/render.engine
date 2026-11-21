@@ -13,6 +13,10 @@ def _add_epub_args(p):
     p.add_argument("--x0", type=int, default=0, help="left margin x0 in pixels (e.g. 39 or 79)")
     p.add_argument("--right", type=int, default=0, help="right margin x1 in pixels (e.g. 1041 or 1001)")
     p.add_argument("--pitch", type=int, default=0, help="body line pitch in pixels (e.g. 57 or 68)")
+    p.add_argument("--line-spacing-step", type=int, default=None, choices=range(1, 6), help="Kindle line spacing slider (1-5)")
+    p.add_argument("--paragraph-spacing-step", type=int, default=1, choices=range(1, 6), help="Kindle paragraph spacing slider (1-5)")
+    p.add_argument("--word-spacing-step", type=int, default=1, choices=range(1, 6), help="Kindle word spacing slider (1-5)")
+    p.add_argument("--char-spacing-step", type=int, default=1, choices=range(1, 6), help="Kindle character spacing slider (1-5)")
     p.add_argument("--top", type=int, default=0, help="top margin y0 in pixels (default: 168)")
     p.add_argument("--page-bottom", type=int, default=0, help="bottom margin y1 in pixels (default: 2203)")
     p.add_argument("--breaker", choices=["kp", "greedy"], default="kp", help="line breaker algorithm (default: kp)")
@@ -89,6 +93,11 @@ def main(argv=None):
         cfg.x0 = a.x0
     if getattr(a, "right", 0) > 0:
         cfg.right = a.right
+    if getattr(a, "line_spacing_step", None) is not None:
+        cfg.line_spacing_step = a.line_spacing_step
+    cfg.paragraph_spacing_step = getattr(a, "paragraph_spacing_step", 1)
+    cfg.word_spacing_step = getattr(a, "word_spacing_step", 1)
+    cfg.char_spacing_step = getattr(a, "char_spacing_step", 1)
     if getattr(a, "pitch", 0) > 0:
         cfg.pitch = a.pitch
         cfg.pitch_ratio = a.pitch / (cfg.size26 / 64.0)

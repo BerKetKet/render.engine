@@ -1,7 +1,7 @@
 import math
 import os
 from dataclasses import dataclass
-from typing import Tuple, Dict
+from typing import Optional, Tuple, Dict
 
 PALETTES: Dict[str, Tuple[Tuple[int, int, int], Tuple[int, int, int]]] = {
     "exact":    ((255, 255, 255), (0, 0, 0)),
@@ -25,6 +25,15 @@ TABLET_FONT_RAMP_SP: Tuple[float, ...] = (
 BOLDNESS_FUNITS_RAMP: Tuple[int, ...] = (0, 12, 24, 38, 52, 68)
 
 
+LINE_SPACING_RATIOS: Tuple[float, ...] = (1.358, 1.515, 1.642, 2.313, 2.977)
+WORD_SPACING_STEP_EM: float = 0.22
+CHAR_SPACING_STEP_EM: float = 0.056
+THEME_SPACING_PRESETS: Dict[str, Dict[str, int]] = {
+    "standard": {"line": 2, "paragraph": 1, "word": 1, "char": 1},
+    "compact":  {"line": 1, "paragraph": 1, "word": 1, "char": 1},
+    "large":    {"line": 3, "paragraph": 1, "word": 1, "char": 1},
+}
+
 @dataclass
 class Config:
     # ---------------- screen / geometry ----------------
@@ -43,6 +52,10 @@ class Config:
     # ---------------- vertical rhythm ----------------
     pitch: int = 0                    # Explicit body line pitch in px (0 = use round(pitch_ratio * size_px()))
     pitch_ratio: float = 1.5          # Default ratio when pitch == 0 (e.g. 34px -> 51px)
+    line_spacing_step: Optional[int] = None  # User line-spacing slider (1..5; None = use pitch/pitch_ratio)
+    paragraph_spacing_step: int = 1   # User paragraph-spacing slider (1..5; step 1 = 0 extra gap)
+    word_spacing_step: int = 1        # User word-spacing slider (1..5; +0.22 em per step above 1)
+    char_spacing_step: int = 1        # User character-spacing slider (1..5; +0.056 em per step above 1)
     typo_ascender: float = 0.802      # Bookerly OS/2 sTypoAscender (+802 FUnits)
     body_cap_height: float = 0.693
     display_cap_height: float = 0.762
@@ -146,7 +159,22 @@ class Config:
     def pitch_px(self) -> int:
         if self.pitch > 0:
             return self.pitch
+        if self.line_spacing_step is not None:
+            step = max(1, min(5, int(self.line_spacing_step)))
+            return int(round(LINE_SPACING_RATIOS[step - 1] * self.size_px()))
         return int(math.floor(self.pitch_ratio * self.size_px() + 0.5))
+
+    def user_para_gap_px(self) -> int:
+        step = max(1, min(5, int(self.paragraph_spacing_step)))
+        return int(round((step - 1) * self.size_px())) if step > 1 else 0
+
+    def user_word_spacing_26(self) -> int:
+        step = max(1, min(5, int(self.word_spacing_step)))
+        return int(round((step - 1) * WORD_SPACING_STEP_EM * self.size26)) if step > 1 else 0
+
+    def user_char_spacing_26(self) -> int:
+        step = max(1, min(5, int(self.char_spacing_step)))
+        return int(round((step - 1) * CHAR_SPACING_STEP_EM * self.size26)) if step > 1 else 0
 
     def extra_lead_px(self) -> float:
         # pitch_px() is integer-rounded, so |error| <= 0.5; below that the

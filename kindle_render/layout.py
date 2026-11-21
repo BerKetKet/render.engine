@@ -311,8 +311,8 @@ def build_items(runs, family, cfg, size26, display=False, hyphenator=None, allow
         if not text:
             continue
 
-        extra_track26 = int(round(getattr(run, 'letter_spacing_em', 0.0) * r_size26))
-        extra_word26 = int(round(getattr(run, 'word_spacing_em', 0.0) * r_size26))
+        extra_track26 = int(round(getattr(run, 'letter_spacing_em', 0.0) * r_size26)) + cfg.user_char_spacing_26()
+        extra_word26 = int(round(getattr(run, 'word_spacing_em', 0.0) * r_size26)) + cfg.user_word_spacing_26()
         if extra_word26 > 0 and items and isinstance(items[-1], Glue):
             items[-1].width += extra_word26
         is_nowrap = getattr(run, 'nowrap', False)

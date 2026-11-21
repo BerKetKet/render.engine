@@ -592,6 +592,9 @@ class Pager:
                 self.prev_mb = 0
                 gap = mt
 
+        user_pgap = c.user_para_gap_px()
+        if user_pgap > 0 and not self.page_empty and b.heading == 0:
+            gap += user_pgap
         if not self.page_empty:
             self.y_float += gap
             self.y = int(round(self.y_float))
