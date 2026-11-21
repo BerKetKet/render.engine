@@ -867,6 +867,8 @@ class Pager:
         c = self.cfg
         if not b.table_rows:
             return
+        _y_start = self.y
+        _pg_start = self.cur_ir_page.page_number if self.cur_ir_page is not None else len(self.ir_pages)+1
         block_idx = self._block_counter
         self._block_counter += 1
         is_col = getattr(b, "border_collapse", False)
@@ -997,47 +999,91 @@ class Pager:
             for col_j in range(ncols)
         )
 
-        if (tot_1x <= avail_w and not has_spans) or (is_col and ncols <= 3 and has_spans and c.size_px() != 42.0):
-            sc_tbl = 1.0
-        elif is_col and ncols == 3 and tot_1x > avail_w and not has_spans:
-            sc_tbl = 0.81 if c.size_px() > 46.0 else 0.96
-        elif ncols >= 4 and tot_1x > avail_w:
-            if c.size_px() == 42.0:
-                sc_tbl = c.collapsed_table_scale
-            else:
-                text_1x_cols = sum(
-                    max([_text_w_px(bld_base if is_h else reg_base, txt)
-                         for ri, ci, txt, is_h, align, cs, rs in grid_cells if ci == col_j and cs == 1] or [0.0])
-                    for col_j in range(ncols)
-                )
-                sc_tbl = max(0.35, min(0.95, avail_w / max(text_1x_cols + 7.75 * ncols, 3.081 * ncols * std_pitch)))
+        # Device table-scale model (v1.12 experiment M): the device lays the table out at 1x with
+        # column width = clamp(min-content of header cells, max-content, cap_em*font) + pad_em*font,
+        # then scales the whole table by avail/total when it is wider than the measure.
+        # Fitted on 46 tables x 3 themes (mean relative error 0.8%); see docs/hypotheses/table_scale_model_M.md.
+        _uni = False
+        _w1 = []
+        if is_col and getattr(c, "tbl_scale_model", "M") == "M" and c.size_px() != 42.0:  # 42 px (exam2) keeps the legacy path until experiment E10 makes M reproduce exam2
+            _px = c.size_px()
+            _P = c.tbl_pad_em * _px
+            _C = c.tbl_cap_em * _px
+            _cols_mx = {}
+            _cols_mn = {}
+            for ri, ci, txt, is_h, align, cs, rs in grid_cells:
+                if cs != 1:
+                    continue
+                f1 = bld_base if is_h else reg_base
+                _cols_mx[ci] = max(_cols_mx.get(ci, 0.0), _text_w_px(f1, txt))
+                pieces = []
+                for w_ in txt.split():
+                    pieces += re.findall(r"[^-/]+[-/]?|[-/]", w_) or [w_]
+                _mp = max([_text_w_px(f1, q) for q in pieces] or [0.0])
+                _df = c.tbl_data_min_factor
+                if is_h:
+                    _cols_mn[ci] = max(_cols_mn.get(ci, 0.0), _mp)
+                elif _df > 0.0:
+                    _cols_mn[ci] = max(_cols_mn.get(ci, 0.0), _df * _mp)
+            _tot_m = sum(max(_cols_mn.get(j, 0.0), min(_cols_mx.get(j, 0.0), _C)) + _P for j in range(ncols))
+            sc_tbl = 1.0 if _tot_m <= avail_w else max(c.tbl_scale_floor, avail_w / _tot_m)
+            _uni = (sc_tbl < 1.0) and bool(getattr(c, "tbl_uniform_layout", True))
+            _w1 = [max(_cols_mn.get(j, 0.0), min(_cols_mx.get(j, 0.0), _C)) + _P for j in range(ncols)]
+            if is_col and ncols == 3 and tot_1x > avail_w and not has_spans and max(_cols_mx.values() or [0.0]) > avail_w:
+                _uni = False
+                # E2: long 3-col table with wrapping cell > avail_w lays out to max(measure, 8.8em-capped sum)
+                _tot_long = sum(max(_cols_mn.get(j, 0.0), min(_cols_mx.get(j, 0.0), c.tbl_long3_cap_em * _px)) + _P for j in range(ncols))
+                sc_tbl = avail_w / max(float(c.right - c.x0), _tot_long)
         else:
-            pref_cols_1x = []
-            pad_col_pref = 78.53 if has_spans else 72.10
-            for col_j in range(ncols):
-                col_w_pref = 0.0
-                for ri, ci, txt, is_h, align, cs, rs in grid_cells:
-                    if ci == col_j and cs == 1:
-                        f1 = bld_base if is_h else reg_base
-                        w_full = _text_w_px(f1, txt)
-                        w_words = txt.split()
-                        if is_h or len(w_words) <= 2 or w_full <= avail_w / float(max(1, ncols)):
-                            w_eff = w_full
-                        else:
-                            w_eff = max(w_full / (2.112 if has_spans else 2.863), max(_text_w_px(f1, w) for w in w_words))
-                        if w_eff > col_w_pref:
-                            col_w_pref = w_eff
-                pref_cols_1x.append(col_w_pref + pad_col_pref)
-            w_pref_tot = sum(pref_cols_1x)
-            sc_tbl = max(c.collapsed_table_scale, min(1.0, avail_w / max(1.0, w_pref_tot)))
+            if (tot_1x <= avail_w and not has_spans) or (is_col and ncols <= 3 and has_spans and c.size_px() != 42.0):
+                sc_tbl = 1.0
+            elif is_col and ncols == 3 and tot_1x > avail_w and not has_spans:
+                sc_tbl = 0.81 if c.size_px() > 46.0 else 0.96
+            elif ncols >= 4 and tot_1x > avail_w:
+                if c.size_px() == 42.0:
+                    sc_tbl = c.collapsed_table_scale
+                else:
+                    text_1x_cols = sum(
+                        max([_text_w_px(bld_base if is_h else reg_base, txt)
+                             for ri, ci, txt, is_h, align, cs, rs in grid_cells if ci == col_j and cs == 1] or [0.0])
+                        for col_j in range(ncols)
+                    )
+                    sc_tbl = max(0.35, min(0.95, avail_w / max(text_1x_cols + 7.75 * ncols, 3.081 * ncols * std_pitch)))
+            else:
+                pref_cols_1x = []
+                pad_col_pref = 78.53 if has_spans else 72.10
+                for col_j in range(ncols):
+                    col_w_pref = 0.0
+                    for ri, ci, txt, is_h, align, cs, rs in grid_cells:
+                        if ci == col_j and cs == 1:
+                            f1 = bld_base if is_h else reg_base
+                            w_full = _text_w_px(f1, txt)
+                            w_words = txt.split()
+                            if is_h or len(w_words) <= 2 or w_full <= avail_w / float(max(1, ncols)):
+                                w_eff = w_full
+                            else:
+                                w_eff = max(w_full / (2.112 if has_spans else 2.863), max(_text_w_px(f1, w) for w in w_words))
+                            if w_eff > col_w_pref:
+                                col_w_pref = w_eff
+                    pref_cols_1x.append(col_w_pref + pad_col_pref)
+                w_pref_tot = sum(pref_cols_1x)
+                sc_tbl = max(c.collapsed_table_scale, min(1.0, avail_w / max(1.0, w_pref_tot)))
 
+
+        import os as _os
+        if _os.environ.get('KR_TBL_SCALE'):
+            sc_tbl = float(_os.environ['KR_TBL_SCALE'])
+        _sc_model = sc_tbl
         tbl_size26 = int(round(c.size26 * sc_tbl))
         sc_eff = tbl_size26 / float(c.size26)
         reg = self.fam.face(False, False, tbl_size26)
         bld = self.fam.face(True, False, tbl_size26)
 
         line_p = int(round(std_pitch * sc_eff)) if sc_tbl < 1.0 else std_pitch
-        if sc_tbl <= 0.75:
+        if _uni:
+            row_pad = int(round(int(c.tbl_row_pad_em * c.size_px()) * sc_eff)) if is_col else 7
+            top_pad = 0
+        elif sc_tbl <= 0.75:
             row_pad = max(7, int(int(0.28 * c.size_px()) * sc_eff)) if is_col else 7
             top_pad = 0
         elif sc_tbl < 1.0:
@@ -1055,6 +1101,8 @@ class Pager:
                 col_align[ci] = "right"
 
         def _col_pad2(ci):
+            if _uni:
+                return c.tbl_pad_em * (tbl_size26 / 64.0)
             if sc_tbl <= 0.75:
                 if col_align[ci] == "right":
                     return 42.8 if ci == ncols - 1 else 33.3
@@ -1066,6 +1114,10 @@ class Pager:
             if has_spans:
                 return 75.5
             tbl_em = tbl_size26 / 64.0
+            if c.size_px() != 42.0:
+                if col_align[ci] == "right":
+                    return (0.845 if ci == ncols - 1 else 1.134) * tbl_em
+                return (1.45 if ci == 0 else (1.41 if ci == ncols - 1 else 1.134)) * tbl_em
             if col_align[ci] == "right":
                 return (0.845 * tbl_em if tot_1x > avail_w else 36.5) if ci == ncols - 1 else (1.134 * tbl_em if tot_1x > avail_w else 49.0)
             if tot_1x > avail_w:
@@ -1106,7 +1158,12 @@ class Pager:
                         min_w[ci] = wt
 
         tot_max = sum(max_w)
-        if tot_max <= avail_w and not has_spans:
+        if _uni:
+            _sc_cols = avail_w / max(1.0, sum(_w1))
+            col_ws = [int(round(w * _sc_cols)) for w in _w1]
+            col_ws[-1] += avail_w - sum(col_ws)
+            table_w = avail_w
+        elif tot_max <= avail_w and not has_spans:
             if sc_tbl < 1.0:
                 extra_each = (avail_w - tot_max) / max(1, ncols)
                 col_ws = [int(round(w + extra_each)) for w in max_w]
@@ -1237,7 +1294,7 @@ class Pager:
 
         wrap_line_p = int(round(std_pitch * sc_eff)) if sc_tbl < 1.0 else line_p
         row_hs = [
-            (int(round(n_l * (std_pitch * sc_eff) + row_pad)) if (is_col and 0.90 <= sc_tbl < 1.0 and c.size_px() != 42.0) else (n_l * line_p + row_pad))
+            (n_l * line_p + row_pad if _uni else int(round(n_l * (std_pitch * sc_eff) + row_pad)) if (is_col and 0.90 <= sc_tbl < 1.0 and c.size_px() != 42.0) else (n_l * line_p + row_pad))
             for n_l in row_max_lines
         ]
         tot_tbl_h = sum(row_hs)
@@ -1256,7 +1313,11 @@ class Pager:
         col_l_pad = []
         col_r_pad = []
         for ci in range(ncols):
-            if sc_tbl <= 0.75:
+            if _uni:
+                _em = tbl_size26 / 64.0
+                lp = (c.tbl_lp0_em * _em) if ci == 0 else (c.tbl_lpm_em * _em)
+                rp = max(0.0, c.tbl_pad_em * _em - lp)
+            elif sc_tbl <= 0.75:
                 lp = 30.5 if ci == 0 else 16.65
                 rp = 31.0 if ci == ncols - 1 else 16.65
             elif not is_col and sc_tbl == 1.0:
@@ -1520,6 +1581,12 @@ class Pager:
                 self.prev_mb = (int(round(1.0 * c.vem_px())) if c.size_px() == 42.0 else 0) if is_col else int(round(0.2 * c.size_px()))
         self.prev_kind = "table"
         self._mark_page_non_empty()
+        if os.environ.get('KR_TBL_LOG'):
+            import json as _json
+            _pg_end = self.cur_ir_page.page_number if self.cur_ir_page is not None else len(self.ir_pages)+1
+            with open(os.environ['KR_TBL_LOG'],'a') as _f:
+                _f.write(_json.dumps(dict(page0=_pg_start,page1=_pg_end,y0=_y_start,y1=self.y,ncols=ncols,nrows=nrows,avail_w=avail_w,tot_1x=tot_1x,sc=_sc_model,is_col=bool(is_col),spans=bool(has_spans),cap=cap_txt,size_px=c.size_px(),pitch=std_pitch,cells=[[ri,ci,t,bool(h),cs,rs] for ri,ci,t,h,al,cs,rs in grid_cells]))+"\n")
+
 
     def add_image(self, b):
         c = self.cfg

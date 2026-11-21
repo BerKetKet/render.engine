@@ -108,6 +108,16 @@ class Config:
     left_hyphen_min: int = 2
     right_hyphen_min: int = 3
     min_word_length: int = 5
+    tbl_scale_model: str = "M"
+    tbl_pad_em: float = 1.37
+    tbl_cap_em: float = 7.5
+    tbl_scale_floor: float = 0.2
+    tbl_uniform_layout: bool = True
+    tbl_data_min_factor: float = 0.8
+    tbl_long3_cap_em: float = 8.8
+    tbl_lp0_em: float = 0.845
+    tbl_lpm_em: float = 0.567
+    tbl_row_pad_em: float = 0.28
     hyphen_penalty: int = 125
     ragged_hyphen_penalty: int = 50
     ladder2: int = 3000
