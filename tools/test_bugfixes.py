@@ -52,6 +52,17 @@ def test_all():
     ir_h = layout_blocks_to_ir([p_tall, h2_long], cfg, fam)
     assert len(ir_h.pages) == 2
 
+    # 7. Four 5-step user spacing settings: pitch resolution, override priority, and helpers
+    assert [Config(size26=45*64, line_spacing_step=s).pitch_px() for s in range(1, 6)] == [61, 68, 74, 104, 134]
+    assert [Config(size26=39*64, line_spacing_step=s).pitch_px() for s in range(1, 6)] == [53, 59, 64, 90, 116]
+    assert [Config(size26=50*64, line_spacing_step=s).pitch_px() for s in range(1, 6)] == [68, 76, 82, 116, 149]
+    assert Config(size26=45*64, pitch=70, line_spacing_step=5).pitch_px() == 70
+    assert [Config(size26=45*64, paragraph_spacing_step=s).user_para_gap_px() for s in range(1, 6)] == [0, 45, 90, 135, 180]
+    assert Config(size26=45*64, word_spacing_step=1).user_word_spacing_26() == 0
+    assert Config(size26=45*64, char_spacing_step=1).user_char_spacing_26() == 0
+    assert round(Config(size26=45*64, word_spacing_step=2).user_word_spacing_26() / 64.0, 2) == 9.91
+    assert round(Config(size26=45*64, char_spacing_step=2).user_char_spacing_26() / 64.0, 2) == 2.52
+
     print("ALL BUGFIX TESTS PASSED")
 
 if __name__ == "__main__":
