@@ -13,6 +13,17 @@
 
 # Changelog
 
+## [1.11.13] - 2026-11-21 — Table Scale Model M Adoption, Tuning & Extensions (E0–E9)
+
+### Changed
+- **Model M Collapsed Table Scaling & Uniform Layout (`kindle_render/page.py`, `kindle_render/config.py`)**:
+  - Adopted reviewer Model M (`tbl_pad_em=1.37`, `tbl_cap_em=7.5`, `tbl_scale_floor=0.2`, `tbl_uniform_layout=True`) gated by `is_col` (preserving `exam1` uncollapsed tables) and `size_px() != 42.0` (`exam2`). Settled tuning parameters into named `Config` fields (`tbl_data_min_factor=0.8`, `tbl_long3_cap_em=8.8`, `tbl_lp0_em=0.845`, `tbl_lpm_em=0.567`, `tbl_row_pad_em=0.28`), keeping `KR_TBL_SCALE` and `KR_TBL_LOG` as debug hooks.
+  - **E2 (Long 3-col table)**: Replaced hardcoded `0.81 / 0.96` with `avail_w / max(right - x0, sum(clamp(mn, mx, 8.8 * px) + P))` (`-165,077` px).
+  - **E3 (Data-cell unbreakable min-content)**: Added `tbl_data_min_factor = 0.8` weight on non-header split pieces (`-70,039` px on Large p09/p10).
+  - **E4 (Unscaled collapsed tables)**: Replaced hardcoded `64.0 / 49.0 / 36.5` px padding constants with em-based `1.45 / 1.41 / 1.134 / 0.845 * tbl_em` (`-64,902` px across all 3 themes).
+  - **Total 3-theme impact (`tables_images`, `ti_compact`, `ti_large`)**: **`-1,088,528` diff px** (`25,210,579 -> 24,122,051`: Standard `8,183,519 -> 7,941,639` exact `4 -> 5`, Compact `6,747,943 -> 6,242,449` exact `3`, Large `10,279,117 -> 9,937,963` exact `3`), page counts unchanged (`44 / 35 / 57`), `18/18` goldens & `6/6` unit gates PASS under `KINDLE_RENDER_STRICT_HARFBUZZ=1`.
+- **Lab Toolkit & Documentation**: Added `tools/lab_tables/*`, `docs/hypotheses/table_scale_model_M.md`, `docs/hypotheses/tables_v3.md`, `docs/data/table_scale_measurements.json`, updated `BACKLOG.md`, and ignored `tools/lab_tables/work/`.
+
 ## [1.11.12] - 2026-11-21 — Four 5-Step Kindle User Spacing Settings
 
 ### Added

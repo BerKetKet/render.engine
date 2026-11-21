@@ -1,4 +1,4 @@
-# `kindle_render` v1.11.12 — Mathematical EPUB Layout, Structured Text Layer & Rasterization Engine
+# `kindle_render` v1.11.13 — Mathematical EPUB Layout, Structured Text Layer & Rasterization Engine
 
 `kindle_render` is a deterministic, self-contained Python EPUB layout, pagination, structured text-layer extraction, and glyph rasterization engine operating in 26.6 fixed-point coordinates (`1 px = 64 units`).
 
