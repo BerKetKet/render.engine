@@ -94,6 +94,20 @@
   - **Total**: `25,435,139 -> 25,354,542` (**`-80,597`** px), `0` lost exact pages, `15/15` regression goldens PASS.
 - **Residuals Logged (`BACKLOG.md`)**: Changing 4–9 col `sc_tbl` or 2-col `Name/Description` (`1.0x`) independently shifts `t2_text` page counts (`44->43` / `+1` page -> `+15–28M` px cascade) because `Name/Description` (too short) and `Qtr1..Qtr9` (too tall due to negative `col_ws[-1]`) currently offset each other in `t2_text`; they must be solved jointly in **Step E(d)**.
 
+
+
+### Step D2 Measured Result (`v1.11.11` — `PASS`)
+- **Cross-theme 4+ column scale model (`Model A`, 2 parameters fitted on 7 training points `5-col`/`6-col`/`9-col`, held-out `4-col`)**:
+  - `sc_tbl = max(0.35, min(0.95, avail_w / max(text_1x_cols + 7.75 * ncols, 3.081 * ncols * std_pitch)))`
+  - **Training residuals**: Std 5-col `+0.006` (`0.846` vs `0.840`), Cmp 5-col `+0.030` (`0.950` vs `0.920`), Lrg 5-col `+0.069` (`0.619` vs `0.550`), Std 6-col `+0.005` (`0.705` vs `0.700`), Std 9-col `-0.060` (`0.470` vs `0.530`), Cmp 9-col `0.000` (`0.655` vs `0.655`), Lrg 9-col `-0.060` (`0.350` vs `0.410`).
+  - **Held-out 4-col residuals**: Std `0.000` (`1.000`), Cmp `0.000` (`1.000`), Lrg `+0.134` (`0.774` vs `0.640`).
+- **Removed `c.size_px() == 42.0` from `sc_tbl <= 0.75` `row_pad`**: `max(7, int(int(0.28 * c.size_px()) * sc_eff))` reproduces `exam2` (`7 px`); kept `42.0 -> 10` on `0.75 < sc_tbl < 1.0` because `exam2 p36` golden expects `10` vs `round(11*0.96)=11`.
+- **3-Theme Diff (`v1.11.10 -> v1.11.11`, `tools/corpus.py` `totals.diff_pixels`, strict HB `6.0.0`)**:
+  - `tables_images`: `8,284,292 -> 8,183,519` (**`-100,773`** px, `92.0161%`, `4/44` exact, `44` pages; `p05 -80,016`, `p08 -31,086`, `p03 -19,089`).
+  - `ti_compact`: `6,697,823 -> 6,747,943` (`+50,120` px, `91.7238%`, `3/35` exact, `35` pages; `p03 -7,343`, `p04 +36,817`).
+  - `ti_large`: `10,372,427 -> 10,279,117` (**`-93,310`** px, `92.2588%`, `3/57` exact, `57` pages; `p06 -108,053`, `p10 -78,791`, `p04 -18,294`).
+  - **Total**: `25,354,542 -> 25,210,579` (**`-143,963`** px), `0` lost exact pages, `15/15` regression goldens PASS.
+
 ---
 
 ## Group C — Cross-Theme Table Fixes (a–d)

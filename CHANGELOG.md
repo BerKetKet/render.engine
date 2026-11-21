@@ -13,6 +13,11 @@
 
 # Changelog
 
+## [1.11.11] - 2026-11-20 — Step D2: Cross-Theme 4+ Column Table Scale & Unified Row Padding
+
+### Changed
+- **Step D2 (`kindle_render/page.py:add_table`)**: Replaced the fixed `0.70 / 0.618` 4+ column table scale with the cross-theme model `max(0.35, min(0.95, avail_w / max(text_1x_cols + 7.75 * ncols, 3.081 * ncols * std_pitch)))` (fitted on 5/6/9-col across all 3 themes, held-out 4-col validated) and removed the `c.size_px() == 42.0` special case from `sc_tbl <= 0.75` `row_pad`. Reduces 3-theme total diff by **`-143,963` px** (`25,354,542 -> 25,210,579`: Standard `-100,773`, Compact `+50,120`, Large `-93,310`; eliminates `1.11.10`'s regressions on Large p6 `-108,053`, Large p10 `-78,791`, and Standard p8 `-31,086`) with `0` lost exact pages, unchanged page counts (`44/35/57`), and `15/15` regression goldens passing.
+
 ## [1.11.10] - 2026-11-20 — Step D: Physical Scaled Table Row Pitch & Padding
 
 ### Fixed
