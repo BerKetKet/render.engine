@@ -2,9 +2,9 @@
 
 ## Current State
 - **Working Directory**: `/home/bgg/projects/render.engine`
-- **Module**: `kindle_render` v1.11.12
+- **Module**: `kindle_render` v1.11.13
 - **Git Branch**: `main`
-- **Latest Tag**: `v1.11.12`
+- **Latest Tag**: `v1.11.13`
 - **Python Runtime**: Python 3.13, FreeType 2.13+, HarfBuzz (Docker lock: 6.0.0, host CachyOS: 15.1.0)
 
 ## What is Verified
@@ -94,6 +94,12 @@
      - Paragraph spacing adds `(step - 1) * size_px` extra vertical gap between paragraphs, lists, and TOC items while keeping page-top invariant.
      - Word spacing adds `(step - 1) * 0.22` body `em` per step (`user_word_spacing_26()`), and character spacing adds `(step - 1) * 0.056` body `em` per step after every glyph (`user_char_spacing_26()`).
      - Zero regressions on default presets: all 18 corpora/sizes goldens and unit tests pass bit-identically.
+   - **v1.11.13 (`v1.11.13`)**: Integrated `1.11.13_overlay_tables_M.zip` (Table Scale Model M Adoption, Tuning & Extensions):
+     - Adopted Model M collapsed table scaling and uniform layout in `kindle_render/page.py` and `config.py` (`tbl_pad_em=1.37`, `tbl_cap_em=7.5`, `tbl_scale_floor=0.2`, `tbl_uniform_layout=True`) gated by `is_col` and `size_px() != 42.0`.
+     - Integrated E2 (long 3-col table), E3 (data-cell unbreakable min-content with factor 0.8), and E4 (unscaled collapsed tables with em-based paddings).
+     - Reduces 3-theme total diff by **`-1,088,528` px** (`25,210,579 -> 24,122,051`: Standard `-241,880`, Compact `-505,494`, Large `-341,154`, exact pages `10 -> 11`) with unchanged page counts (`44/35/57`).
+     - Added lab tooling in `tools/lab_tables/`, measurement data in `docs/data/table_scale_measurements.json`, and documentation in `docs/hypotheses/table_scale_model_M.md` and `docs/hypotheses/tables_v3.md`.
+     - Updated goldens for `tables_images.json`, `ti_compact.json`, and `ti_large.json`.
 
 ## What is Broken / Open Issues
 - **HarfBuzz Host vs Lock**: Runtime warning emitted on host CachyOS (HarfBuzz `15.1.0`); strict mode disabled by default per v1.11.6 policy.

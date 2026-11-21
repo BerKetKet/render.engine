@@ -3,3 +3,4 @@ __pycache__/
 out/
 tools/reports_local/
 *.zip
+tools/lab_tables/work/
