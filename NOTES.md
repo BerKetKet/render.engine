@@ -2,9 +2,9 @@
 
 ## Current State
 - **Working Directory**: `/home/bgg/projects/render.engine`
-- **Module**: `kindle_render` v1.11.10
+- **Module**: `kindle_render` v1.11.11
 - **Git Branch**: `main`
-- **Latest Tag**: `v1.11.10`
+- **Latest Tag**: `v1.11.11`
 - **Python Runtime**: Python 3.13, FreeType 2.13+, HarfBuzz (Docker lock: 6.0.0, host CachyOS: 15.1.0)
 
 ## What is Verified
@@ -83,6 +83,11 @@
      - Reduces 3-theme total diff by **`-80,597` px** (`25,435,139 -> 25,354,542`: Standard `-87,322`, Compact `0`, Large `+6,725`) with `0` lost exact pages, unchanged page counts (`44/35/57`), and `15/15` regression goldens passing.
      - Documented Step B (reverted) and Step D hypotheses and measurements in `docs/hypotheses/tables_v2.md`.
      - Updated goldens for `tables_images.json` and `ti_large.json`.
+   - **v1.11.11 (`v1.11.11`)**: Integrated `1.11.11_overlay_tables_D2.zip` (Step D2: Cross-Theme 4+ Column Table Scale & Unified Row Padding):
+     - In `kindle_render/page.py:add_table`: replaced fixed 4+ column table scale with cross-theme model `max(0.35, min(0.95, avail_w / max(text_1x_cols + 7.75 * ncols, 3.081 * ncols * std_pitch)))` for `c.size_px() != 42.0`, and unified `row_pad = max(7, int(int(0.28 * c.size_px()) * sc_eff)) if is_col else 7`.
+     - Reduces 3-theme total diff by **`-143,963` px** (`25,354,542 -> 25,210,579`: Standard `-100,773`, Compact `+50,120`, Large `-93,310`) with `0` lost exact pages, unchanged page counts (`44/35/57`), and `15/15` regression goldens passing.
+     - Documented Step D2 hypotheses and measurements in `docs/hypotheses/tables_v2.md`.
+     - Updated goldens for `tables_images.json`, `ti_compact.json`, and `ti_large.json`.
 
 ## What is Broken / Open Issues
 - **HarfBuzz Host vs Lock**: Runtime warning emitted on host CachyOS (HarfBuzz `15.1.0`); strict mode disabled by default per v1.11.6 policy.
