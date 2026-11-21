@@ -999,7 +999,15 @@ class Pager:
         elif is_col and ncols == 3 and tot_1x > avail_w and not has_spans:
             sc_tbl = 0.81 if c.size_px() > 46.0 else 0.96
         elif ncols >= 4 and tot_1x > avail_w:
-            sc_tbl = c.collapsed_table_scale * (min(1.0, avail_w / 886.0) if c.size_px() > 46.0 else 1.0)
+            if c.size_px() == 42.0:
+                sc_tbl = c.collapsed_table_scale
+            else:
+                text_1x_cols = sum(
+                    max([_text_w_px(bld_base if is_h else reg_base, txt)
+                         for ri, ci, txt, is_h, align, cs, rs in grid_cells if ci == col_j and cs == 1] or [0.0])
+                    for col_j in range(ncols)
+                )
+                sc_tbl = max(0.35, min(0.95, avail_w / max(text_1x_cols + 7.75 * ncols, 3.081 * ncols * std_pitch)))
         else:
             pref_cols_1x = []
             pad_col_pref = 78.53 if has_spans else 72.10
@@ -1027,7 +1035,7 @@ class Pager:
 
         line_p = int(round(std_pitch * sc_eff)) if sc_tbl < 1.0 else std_pitch
         if sc_tbl <= 0.75:
-            row_pad = 7 if (not is_col or c.size_px() == 42.0) else max(7, int(round(int(0.28 * c.size_px()) * sc_eff)))
+            row_pad = max(7, int(int(0.28 * c.size_px()) * sc_eff)) if is_col else 7
             top_pad = 0
         elif sc_tbl < 1.0:
             row_pad = (max(7, int(round(int(0.28 * c.size_px()) * sc_eff))) if c.size_px() != 42.0 else 10) if is_col else 15
