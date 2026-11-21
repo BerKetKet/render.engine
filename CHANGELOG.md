@@ -13,6 +13,16 @@
 
 # Changelog
 
+## [1.11.12] - 2026-11-21 — Four 5-Step Kindle User Spacing Settings
+
+### Added
+- **Four 5-Step Kindle User Spacing Settings (`kindle_render/config.py`, `layout.py`, `page.py`, `cli.py`, `__init__.py`)**:
+  - Added `line_spacing_step` (1..5, `None` default), `paragraph_spacing_step` (1..5, default 1), `word_spacing_step` (1..5, default 1), and `char_spacing_step` (1..5, default 1) to `Config`, CLI flags (`--line-spacing-step`, `--paragraph-spacing-step`, `--word-spacing-step`, `--char-spacing-step`), and exported `LINE_SPACING_RATIOS` and `THEME_SPACING_PRESETS`.
+  - Line spacing resolves `round(K[step-1] * size_px)` with `K = (1.358, 1.515, 1.642, 2.313, 2.977)` when explicit `pitch == 0` (explicit `pitch` keeps priority): Standard `61/68/74/104/134`, Compact `53/59/64/90/116`, Large `68/76/82/116/149`.
+  - Paragraph spacing adds `(step - 1) * size_px` extra vertical gap between consecutive paragraphs, list/TOC items (`<li>`), and headings followed by paragraphs, while keeping page-top headings invariant.
+  - Word spacing adds `(step - 1) * 0.22` body `em` per step (`user_word_spacing_26()`), and character spacing adds `(step - 1) * 0.056` body `em` per step after every glyph including spaces (`user_char_spacing_26()`), with trailing spacing counted toward line width.
+  - Zero regression at default presets: all 18 corpora and size-series goldens, all 6 unit gates, and 6-corpus determinism pass 100% bit-identically under `KINDLE_RENDER_STRICT_HARFBUZZ=1`.
+
 ## [1.11.11] - 2026-11-20 — Step D2: Cross-Theme 4+ Column Table Scale & Unified Row Padding
 
 ### Changed
