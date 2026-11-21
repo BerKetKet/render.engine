@@ -13,6 +13,14 @@
 
 # Changelog
 
+## [1.11.14] - 2026-11-22 — Horizontal em = column width/32; spacer gap always (10/17)*pitch
+
+### Fixed
+- **Horizontal margin unit (`epub.py`)**: margin-left/right in em now resolve to `(right - x0)/32` px (Kindle Previewer maps 1em = 12pt = 3.125% of page width) instead of a fixed 28.8125 px. Identical at Standard (922/32), corrects Compact/Large indents.
+- **Spacer paragraph gap (`page.py`)**: always `(10/17)*pitch`; the tight-regime exception (full pitch) was wrong (verse stanza gap 53 px vs device 31 px in Compact). Needs the margin fix to avoid pagination cascade.
+- **Impact** (v1.11.13 -> 1.11.14): e3_compact 1,852,980 -> 1,226,981 diff px; e3_large 2,667,605 -> 2,264,291; exam2 1,034,912 -> 1,062,040 (p41 only, open); all other corpora bit-identical; no exact page lost. Goldens regenerated for exam2, e3_compact, e3_large only.
+- Source of the unit rule: comments in github.com/jloutsch/kfxgen (read, no code copied).
+
 ## [1.11.13] - 2026-11-21 — Table Scale Model M Adoption, Tuning & Extensions (E0–E9)
 
 ### Changed
