@@ -1,4 +1,4 @@
-__version__ = "1.11.11"
+__version__ = "1.11.12"
 """
 kindle_render v1.11.3 — Universal, viewport-independent EPUB typography, pagination, IR layout, structured text layer, and rasterization engine.
 
@@ -13,7 +13,7 @@ Core compute mechanisms:
 """
 from pathlib import Path
 from typing import Optional, Union
-from .config import Config, PALETTES
+from .config import Config, PALETTES, LINE_SPACING_RATIOS, THEME_SPACING_PRESETS
 from .fonts import Family, Face
 from .epub import Block, load_epub
 from .layout import Run, Box, Glue, Penalty, build_items, make_lines, layout_line

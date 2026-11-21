@@ -2,9 +2,9 @@
 
 ## Current State
 - **Working Directory**: `/home/bgg/projects/render.engine`
-- **Module**: `kindle_render` v1.11.11
+- **Module**: `kindle_render` v1.11.12
 - **Git Branch**: `engine`
-- **Latest Tag**: `v1.11.11`
+- **Latest Tag**: `v1.11.12`
 - **Python Runtime**: Python 3.13, FreeType 2.13+, HarfBuzz (Docker lock: 6.0.0, host CachyOS: 15.1.0)
 
 ## Scope
@@ -80,6 +80,12 @@
      - Reduces 3-theme total diff by **`-143,963` px** (`25,354,542 -> 25,210,579`: Standard `-100,773`, Compact `+50,120`, Large `-93,310`) with `0` lost exact pages, unchanged page counts (`44/35/57`), and `15/15` regression goldens passing.
      - Documented Step D2 hypotheses and measurements in `docs/hypotheses/tables_v2.md`.
      - Updated goldens for `tables_images.json`, `ti_compact.json`, and `ti_large.json`.
+   - **v1.11.12 (`v1.11.12`)**: Integrated `1.11.12_overlay_spacing.zip` (Four 5-Step Kindle User Spacing Settings):
+     - Added `line_spacing_step` (1..5), `paragraph_spacing_step` (1..5), `word_spacing_step` (1..5), and `char_spacing_step` (1..5) to `Config` and CLI options.
+     - Line spacing resolves `round(K[step-1] * size_px)` with `K = (1.358, 1.515, 1.642, 2.313, 2.977)` when explicit pitch is 0.
+     - Paragraph spacing adds `(step - 1) * size_px` extra vertical gap between paragraphs, lists, and TOC items while keeping page-top invariant.
+     - Word spacing adds `(step - 1) * 0.22` body `em` per step (`user_word_spacing_26()`), and character spacing adds `(step - 1) * 0.056` body `em` per step after every glyph (`user_char_spacing_26()`).
+     - Zero regressions on default presets: all 18 corpora/sizes goldens and unit tests pass bit-identically.
 
 ## What is Broken / Open Issues
 - **HarfBuzz Host vs Lock**: Runtime warning emitted on host CachyOS (HarfBuzz `15.1.0`); strict mode disabled by default per v1.11.6 policy.
