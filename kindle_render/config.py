@@ -25,7 +25,7 @@ TABLET_FONT_RAMP_SP: Tuple[float, ...] = (
 BOLDNESS_FUNITS_RAMP: Tuple[int, ...] = (0, 12, 24, 38, 52, 68)
 
 
-LINE_SPACING_RATIOS: Tuple[float, ...] = (1.358, 1.515, 1.642, 2.313, 2.977)
+LINE_SPACING_RATIOS: Tuple[float, ...] = (1.353, 1.510, 1.635, 2.318, 2.977)
 WORD_SPACING_STEP_EM: float = 0.22
 CHAR_SPACING_STEP_EM: float = 0.056
 THEME_SPACING_PRESETS: Dict[str, Dict[str, int]] = {
@@ -56,6 +56,11 @@ class Config:
     paragraph_spacing_step: int = 1   # User paragraph-spacing slider (1..5; step 1 = 0 extra gap)
     word_spacing_step: int = 1        # User word-spacing slider (1..5; +0.22 em per step above 1)
     char_spacing_step: int = 1        # User character-spacing slider (1..5; +0.056 em per step above 1)
+    word_spacing_step_em: float = WORD_SPACING_STEP_EM
+    char_spacing_step_em: float = CHAR_SPACING_STEP_EM
+    word_spacing_shrink_mult: float = 0.10
+    char_spacing_shrink_mult: float = 0.70
+    heading_line_spacing_lead_k: float = 0.045
     typo_ascender: float = 0.802      # Bookerly OS/2 sTypoAscender (+802 FUnits)
     body_cap_height: float = 0.693
     display_cap_height: float = 0.762
@@ -166,12 +171,19 @@ class Config:
     def size_px(self) -> float:
         return self.size26 / 64.0
 
+    def raw_pitch_px(self) -> float:
+        if self.pitch > 0:
+            return float(self.pitch)
+        if self.line_spacing_step is not None:
+            step = max(1, min(5, int(self.line_spacing_step)))
+            return LINE_SPACING_RATIOS[step - 1] * self.size_px()
+        return float(int(math.floor(self.pitch_ratio * self.size_px() + 0.5)))
+
     def pitch_px(self) -> int:
         if self.pitch > 0:
             return self.pitch
         if self.line_spacing_step is not None:
-            step = max(1, min(5, int(self.line_spacing_step)))
-            return int(round(LINE_SPACING_RATIOS[step - 1] * self.size_px()))
+            return int(round(self.raw_pitch_px()))
         return int(math.floor(self.pitch_ratio * self.size_px() + 0.5))
 
     def user_para_gap_px(self) -> int:
@@ -180,11 +192,11 @@ class Config:
 
     def user_word_spacing_26(self) -> int:
         step = max(1, min(5, int(self.word_spacing_step)))
-        return int(round((step - 1) * WORD_SPACING_STEP_EM * self.size26)) if step > 1 else 0
+        return int(round((step - 1) * self.word_spacing_step_em * self.size26)) if step > 1 else 0
 
     def user_char_spacing_26(self) -> int:
         step = max(1, min(5, int(self.char_spacing_step)))
-        return int(round((step - 1) * CHAR_SPACING_STEP_EM * self.size26)) if step > 1 else 0
+        return int(round((step - 1) * self.char_spacing_step_em * self.size26)) if step > 1 else 0
 
     def extra_lead_px(self) -> float:
         # pitch_px() is integer-rounded, so |error| <= 0.5; below that the

@@ -292,7 +292,10 @@ class Pager:
             base_thk = float(round(0.065 * sz_px))
             y_off_top = base_thk + 0.02612 * sz_px + 0.00245 * pt_px + getattr(self.cfg, "link_underline_base_offset", -0.5855)
             thk_fl = base_thk - 0.00015 * sz_px + 0.00013 * pt_px - 0.00165
+            _ul_trk = self.cfg.user_char_spacing_26() / 64.0
             for x0_fl, x1_fl, dy_px, fg_col, l_href in link_spans:
+                if _ul_trk > 0.0:
+                    x1_fl = max(x0_fl, x1_fl - _ul_trk)
                 yt = baseline + dy_px + y_off_top
                 yb = yt + thk_fl
                 if 0.0 <= yt and yb <= H:
@@ -312,17 +315,18 @@ class Pager:
     def _draw_list_marker(self, b, left_px, baseline, size26, block_idx: int, line_idx: int):
         c = self.cfg
         face = self.fam.face(False, False, size26)
-        text_x26 = int(round((c.x0 + left_px) * 64))
+        text_x26 = int(round((c.x0 + b.left_em * c.size_px()) * 64))
         if getattr(b, "ol_number", None):
             shaped = face.shape_with_clusters(b.ol_number)
             num_w26 = sum(a for _, a, _ in shaped)
             is_alpha_rom = not b.ol_number[0].isdigit()
             sp26 = int(round(face.space26() * (1.25 if is_alpha_rom else 1.0)))
             start26 = text_x26 - num_w26 - sp26
+            _ol_trk = c.user_char_spacing_26()
             pl, pen = [], 0
             for c_i, (n, a, ctxt) in enumerate(shaped):
                 pl.append((face, n, pen, a, {"cluster_text": ctxt, "word_idx": -1, "logical_word_idx": -1, "logical_char_idx": c_i}))
-                pen += a
+                pen += a + _ol_trk
             self.draw_line(pl, start26, baseline, block_idx=block_idx, line_idx=line_idx, is_list_marker=True)
         elif getattr(b, "bullet", None):
             if b.bullet == "\u25e6":
@@ -396,7 +400,10 @@ class Pager:
 
         has_custom_lh = getattr(b, "line_height", None) is not None
         extra_lead = c.extra_lead_px()
-        eff_body_pitch = max(float(std_body_pitch), (68.0 / 45.0) * c.size_px()) if (extra_lead > 0.0 and (b.heading or b.scale > 1.0)) else float(std_body_pitch)
+        if c.line_spacing_step is not None and c.pitch == 0 and b.heading:
+            eff_body_pitch = c.raw_pitch_px()
+        else:
+            eff_body_pitch = max(float(std_body_pitch), (68.0 / 45.0) * c.size_px()) if (extra_lead > 0.0 and (b.heading or b.scale > 1.0)) else float(std_body_pitch)
         if has_custom_lh:
             pitch = int(b.line_height * vem_px * b.scale + 1e-6) if (1.5 < b.line_height < 2.0) else int(round(b.line_height * vem_px * b.scale))
             pitch_fl = float(pitch)
@@ -406,7 +413,10 @@ class Pager:
             lh_bot_delta = lead_diff - lh_top_delta
         else:
             pitch = int(round(eff_body_pitch * b.scale))
-            pitch_fl = (float(int(eff_body_pitch * b.scale)) if b.heading in (2, 3) else float(eff_body_pitch * b.scale)) if (extra_lead == 0.0 and b.heading) else float(pitch)
+            if c.line_spacing_step is not None and c.pitch == 0 and b.heading:
+                pitch_fl = float(pitch)
+            else:
+                pitch_fl = (float(int(eff_body_pitch * b.scale)) if b.heading in (2, 3) else float(eff_body_pitch * b.scale)) if (extra_lead == 0.0 and b.heading) else float(pitch)
             lh_top_delta = 0
             lh_bot_delta = 0
 
@@ -420,7 +430,7 @@ class Pager:
             indent_em = 0.0
         else:
             indent_em = c.default_indent_em
-        left_px = b.left_em * c.size_px()
+        left_px = b.left_em * c.size_px() + ((c.user_char_spacing_26() / 64.0) if getattr(b, "ol_number", None) else 0.0)
         width26 = int(round((c.right - c.x0 - left_px - b.right_em * c.size_px()) * 64))
 
         drop_letter = getattr(b, 'drop_cap_letter', None)
@@ -552,7 +562,8 @@ class Pager:
             mt_base_em = (0.66, 0.81, 0.963, 1.32, 1.64, 2.29)[h_idx]
             mb_base_em = (0.654, 0.822, 0.963, 1.32, 1.64, 2.30)[h_idx]
             is_tall_lead = std_body_pitch < 3 * (std_body_pitch - c.size_px())
-            mt_lead_k = (0.10 if h_idx == 0 else (0.28 if h_idx == 1 else (0.25 if h_idx == 2 else ((0.05 if is_tall_lead else 0.25) if h_idx == 4 else (0.25 if (h_idx == 5 and is_tall_lead) else 0.0)))))
+            _h0_lk = c.heading_line_spacing_lead_k if (c.line_spacing_step is not None and c.pitch == 0) else 0.10
+            mt_lead_k = (_h0_lk if h_idx == 0 else (0.28 if h_idx == 1 else (0.25 if h_idx == 2 else ((0.05 if is_tall_lead else 0.25) if h_idx == 4 else (0.25 if (h_idx == 5 and is_tall_lead) else 0.0)))))
             mb_lead_k = (0.0 if h_idx == 0 else (0.10 if h_idx == 3 else (0.05 if h_idx == 1 else (0.40 if h_idx == 2 else ((0.12 if is_tall_lead else 0.35) if h_idx == 4 else 0.28)))))
             mt = int(round(mt_base_em * b.scale * vem_px + mt_lead_k * extra_lead))
             mb_est = int(round(mb_base_em * b.scale * vem_px + mb_lead_k * extra_lead)) + (1 if h_idx == 0 else 0)
