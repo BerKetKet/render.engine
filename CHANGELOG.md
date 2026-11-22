@@ -13,6 +13,16 @@
 
 # Changelog
 
+## [1.11.15] - 2026-11-22 — Device-Fitted Four 5-Step Spacing Settings (S0–S8)
+
+### Changed
+- **Spacing Fit (`kindle_render/config.py`, `kindle_render/layout.py`, `kindle_render/page.py`)**:
+  - Refined `LINE_SPACING_RATIOS` to `(1.353, 1.510, 1.635, 2.318, 2.977)` with `Config.raw_pitch_px()` so all 30/30 body and heading pitches match device captures exactly across Standard/Compact/Large, and added `heading_line_spacing_lead_k = 0.045` (gated on `line_spacing_step is not None and pitch == 0`).
+  - Added `ol_number` marker tracking (`+trk` anchored to base `left_em`) and link underline trailing-track trim (`-trk`), confirming `char_spacing_step_em = 0.056` as a sharp V-minimum (`0.048..0.058` sweep).
+  - Exposed named `Config` fields `word_spacing_step_em = 0.22`, `char_spacing_step_em = 0.056`, `word_spacing_shrink_mult = 0.10`, `char_spacing_shrink_mult = 0.70`, and `heading_line_spacing_lead_k = 0.045`, reducing 60-run spacing capture diff total (pages 2–5) by **`-5,278,703` px (`-20.1%`, `26,307,438 -> 21,028,735`)**.
+  - Added `tools/lab_spacing/score_spacing.py`, `docs/hypotheses/spacing_fit.md`, worst-page side-by-side PNGs, and `docs/data/spacing_measurements.json`.
+  - **Regression Gate (S8)**: `18/18` goldens bit-identical to `v1.11.14` (zero golden changes) under `KINDLE_RENDER_STRICT_HARFBUZZ=1`.
+
 ## [1.11.14] - 2026-11-22 — Horizontal em = column width/32; spacer gap always (10/17)*pitch
 
 ### Fixed
