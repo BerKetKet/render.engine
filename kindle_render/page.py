@@ -387,7 +387,7 @@ class Pager:
 
         if getattr(b, "is_spacer", False):
             if not self.page_empty:
-                self.y_float += ((10.0 / 17.0) * std_body_pitch if c.extra_lead_px() > 0.0 else float(std_body_pitch))
+                self.y_float += ((10.0 / 17.0) * std_body_pitch)
                 self.y = int(round(self.y_float))
             return
 

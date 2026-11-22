@@ -153,7 +153,7 @@ CSS_FONT_SIZE_KEYWORDS = {
     "larger": 1.2,
 }
 
-def _em(val, cfg, pct_base_px=None, use_root_em=False):
+def _em(val, cfg, pct_base_px=None, use_root_em=False, root_px=None):
     if val is None:
         return None
     v_str = val.strip().lower()
@@ -166,7 +166,7 @@ def _em(val, cfg, pct_base_px=None, use_root_em=False):
     sz = cfg.size26 / 64.0
     if u in ("em", "rem"):
         if use_root_em:
-            return v * cfg.base_root_em_px() / sz
+            return v * (root_px if root_px else cfg.base_root_em_px()) / sz
         return v
     if u == "px":
         return v * cfg.css_px_scale / sz
@@ -526,8 +526,8 @@ def _doc_blocks(z, href, html, cfg):
                 hyph_flag = False if hyph_prop in ("none", "manual") else (True if hyph_prop == "auto" else None)
 
                 has_col_css = any(sel == "table" and p.get("border-collapse") == "collapse" for sel, p in rules)
-                ml_val = 0.0 if nm in ("blockquote", "figure") else (_em(props.get("margin-left"), cfg, pct_base_px=box_w, use_root_em=True) or 0.0)
-                mr_val = 0.0 if nm in ("blockquote", "figure") else (_em(props.get("margin-right"), cfg, pct_base_px=box_w, use_root_em=True) or 0.0)
+                ml_val = 0.0 if nm in ("blockquote", "figure") else (_em(props.get("margin-left"), cfg, pct_base_px=box_w, use_root_em=True, root_px=(cfg.right-cfg.x0)/32.0) or 0.0)
+                mr_val = 0.0 if nm in ("blockquote", "figure") else (_em(props.get("margin-right"), cfg, pct_base_px=box_w, use_root_em=True, root_px=(cfg.right-cfg.x0)/32.0) or 0.0)
                 cur_left = inh_left + ml_val
                 cur_right = inh_right + mr_val
                 cur_list_level = list_level
