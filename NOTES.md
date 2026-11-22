@@ -2,9 +2,9 @@
 
 ## Current State
 - **Working Directory**: `/home/bgg/projects/render.engine`
-- **Module**: `kindle_render` v1.11.13
+- **Module**: `kindle_render` v1.11.14
 - **Git Branch**: `engine`
-- **Latest Tag**: `v1.11.13`
+- **Latest Tag**: `v1.11.14`
 - **Python Runtime**: Python 3.13, FreeType 2.13+, HarfBuzz (Docker lock: 6.0.0, host CachyOS: 15.1.0)
 
 ## Scope
@@ -92,6 +92,11 @@
      - Reduces 3-theme total diff by **`-1,088,528` px** (`25,210,579 -> 24,122,051`: Standard `-241,880`, Compact `-505,494`, Large `-341,154`, exact pages `10 -> 11`) with unchanged page counts (`44/35/57`).
      - Added lab tooling in `tools/lab_tables/`, measurement data in `docs/data/table_scale_measurements.json`, and documentation in `docs/hypotheses/table_scale_model_M.md` and `docs/hypotheses/tables_v3.md`.
      - Updated goldens for `tables_images.json`, `ti_compact.json`, and `ti_large.json`.
+   - **v1.11.14 (`v1.11.14`)**: Integrated `v1.11.14_overlay.zip` (Horizontal em unit and universal spacer pitch gap):
+     - Horizontal `em`/`rem` margins in `epub.py` (`margin-left` and `margin-right`) resolve to `(right - x0)/32` px (matching Kindle Previewer's mapping of 1em = 12pt = 3.125% of column width) instead of fixed 28.8125 px, correctly resolving Compact and Large indents while preserving Standard (`922/32`).
+     - Spacer paragraph advance in `page.py` unified to always `(10/17)*pitch`, removing the invalid full-pitch branch in tight regimes.
+     - Reduces diff across corpora (`e3_compact`: 1,852,980 -> 1,226,981 diff px; `e3_large`: 2,667,605 -> 2,264,291; `exam2`: 1,034,912 -> 1,062,040 on p41 only).
+     - Updated goldens for `exam2.json`, `e3_compact.json`, and `e3_large.json`.
 
 ## What is Broken / Open Issues
 - **HarfBuzz Host vs Lock**: Runtime warning emitted on host CachyOS (HarfBuzz `15.1.0`); strict mode disabled by default per v1.11.6 policy.
