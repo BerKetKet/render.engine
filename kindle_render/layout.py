@@ -792,6 +792,14 @@ def break_kp(items, line_w, tolerance, cfg, ragged, in_forced_seg=False):
             break
     std_sp26 = ref_size26 * 0.25
 
+    _has_uw = getattr(cfg, "word_spacing_step", 1) > 1
+    _has_uc = getattr(cfg, "char_spacing_step", 1) > 1
+    _sh_mult = 1.0
+    if _has_uw:
+        _sh_mult = min(_sh_mult, float(getattr(cfg, "word_spacing_shrink_mult", 0.10)))
+    if _has_uc:
+        _sh_mult = min(_sh_mult, float(getattr(cfg, "char_spacing_shrink_mult", 0.70)))
+
     W = [0.0] * (n_items + 1)
     SP = [0.0] * (n_items + 1)
     for idx, it in enumerate(items):
@@ -969,7 +977,7 @@ def break_kp(items, line_w, tolerance, cfg, ragged, in_forced_seg=False):
             )
             if n_mono_boxes >= 4 or (n_mono_boxes >= 2 and indent_w > 0):
                 return s9 + 1000000.0, w - nd_e["hang"]
-            max_sh = G * (0.099 if ragged else 0.179)
+            max_sh = G * (0.099 if ragged else 0.179) * _sh_mult
             if (-slack) > max_sh:
                 return s9 + 1000000.0, w - nd_e["hang"]
 
