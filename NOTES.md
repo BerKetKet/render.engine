@@ -2,9 +2,9 @@
 
 ## Current State
 - **Working Directory**: `/home/bgg/projects/render.engine`
-- **Module**: `kindle_render` v1.11.14
+- **Module**: `kindle_render` v1.11.15
 - **Git Branch**: `main`
-- **Latest Tag**: `v1.11.14`
+- **Latest Tag**: `v1.11.15`
 - **Python Runtime**: Python 3.13, FreeType 2.13+, HarfBuzz (Docker lock: 6.0.0, host CachyOS: 15.1.0)
 
 ## What is Verified
@@ -105,6 +105,13 @@
      - Spacer paragraph advance in `page.py` unified to always `(10/17)*pitch`, removing the invalid full-pitch branch in tight regimes.
      - Reduces diff across corpora (`e3_compact`: 1,852,980 -> 1,226,981 diff px; `e3_large`: 2,667,605 -> 2,264,291; `exam2`: 1,034,912 -> 1,062,040 on p41 only).
      - Updated goldens for `exam2.json`, `e3_compact.json`, and `e3_large.json`.
+   - **v1.11.15 (`v1.11.15`)**: Integrated `1.11.15_overlay_spacing.zip` (Device-Fitted Four 5-Step Spacing Settings S0–S8):
+     - Refined `LINE_SPACING_RATIOS` to `(1.353, 1.510, 1.635, 2.318, 2.977)` with `Config.raw_pitch_px()` so all 30/30 body and heading pitches match device captures exactly across Standard, Compact, and Large themes. Added `heading_line_spacing_lead_k = 0.045` gated on `line_spacing_step is not None and pitch == 0`.
+     - Added `ol_number` marker tracking (`+trk` anchored to base `left_em`) and link underline trailing tracking trim (`-trk`), confirming `char_spacing_step_em = 0.056` as sharp V-minimum (`0.048..0.058` sweep).
+     - Exposed named `Config` fields: `word_spacing_step_em = 0.22`, `char_spacing_step_em = 0.056`, `word_spacing_shrink_mult = 0.10`, `char_spacing_shrink_mult = 0.70`, `heading_line_spacing_lead_k = 0.045`.
+     - Reduces 60-run spacing capture diff total (pages 2–5) by **`-5,278,703` px (`-20.1%`, `26,307,438 -> 21,028,735`)**.
+     - Added `tools/lab_spacing/score_spacing.py`, `docs/hypotheses/spacing_fit.md`, worst-page comparison PNGs, and `docs/data/spacing_measurements.json`.
+     - Zero regressions on default presets: `18/18` goldens bit-identical to `v1.11.14` (0 golden updates).
 
 ## What is Broken / Open Issues
 - **HarfBuzz Host vs Lock**: Runtime warning emitted on host CachyOS (HarfBuzz `15.1.0`); strict mode disabled by default per v1.11.6 policy.
