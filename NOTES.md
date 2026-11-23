@@ -2,9 +2,9 @@
 
 ## Current State
 - **Working Directory**: `/home/bgg/projects/render.engine`
-- **Module**: `kindle_render` v1.11.17
+- **Module**: `kindle_render` v1.11.18
 - **Git Branch**: `engine`
-- **Latest Tag**: `v1.11.17`
+- **Latest Tag**: `v1.11.18`
 - **Python Runtime**: Python 3.13, FreeType 2.13+, HarfBuzz (Docker lock: 6.0.0, host CachyOS: 15.1.0)
 
 ## Scope
@@ -117,6 +117,12 @@
      - Reduces 60-run spacing capture diff total (pages 2–5) by **`-1,767,605` px** (`17,684,610 -> 15,917,005`, `-10,390,433` px / `-39.5%` vs `v1.11.14`), 0 cells worsened across all 60 runs.
      - Added `tools/lab_spacing/bands.py`, `docs/data/spacing_bands.json`, `docs/hypotheses/spacing_fit3.md`, worst-page side-by-side PNGs, and updated `REPORT.md`.
      - Zero regressions on default presets: `18/18` goldens bit-identical to `v1.11.16` (0 golden updates).
+   - **v1.11.18 (`v1.11.18`)**: Integrated `1.11.18_overlay_spacing4.zip` (Possessive `'s` Hyphenation Fix, Float-Baseline Link Underline & Thresholded Ligatures):
+     - English possessive `'s` / `’s` hyphenation fix in `layout.py`: trailing `'s`/`’s` is stripped into `trail_punct` when `len(left) >= min_word_length` (and French prefix elision requires `len(right) >= 2`), enabling `family’s` -> `fam-ily’s`. Drops `Compact p4` from `111,752 -> 0` (bitwise exact) across 7+ cells and improves default `exam1` by **`-41,673` diff px** (`1,506,993 -> 1,465,320`, `e01_prologue 70,279 -> 28,795`, `+3` exact lines; `tools/golden/exam1.json` updated), keeping all 17 other default goldens 100% bit-identical.
+     - Float-baseline link underline in `page.py` and `config.py` (`link_underline_center_em = 0.12593`, gated on `line_spacing_step is not None and pitch == 0`), halving Standard (`19,270 -> 9,590`) and Large (`21,439 -> 10,693`) underline diffs while keeping Standard line 2 at `0`.
+     - Thresholded ligature disabling in `fonts.py` and `config.py` (`char_spacing_no_liga_px = 2.5`): disables OpenType `liga` when `user_char_spacing_26() >= 2.5 * 64.0`, improving all 3 themes by `-70,492` px with zero Compact char 2 regression.
+     - Reduces 60-run spacing capture diff total (pages 2–5) by **`-1,822,557` px** (`15,917,005 -> 14,094,448`, `-12,212,990` px / `-46.4%` vs `v1.11.14`).
+     - Added `docs/data/spacing_v18_measurements.json`, `docs/hypotheses/spacing_fit4.md`, worst-page side-by-side PNGs, and updated `REPORT.md`.
 
 ## What is Broken / Open Issues
 - **HarfBuzz Host vs Lock**: Runtime warning emitted on host CachyOS (HarfBuzz `15.1.0`); strict mode disabled by default per v1.11.6 policy.
