@@ -2,9 +2,9 @@
 
 ## Current State
 - **Working Directory**: `/home/bgg/projects/render.engine`
-- **Module**: `kindle_render` v1.11.15
+- **Module**: `kindle_render` v1.11.16
 - **Git Branch**: `engine`
-- **Latest Tag**: `v1.11.15`
+- **Latest Tag**: `v1.11.16`
 - **Python Runtime**: Python 3.13, FreeType 2.13+, HarfBuzz (Docker lock: 6.0.0, host CachyOS: 15.1.0)
 
 ## Scope
@@ -104,6 +104,13 @@
      - Reduces 60-run spacing capture diff total (pages 2–5) by **`-5,278,703` px (`-20.1%`, `26,307,438 -> 21,028,735`)**.
      - Added `tools/lab_spacing/score_spacing.py`, `docs/hypotheses/spacing_fit.md`, worst-page comparison PNGs, and `docs/data/spacing_measurements.json`.
      - Zero regressions on default presets: `18/18` goldens bit-identical to `v1.11.14` (0 golden updates).
+   - **v1.11.16 (`v1.11.16`)**: Integrated `1.11.16_overlay_spacing2.zip` (Close Remaining Spacing-Setting Gaps S-A through S-G):
+     - Added `word_spacing_shrink_decay = 3.27` in `Config` and dynamic Knuth-Plass shrink budget calculation (`max(word_spacing_shrink_mult, 1.0 - word_spacing_shrink_decay * extra_word_em)`), fixing `Compact word 2` (`665,107 -> 31,260`, `-633,847` px) with zero regressions.
+     - Tuned `char_spacing_shrink_mult = 0.80` (from `0.70`), fixing `Standard char 4` (`789,805 -> 688,741`, `-101,064` px; `-112,179` px across 3-theme char 2..5).
+     - Added tight-floor `h1` top margin correction (`mt += 1`) in `page.py` when `line_spacing_step is not None and pitch == 0 and h_idx == 0 and std_body_pitch < (19.0 / 14.0) * c.size_px()`, reducing Standard step-1 runs by `-2,713,245` px (`Standard line 1` `p3/p4/p5 = 0`).
+     - Reduces 60-run spacing capture diff total (pages 2–5) by **`-3,344,125` px** (`21,028,735 -> 17,684,610`, `-8,622,828` px vs `v1.11.14`), zero cells worsened `> 0.5%`.
+     - Added `tools/lab_spacing/align.py`, `docs/data/spacing_acceptance_region.json`, `docs/hypotheses/spacing_fit2.md`, side-by-side PNGs, and `REPORT.md`.
+     - Zero regressions on default presets: `18/18` goldens bit-identical to `v1.11.15` (0 golden updates).
 
 ## What is Broken / Open Issues
 - **HarfBuzz Host vs Lock**: Runtime warning emitted on host CachyOS (HarfBuzz `15.1.0`); strict mode disabled by default per v1.11.6 policy.
