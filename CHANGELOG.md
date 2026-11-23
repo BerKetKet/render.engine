@@ -13,6 +13,18 @@
 
 # Changelog
 
+## [1.11.18] - 2026-11-23 — Possessive `'s` Hyphenation Fix, Float-Baseline Link Underline & Thresholded Ligatures
+
+### Changed
+- **English Possessive `'s` Hyphenation Fix (`kindle_render/layout.py`) [DEFAULT-AFFECTING IMPROVEMENT]**:
+  - Fixed apostrophe stripping so trailing `'s`/`’s` is placed in `trail_punct` when `len(left) >= min_word_length` (and French prefix elision requires `len(right) >= 2`), allowing `family’s` -> `fam-ily’s`.
+  - Drops `Compact p4` from **`111,752 -> 0` (bitwise exact)** across all 7+ spacing cells (`Compact` total `-1,239,426` px), improves default **`exam1` by `-41,673` diff px** (`1,506,993 -> 1,465,320`, `e01_prologue 70,279 -> 28,795`, `+3` exact lines, `0` lost exact pages; `tools/golden/exam1.json` regenerated), and leaves all 17 other default goldens 100% bit-identical.
+- **Float-Baseline Link Underline (`kindle_render/config.py`, `kindle_render/page.py`)**:
+  - Added `link_underline_center_em = 0.12593` (gated on `line_spacing_step is not None and pitch == 0`), keeping `Standard line 2 = 0` while halving Standard (`19,270 -> 9,590`) and Large (`21,439 -> 10,693`) underline diffs (`~-360k` px across step-1 runs).
+- **Thresholded Ligature Disabling (`kindle_render/config.py`, `kindle_render/fonts.py`)**:
+  - Added `char_spacing_no_liga_px = 2.5`: disables OpenType `liga` when `user_char_spacing_26() >= 2.5 * 64.0`, improving all 3 themes simultaneously (`Std -23,579`, `Cmp -10,142`, `Lrg -36,771`, total `-70,492` px) with zero Compact char 2 regression.
+- **Total 60-Run Spacing Diff (`pages 2–5`)**: **`15,917,005 -> 14,094,448` (`-1,822,557` px vs `v1.11.17`; `-12,212,990` px / `-46.4%` vs `v1.11.14`)**, `18/18` goldens & unit gates PASS under `KINDLE_RENDER_STRICT_HARFBUZZ=1`.
+
 ## [1.11.17] - 2026-11-23 — Step-1 Geometry, Spillover `<ol>` Alignment & Spacing Fit (S0–S8)
 
 ### Changed
