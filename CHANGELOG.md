@@ -13,6 +13,16 @@
 
 # Changelog
 
+## [1.11.17] - 2026-11-23 — Step-1 Geometry, Spillover `<ol>` Alignment & Spacing Fit (S0–S8)
+
+### Changed
+- **Multi-Line `h1` Bottom Margin (`kindle_render/config.py`, `kindle_render/page.py`)**:
+  - Added `heading_line_spacing_mb_em = 0.652` so multi-line `h1` (`len(lines) >= 2`) bottom margin derives from `pitch_fl` (`round(0.652 * (pitch_fl / 1.2)) + 1`) when `line_spacing_step is not None and pitch == 0`: drops `Standard line 3 p3` (`107,036 -> 0`), `Large line 1 p3` (`117,938 -> 21,397`), `Large line 2 p3` (`82,817 -> 0`), and `Large paragraph 3/4/5` body pages to `0` (`~-1.45M` px).
+- **Spillover 2-Digit `<ol>` Horizontal Alignment (`kindle_render/page.py`)**:
+  - When a 2-digit `<ol>` item (`10.`..`17.`) begins a spillover page (`self.page_empty`), shifts the page-level `<ol>` indent and marker anchor by `(_w_cur - _w_one) / 64.0` (`+28/+24/+31 px`), eliminating the constant horizontal offset on all 11 spillover pages (`~-320k` px).
+- **Total 60-Run Spacing Diff (`pages 2–5`)**: **`17,684,610 -> 15,917,005` (`-1,767,605` px vs `v1.11.16`; `-10,390,433` px / `-39.5%` vs `v1.11.14`)**, zero cells worsened across all 60 runs, `18/18` default goldens 100% bit-identical to `v1.11.16`.
+- **Tooling & Docs**: Added `tools/lab_spacing/bands.py`, `docs/data/spacing_bands.json`, `docs/hypotheses/spacing_fit3.md`, worst-page side-by-side PNGs (`docs/hypotheses/spacing_fit3/`), and updated `REPORT.md`.
+
 ## [1.11.16] - 2026-11-22 — Close Remaining Spacing-Setting Gaps (S-A through S-G)
 
 ### Changed

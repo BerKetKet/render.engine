@@ -2,9 +2,9 @@
 
 ## Current State
 - **Working Directory**: `/home/bgg/projects/render.engine`
-- **Module**: `kindle_render` v1.11.16
+- **Module**: `kindle_render` v1.11.17
 - **Git Branch**: `main`
-- **Latest Tag**: `v1.11.16`
+- **Latest Tag**: `v1.11.17`
 - **Python Runtime**: Python 3.13, FreeType 2.13+, HarfBuzz (Docker lock: 6.0.0, host CachyOS: 15.1.0)
 
 ## What is Verified
@@ -119,6 +119,12 @@
      - Reduces 60-run spacing capture diff total (pages 2–5) by **`-3,344,125` px** (`21,028,735 -> 17,684,610`, `-8,622,828` px vs `v1.11.14`), zero cells worsened `> 0.5%`.
      - Added `tools/lab_spacing/align.py`, `docs/data/spacing_acceptance_region.json`, `docs/hypotheses/spacing_fit2.md`, side-by-side PNGs, and `REPORT.md`.
      - Zero regressions on default presets: `18/18` goldens bit-identical to `v1.11.15` (0 golden updates).
+   - **v1.11.17 (`v1.11.17`)**: Integrated `1.11.17_overlay_spacing3.zip` (Step-1 Geometry, Spillover `<ol>` Alignment & Spacing Fit S0–S8):
+     - Multi-line `h1` bottom margin in `page.py` derives from `pitch_fl` (`round(heading_line_spacing_mb_em * (pitch_fl / 1.2)) + 1` with `heading_line_spacing_mb_em = 0.652`, `len(lines) >= 2`) when `line_spacing_step is not None and pitch == 0`, dropping `Standard line 3 p3` (`107,036 -> 0`), `Large line 1 p3` (`117,938 -> 21,397`), `Large line 2 p3` (`82,817 -> 0`), and `Large paragraph 3/4/5` body pages to `0` (`~-1.45M` px).
+     - Spillover 2-digit `<ol>` horizontal alignment in `page.py`: when a 2-digit item (`10.`..`17.`) begins a spillover page (`self.page_empty`), shifts the page-level indent and marker anchor by `(_w_cur - _w_one) / 64.0` (`+28/+24/+31 px`), eliminating constant horizontal offsets on all 11 spillover pages (`~-320k` px).
+     - Reduces 60-run spacing capture diff total (pages 2–5) by **`-1,767,605` px** (`17,684,610 -> 15,917,005`, `-10,390,433` px / `-39.5%` vs `v1.11.14`), 0 cells worsened across all 60 runs.
+     - Added `tools/lab_spacing/bands.py`, `docs/data/spacing_bands.json`, `docs/hypotheses/spacing_fit3.md`, worst-page side-by-side PNGs, and updated `REPORT.md`.
+     - Zero regressions on default presets: `18/18` goldens bit-identical to `v1.11.16` (0 golden updates).
 
 ## What is Broken / Open Issues
 - **HarfBuzz Host vs Lock**: Runtime warning emitted on host CachyOS (HarfBuzz `15.1.0`); strict mode disabled by default per v1.11.6 policy.
