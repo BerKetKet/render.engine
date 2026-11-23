@@ -59,7 +59,8 @@ class Config:
     word_spacing_step_em: float = WORD_SPACING_STEP_EM
     char_spacing_step_em: float = CHAR_SPACING_STEP_EM
     word_spacing_shrink_mult: float = 0.10
-    char_spacing_shrink_mult: float = 0.70
+    word_spacing_shrink_decay: float = 3.27
+    char_spacing_shrink_mult: float = 0.80
     heading_line_spacing_lead_k: float = 0.045
     typo_ascender: float = 0.802      # Bookerly OS/2 sTypoAscender (+802 FUnits)
     body_cap_height: float = 0.693

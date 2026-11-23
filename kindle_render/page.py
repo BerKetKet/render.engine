@@ -566,6 +566,8 @@ class Pager:
             mt_lead_k = (_h0_lk if h_idx == 0 else (0.28 if h_idx == 1 else (0.25 if h_idx == 2 else ((0.05 if is_tall_lead else 0.25) if h_idx == 4 else (0.25 if (h_idx == 5 and is_tall_lead) else 0.0)))))
             mb_lead_k = (0.0 if h_idx == 0 else (0.10 if h_idx == 3 else (0.05 if h_idx == 1 else (0.40 if h_idx == 2 else ((0.12 if is_tall_lead else 0.35) if h_idx == 4 else 0.28)))))
             mt = int(round(mt_base_em * b.scale * vem_px + mt_lead_k * extra_lead))
+            if c.line_spacing_step is not None and c.pitch == 0 and h_idx == 0 and std_body_pitch < (19.0 / 14.0) * c.size_px():
+                mt += 1
             mb_est = int(round(mb_base_em * b.scale * vem_px + mb_lead_k * extra_lead)) + (1 if h_idx == 0 else 0)
         else:
             eff_vem = (max(float(std_body_pitch), (68.0 / 45.0) * c.size_px()) if extra_lead > 0.0 else float(std_body_pitch)) / 1.2
