@@ -13,6 +13,17 @@
 
 # Changelog
 
+## [1.11.16] - 2026-11-22 — Close Remaining Spacing-Setting Gaps (S-A through S-G)
+
+### Changed
+- **Word & Char Acceptance Region (`kindle_render/config.py`, `kindle_render/layout.py`)**:
+  - Added `word_spacing_shrink_decay = 3.27` (`max(word_spacing_shrink_mult, 1.0 - word_spacing_shrink_decay * extra_word_em)` -> `0.28×` at step 2, `0.10×` at steps 3–5), fixing `Compact word 2` (`665,107 -> 31,260`, `-633,847` px) with zero regressions.
+  - Tuned `char_spacing_shrink_mult = 0.80` (from `0.70`), fixing `Standard char 4` (`789,805 -> 688,741`, `-101,064` px; `-112,179` px across 3-theme char 2..5).
+- **Tight-Floor `h1` Top Margin (`kindle_render/page.py`)**:
+  - Added `mt += 1` when `line_spacing_step is not None and pitch == 0 and h_idx == 0 and std_body_pitch < (19.0 / 14.0) * c.size_px()`, dropping `Standard line 1` from `231,261 -> 19,270` (`p3/p4/p5 = 0`) and reducing Standard across all 16 step-1 runs by `-2,713,245` px.
+- **Total 60-Run Spacing Diff (`pages 2–5`)**: **`21,028,735 -> 17,684,610` (`-3,344,125` px vs `v1.11.15`; `-8,622,828` px vs `v1.11.14`)**, zero cells worsened `> 0.5%`, `18/18` default goldens 100% bit-identical to `v1.11.15`.
+- **Tooling & Docs**: Added `tools/lab_spacing/align.py`, `docs/data/spacing_acceptance_region.json`, `docs/hypotheses/spacing_fit2.md`, worst-page side-by-side PNGs (`docs/hypotheses/spacing_fit2/`), and `REPORT.md`.
+
 ## [1.11.15] - 2026-11-22 — Device-Fitted Four 5-Step Spacing Settings (S0–S8)
 
 ### Changed
