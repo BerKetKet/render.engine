@@ -441,10 +441,16 @@ def build_items(runs, family, cfg, size26, display=False, hyphenator=None, allow
                     for apos in ("\u2019", "'"):
                         if apos in alpha:
                             a_idx = alpha.index(apos)
-                            if 1 <= a_idx <= 6 and alpha[:a_idx].isalpha() and alpha[a_idx + 1:].isalpha():
-                                lead_punct = lead_punct + alpha[:a_idx + 1]
-                                alpha = alpha[a_idx + 1:]
-                                break
+                            left_a, right_a = alpha[:a_idx], alpha[a_idx + 1:]
+                            if left_a.isalpha() and right_a.isalpha():
+                                if len(right_a) == 1 and right_a.lower() == "s" and len(left_a) >= cfg.min_word_length:
+                                    trail_punct = alpha[a_idx:] + trail_punct
+                                    alpha = left_a
+                                    break
+                                elif 1 <= a_idx <= 6 and len(right_a) >= 2:
+                                    lead_punct = lead_punct + alpha[:a_idx + 1]
+                                    alpha = right_a
+                                    break
 
                     is_all_caps_word = alpha.isupper() and len(alpha) < 8 and not getattr(run, 'from_text_transform', False) and not has_trailing_hyphen
                     if (alpha and alpha.isalpha() and len(alpha) >= cfg.min_word_length

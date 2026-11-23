@@ -628,7 +628,7 @@ class Family:
             self._faces[key] = Face(
                 path,
                 size26,
-                liga=self.cfg.liga,
+                liga=(False if (getattr(self.cfg, 'char_spacing_no_liga_px', 2.5) > 0 and self.cfg.user_char_spacing_26() >= getattr(self.cfg, 'char_spacing_no_liga_px', 2.5) * 64.0) else self.cfg.liga),
                 kern=self.cfg.kern,
                 cpsp=self.cfg.cpsp,
                 boldness_level=self.cfg.boldness_level
