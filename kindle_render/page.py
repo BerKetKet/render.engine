@@ -291,8 +291,13 @@ class Pager:
             sz_px = self.cfg.size_px()
             pt_px = self.cfg.pitch_px()
             base_thk = float(round(0.065 * sz_px))
-            y_off_top = base_thk + 0.02612 * sz_px + 0.00245 * pt_px + getattr(self.cfg, "link_underline_base_offset", -0.5855)
             thk_fl = base_thk - 0.00015 * sz_px + 0.00013 * pt_px - 0.00165
+            if self.cfg.line_spacing_step is not None and self.cfg.pitch == 0:
+                _bf = (pt_px - sz_px) / 2.0 + self.cfg.typo_ascender * sz_px
+                _bl_frac = _bf - round(_bf)
+                y_off_top = _bl_frac + self.cfg.link_underline_center_em * sz_px - 0.5 * thk_fl
+            else:
+                y_off_top = base_thk + 0.02612 * sz_px + 0.00245 * pt_px + getattr(self.cfg, "link_underline_base_offset", -0.5855)
             _ul_trk = self.cfg.user_char_spacing_26() / 64.0
             for x0_fl, x1_fl, dy_px, fg_col, l_href in link_spans:
                 if _ul_trk > 0.0:
