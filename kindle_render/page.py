@@ -156,6 +156,7 @@ class Pager:
         self.y_float = float(c.top)
         self.y = c.top
         self.page_empty = True
+        self._ol_page_extra_px = None
         self.prev_kind = None
         self.prev_heading = 0
 
@@ -315,7 +316,7 @@ class Pager:
     def _draw_list_marker(self, b, left_px, baseline, size26, block_idx: int, line_idx: int):
         c = self.cfg
         face = self.fam.face(False, False, size26)
-        text_x26 = int(round((c.x0 + b.left_em * c.size_px()) * 64))
+        text_x26 = int(round((c.x0 + b.left_em * c.size_px() + (getattr(self, "_ol_page_extra_px", None) or 0.0)) * 64))
         if getattr(b, "ol_number", None):
             shaped = face.shape_with_clusters(b.ol_number)
             num_w26 = sum(a for _, a, _ in shaped)
@@ -568,7 +569,10 @@ class Pager:
             mt = int(round(mt_base_em * b.scale * vem_px + mt_lead_k * extra_lead))
             if c.line_spacing_step is not None and c.pitch == 0 and h_idx == 0 and std_body_pitch < (19.0 / 14.0) * c.size_px():
                 mt += 1
-            mb_est = int(round(mb_base_em * b.scale * vem_px + mb_lead_k * extra_lead)) + (1 if h_idx == 0 else 0)
+            if c.line_spacing_step is not None and c.pitch == 0 and h_idx == 0 and len(lines) >= 2:
+                mb_est = int(round(c.heading_line_spacing_mb_em * (pitch_fl / 1.2))) + 1
+            else:
+                mb_est = int(round(mb_base_em * b.scale * vem_px + mb_lead_k * extra_lead)) + (1 if h_idx == 0 else 0)
         else:
             eff_vem = (max(float(std_body_pitch), (68.0 / 45.0) * c.size_px()) if extra_lead > 0.0 else float(std_body_pitch)) / 1.2
             mt = (int(b.mt_em * eff_vem * b.scale + 0.25) if (getattr(b, 'list_level', 0) > 0 and extra_lead > 0.0) else (int(round(b.mt_em * vem_px * b.scale)) if (getattr(b, 'list_level', 0) > 0 and ((getattr(b, 'bullet', None) == '\u2022' and b.mt_em == 1.0) or (getattr(b, 'border_collapse', False) and (getattr(b, 'bullet', None) == '\u2022' or (getattr(b, 'ol_number', None) and b.ol_number[0].isupper()))))) else int(b.mt_em * vem_px * b.scale + 1e-6))) if b.mt_em else 0
@@ -716,12 +720,23 @@ class Pager:
                     else:
                         base = self.baseline_in(self.y, cur_pitch, size26)
 
+                if i + k == 0 and getattr(b, "ol_number", None) and b.ol_number[0].isdigit() and c.line_spacing_step is not None and c.pitch == 0:
+                    if getattr(self, "_ol_page_extra_px", None) is None:
+                        _ol_digits = len(b.ol_number.rstrip("."))
+                        if _ol_digits >= 2 and self.page_empty:
+                            _mf = self.fam.face(False, False, size26)
+                            _w_cur = sum(a for _, a, _ in _mf.shape_with_clusters(b.ol_number))
+                            _w_one = sum(a for _, a, _ in _mf.shape_with_clusters("1."))
+                            self._ol_page_extra_px = max(0.0, (_w_cur - _w_one) / 64.0)
+                        else:
+                            self._ol_page_extra_px = 0.0
+                _ol_sh26 = int(round((getattr(self, "_ol_page_extra_px", None) or 0.0) * 64)) if (getattr(b, "ol_number", None) and b.ol_number[0].isdigit()) else 0
                 if i + k == 0 and (getattr(b, "ol_number", None) or getattr(b, "bullet", None)):
                     self._draw_list_marker(b, left_px, base, size26, block_idx=block_idx, line_idx=cur_line_idx)
 
                 self.draw_line(
                     pl,
-                    c.x0 * 64 + int(round(left_px * 64)) + off26,
+                    c.x0 * 64 + int(round(left_px * 64)) + _ol_sh26 + off26,
                     base,
                     block_idx=block_idx,
                     line_idx=cur_line_idx,
