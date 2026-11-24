@@ -1024,7 +1024,7 @@ def break_kp(items, line_w, tolerance, cfg, ragged, in_forced_seg=False):
             trail_ones = 8 if inv == 0 else ((inv & -inv).bit_length() - 1)
             pop = bin(w8).count("1")
             c_pen = TABLE_CONSEC[min(trail_ones, 8)] + TABLE_WINDOW[min(pop, 8)]
-            cost += 1.5 * c_pen
+            cost += (float(getattr(cfg, 'word_spacing_hyph_k', 1.0)) if _wstep > 1 else 1.5) * c_pen
 
         return cost, w - nd_e["hang"]
 
@@ -1454,6 +1454,9 @@ def layout_line(seg, hy, width26, justify, last, cfg, base_x26=None, indent_frac
             last_logical_w = None
 
     if hy:
+        _hy_trk = cfg.user_char_spacing_26()
+        if _hy_trk > 0:
+            pen -= _hy_trk
         for h_tup in hy.glyphs:
             face, name, adv = h_tup[0], h_tup[1], h_tup[2]
             s_meta = dict(h_tup[3]) if (len(h_tup) > 3 and h_tup[3] is not None) else _make_g_meta(None, "-", "ltr", 0, is_synth_hy=True)
