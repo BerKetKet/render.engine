@@ -65,6 +65,7 @@ class Config:
     heading_line_spacing_mb_em: float = 0.652
     link_underline_center_em: float = 0.12593
     char_spacing_no_liga_px: float = 2.5
+    word_spacing_hyph_k: float = 1.0
     typo_ascender: float = 0.802      # Bookerly OS/2 sTypoAscender (+802 FUnits)
     body_cap_height: float = 0.693
     display_cap_height: float = 0.762
