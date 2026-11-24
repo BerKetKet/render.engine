@@ -1,0 +1,573 @@
+{
+ "version": "1.11.19",
+ "base_version": "1.11.18",
+ "grand_total_v18": 14094448,
+ "grand_total_v19": 14052147,
+ "pag_v18": {
+  "line": "58/60",
+  "paragraph": "58/60",
+  "word": "49/60",
+  "char": "57/60",
+  "total": "222/240"
+ },
+ "fitted_config": {
+  "word_spacing_hyph_k": 1.0,
+  "word_spacing_shrink_decay": 3.27,
+  "word_spacing_shrink_mult": 0.1,
+  "char_spacing_shrink_mult": 0.8,
+  "char_spacing_no_liga_px": 2.5,
+  "link_underline_center_em": 0.12593
+ },
+ "worst5_per_var": {
+  "line": [
+   {
+    "theme": "Compact",
+    "step": 3,
+    "page": 3,
+    "diff_px": 156533
+   },
+   {
+    "theme": "Compact",
+    "step": 3,
+    "page": 5,
+    "diff_px": 145464
+   },
+   {
+    "theme": "Compact",
+    "step": 4,
+    "page": 3,
+    "diff_px": 91762
+   },
+   {
+    "theme": "Large",
+    "step": 3,
+    "page": 3,
+    "diff_px": 89507
+   },
+   {
+    "theme": "Compact",
+    "step": 5,
+    "page": 4,
+    "diff_px": 74175
+   }
+  ],
+  "paragraph": [
+   {
+    "theme": "Large",
+    "step": 3,
+    "page": 5,
+    "diff_px": 31369
+   },
+   {
+    "theme": "Compact",
+    "step": 1,
+    "page": 5,
+    "diff_px": 29317
+   },
+   {
+    "theme": "Large",
+    "step": 4,
+    "page": 5,
+    "diff_px": 21397
+   },
+   {
+    "theme": "Large",
+    "step": 2,
+    "page": 4,
+    "diff_px": 21397
+   },
+   {
+    "theme": "Large",
+    "step": 1,
+    "page": 3,
+    "diff_px": 21397
+   }
+  ],
+  "word": [
+   {
+    "theme": "Compact",
+    "step": 5,
+    "page": 4,
+    "diff_px": 431441
+   },
+   {
+    "theme": "Standard",
+    "step": 5,
+    "page": 4,
+    "diff_px": 400969
+   },
+   {
+    "theme": "Compact",
+    "step": 5,
+    "page": 3,
+    "diff_px": 392683
+   },
+   {
+    "theme": "Large",
+    "step": 3,
+    "page": 5,
+    "diff_px": 358810
+   },
+   {
+    "theme": "Large",
+    "step": 4,
+    "page": 5,
+    "diff_px": 348598
+   }
+  ],
+  "char": [
+   {
+    "theme": "Standard",
+    "step": 5,
+    "page": 5,
+    "diff_px": 285619
+   },
+   {
+    "theme": "Large",
+    "step": 5,
+    "page": 5,
+    "diff_px": 265382
+   },
+   {
+    "theme": "Compact",
+    "step": 5,
+    "page": 4,
+    "diff_px": 249417
+   },
+   {
+    "theme": "Large",
+    "step": 3,
+    "page": 5,
+    "diff_px": 246162
+   },
+   {
+    "theme": "Compact",
+    "step": 4,
+    "page": 4,
+    "diff_px": 237454
+   }
+  ]
+ },
+ "scores_v19": {
+  "Standard.line1": [
+   29609,
+   9590,
+   0,
+   0,
+   0
+  ],
+  "Standard.line2": [
+   29609,
+   0,
+   0,
+   0,
+   0
+  ],
+  "Standard.line3": [
+   29609,
+   9666,
+   0,
+   0,
+   0
+  ],
+  "Standard.line4": [
+   29609,
+   52273,
+   1584,
+   56384,
+   0
+  ],
+  "Standard.line5": [
+   29609,
+   9370,
+   4334,
+   21948,
+   0
+  ],
+  "Standard.paragraph1": [
+   29609,
+   9590,
+   0,
+   0,
+   0
+  ],
+  "Standard.paragraph2": [
+   29609,
+   8656,
+   934,
+   0,
+   0
+  ],
+  "Standard.paragraph3": [
+   29609,
+   6021,
+   3565,
+   0,
+   0
+  ],
+  "Standard.paragraph4": [
+   29609,
+   4689,
+   4895,
+   0,
+   0
+  ],
+  "Standard.paragraph5": [
+   29609,
+   3503,
+   5144,
+   934,
+   0
+  ],
+  "Standard.word1": [
+   29609,
+   9590,
+   0,
+   0,
+   0
+  ],
+  "Standard.word2": [
+   29609,
+   9992,
+   23344,
+   26810,
+   0
+  ],
+  "Standard.word3": [
+   29609,
+   10340,
+   60126,
+   267170,
+   245454
+  ],
+  "Standard.word4": [
+   29609,
+   10928,
+   123120,
+   205523,
+   106881
+  ],
+  "Standard.word5": [
+   29609,
+   11061,
+   140130,
+   400969,
+   328192
+  ],
+  "Standard.char1": [
+   29609,
+   9590,
+   0,
+   0,
+   0
+  ],
+  "Standard.char2": [
+   29609,
+   17188,
+   106534,
+   145656,
+   111542
+  ],
+  "Standard.char3": [
+   29609,
+   20917,
+   148415,
+   177515,
+   146778
+  ],
+  "Standard.char4": [
+   29609,
+   21574,
+   163356,
+   183905,
+   190948
+  ],
+  "Standard.char5": [
+   29609,
+   22351,
+   175661,
+   166618,
+   285619
+  ],
+  "Compact.line1": [
+   29609,
+   11923,
+   0,
+   0,
+   29317
+  ],
+  "Compact.line2": [
+   29609,
+   14461,
+   13893,
+   0,
+   35055
+  ],
+  "Compact.line3": [
+   29609,
+   56877,
+   156533,
+   0,
+   145464
+  ],
+  "Compact.line4": [
+   29609,
+   45766,
+   91762,
+   0,
+   0
+  ],
+  "Compact.line5": [
+   29609,
+   37733,
+   2708,
+   74175,
+   0
+  ],
+  "Compact.paragraph1": [
+   29609,
+   11923,
+   0,
+   0,
+   29317
+  ],
+  "Compact.paragraph2": [
+   29609,
+   11923,
+   0,
+   0,
+   0
+  ],
+  "Compact.paragraph3": [
+   29609,
+   8851,
+   2713,
+   0,
+   0
+  ],
+  "Compact.paragraph4": [
+   29609,
+   6617,
+   4682,
+   0,
+   0
+  ],
+  "Compact.paragraph5": [
+   29609,
+   5074,
+   6824,
+   0,
+   0
+  ],
+  "Compact.word1": [
+   29609,
+   11923,
+   0,
+   0,
+   29317
+  ],
+  "Compact.word2": [
+   29609,
+   12409,
+   18404,
+   250,
+   197
+  ],
+  "Compact.word3": [
+   29609,
+   12453,
+   116519,
+   78725,
+   19560
+  ],
+  "Compact.word4": [
+   29609,
+   13056,
+   34295,
+   294415,
+   115667
+  ],
+  "Compact.word5": [
+   29609,
+   13219,
+   392683,
+   431441,
+   258562
+  ],
+  "Compact.char1": [
+   29609,
+   11923,
+   0,
+   0,
+   29317
+  ],
+  "Compact.char2": [
+   29609,
+   14422,
+   142795,
+   110984,
+   140442
+  ],
+  "Compact.char3": [
+   29609,
+   17486,
+   146054,
+   206531,
+   162123
+  ],
+  "Compact.char4": [
+   29609,
+   17484,
+   191593,
+   237454,
+   24193
+  ],
+  "Compact.char5": [
+   29609,
+   18562,
+   164145,
+   249417,
+   48175
+  ],
+  "Large.line1": [
+   29609,
+   10693,
+   21397,
+   0,
+   0
+  ],
+  "Large.line2": [
+   29609,
+   10610,
+   0,
+   21397,
+   0
+  ],
+  "Large.line3": [
+   29609,
+   71896,
+   89507,
+   21397,
+   0
+  ],
+  "Large.line4": [
+   29609,
+   51202,
+   5579,
+   38732,
+   21397
+  ],
+  "Large.line5": [
+   29609,
+   8497,
+   5465,
+   17566,
+   0
+  ],
+  "Large.paragraph1": [
+   29609,
+   10693,
+   21397,
+   0,
+   0
+  ],
+  "Large.paragraph2": [
+   29609,
+   8440,
+   4500,
+   21397,
+   0
+  ],
+  "Large.paragraph3": [
+   29609,
+   5885,
+   9601,
+   0,
+   31369
+  ],
+  "Large.paragraph4": [
+   29609,
+   4537,
+   12267,
+   0,
+   21397
+  ],
+  "Large.paragraph5": [
+   29609,
+   3423,
+   9997,
+   4500,
+   0
+  ],
+  "Large.word1": [
+   29609,
+   10693,
+   21397,
+   0,
+   0
+  ],
+  "Large.word2": [
+   29609,
+   11089,
+   47810,
+   136790,
+   284501
+  ],
+  "Large.word3": [
+   29609,
+   11485,
+   0,
+   251645,
+   358810
+  ],
+  "Large.word4": [
+   29609,
+   11881,
+   27268,
+   337547,
+   348598
+  ],
+  "Large.word5": [
+   29609,
+   12277,
+   140587,
+   307394,
+   330408
+  ],
+  "Large.char1": [
+   29609,
+   10693,
+   21397,
+   0,
+   0
+  ],
+  "Large.char2": [
+   29609,
+   18891,
+   98055,
+   129865,
+   130399
+  ],
+  "Large.char3": [
+   29609,
+   23134,
+   74657,
+   166606,
+   246162
+  ],
+  "Large.char4": [
+   29609,
+   25946,
+   94211,
+   172581,
+   162788
+  ],
+  "Large.char5": [
+   29609,
+   25366,
+   84163,
+   210270,
+   265382
+  ]
+ }
+}

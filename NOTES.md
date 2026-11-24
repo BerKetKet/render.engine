@@ -2,9 +2,9 @@
 
 ## Current State
 - **Working Directory**: `/home/bgg/projects/render.engine`
-- **Module**: `kindle_render` v1.11.18
+- **Module**: `kindle_render` v1.11.19
 - **Git Branch**: `main`
-- **Latest Tag**: `v1.11.18`
+- **Latest Tag**: `v1.11.19`
 - **Python Runtime**: Python 3.13, FreeType 2.13+, HarfBuzz (Docker lock: 6.0.0, host CachyOS: 15.1.0)
 
 ## What is Verified
@@ -131,6 +131,12 @@
      - Thresholded ligature disabling in `fonts.py` and `config.py` (`char_spacing_no_liga_px = 2.5`): disables OpenType `liga` when `user_char_spacing_26() >= 2.5 * 64.0`, improving all 3 themes by `-70,492` px with zero Compact char 2 regression.
      - Reduces 60-run spacing capture diff total (pages 2–5) by **`-1,822,557` px** (`15,917,005 -> 14,094,448`, `-12,212,990` px / `-46.4%` vs `v1.11.14`).
      - Added `docs/data/spacing_v18_measurements.json`, `docs/hypotheses/spacing_fit4.md`, worst-page side-by-side PNGs, and updated `REPORT.md`.
+   - **v1.11.19 (`v1.11.19`)**: Integrated `1.11.19_overlay_spacing5.zip` (Direct Line-Break Fitting `word_spacing_hyph_k`, Tracked Hyphen Shift & LBA/PAG Tooling):
+     - Wide word-spacing hyphenation penalty scaling in `config.py` and `layout.py`: added `word_spacing_hyph_k = 1.0` (gated on `word_spacing_step > 1`, replacing `1.5` for consecutive/window hyphen penalties), reducing 3-theme `word 2..5` diff by **`-32,304` px** (`Large word 3 p3: 32,304 -> 0`) and improving word LBA (`505/1,039 -> 509/1,039`).
+     - Tracked synthetic hyphen placement in `layout.py`: subtracts `cfg.user_char_spacing_26()` from `pen` before emitting synthetic hyphen glyphs in `layout_line`, removing the spurious `+track` advance before `"-"` and improving 12/12 `char 2..5` cells by **`-9,997` px**.
+     - Reduces 60-run spacing capture diff total (pages 2–5) by **`-42,301` px** (`14,094,448 -> 14,052,147`, `-12,255,291` px / `-46.6%` vs `v1.11.14`), 0 cells worsened across all 60 runs.
+     - Added LBA/PAG ground truth and lab tools: `tools/lab_spacing/extract_device_lines.py`, `tools/lab_spacing/break_lab.py`, `docs/data/device_lines.jsonl` (2,064 aligned device lines), baseline/v19 LBA JSONs, `docs/data/spacing_v19_measurements.json`, `docs/hypotheses/spacing_fit5.md`, worst-page side-by-side PNGs, and updated `REPORT.md`.
+     - Zero regressions on default presets: `18/18` goldens bit-identical to `v1.11.18` (0 golden updates).
 
 ## What is Broken / Open Issues
 - **HarfBuzz Host vs Lock**: Runtime warning emitted on host CachyOS (HarfBuzz `15.1.0`); strict mode disabled by default per v1.11.6 policy.

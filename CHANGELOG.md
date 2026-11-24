@@ -13,6 +13,17 @@
 
 # Changelog
 
+## [1.11.19] - 2026-11-23 — Direct Line-Break Fitting (`word_spacing_hyph_k`), Tracked Hyphen Shift & LBA/PAG Tooling
+
+### Changed
+- **Wide Word-Spacing Hyphenation Cost (`kindle_render/config.py`, `kindle_render/layout.py`)**:
+  - Added `word_spacing_hyph_k = 1.0` (gated on `word_spacing_step > 1`, replacing `1.5` for consecutive/window hyphen penalties): reduces 3-theme `word 2..5` diff by **`-32,304` px** (`6,432,289 -> 6,399,985`, `Large word 3 p3: 32,304 -> 0`), raises word LBA (`505/1,039 -> 509/1,039`, `Compact.word2 +2`, `Large.word3 +2`), with zero regressions across all 60 runs.
+- **Tracked Synthetic Hyphen Placement (`kindle_render/layout.py`)**:
+  - Subtracted `cfg.user_char_spacing_26()` from `pen` before emitting synthetic hyphen glyphs in `layout_line` (keeping `nat`/`hw` unchanged), fixing the spurious `+track` gap before `"-"` and improving **12/12 `char 2..5` cells** by **`-9,997` px** (`5,914,910 -> 5,904,913`).
+- **LBA/PAG Ground-Truth & Fast Harness (`tools/lab_spacing/extract_device_lines.py`, `tools/lab_spacing/break_lab.py`)**:
+  - Extracted `docs/data/device_lines.jsonl` (2,064 aligned device lines), baseline/v1.11.19 LBA JSONs, PAG (`222/240 = 92.5%`), and logged all experiments in `docs/hypotheses/spacing_fit5.md`.
+- **Total 60-Run Spacing Diff (`pages 2–5`)**: **`14,094,448 -> 14,052,147` (`-42,301` px vs `v1.11.18`; `-12,255,291` px / `-46.6%` vs `v1.11.14`)**, `0` cells worsened, `18/18` default goldens 100% bit-identical to `v1.11.18` under `KINDLE_RENDER_STRICT_HARFBUZZ=1`.
+
 ## [1.11.18] - 2026-11-23 — Possessive `'s` Hyphenation Fix, Float-Baseline Link Underline & Thresholded Ligatures
 
 ### Changed
