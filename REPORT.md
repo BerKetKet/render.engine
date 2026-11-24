@@ -1,56 +1,64 @@
-# `kindle_render` v1.11.18 — Possessive Hyphenation Fix, Underline Model & Spacing Fit Report
+# `kindle_render` v1.11.19 Report — Direct Line-Break Fitting (`spacing_fit5`)
 
 ## 1. Interpretation Choices
-- **Default-render change allowed (Ground Rule 0)**: Fixing the English possessive `'s` hyphenation bug in `kindle_render/layout.py` improved default `exam1` by **-41,673 diff px** (`1,506,993 -> 1,465,320`, `e01_prologue 70,279 -> 28,795`, `+3` exact lines, `0` lost exact pages) while keeping **all 17 other default corpora** (`probe`, `exam2`, `exam3_normal`, `exam3_small`, `e3_compact`, `e3_large`, `tables_images`, `ti_compact`, `ti_large`, and `sizes_00..sizes_07`) **100% bit-identical**. Accordingly, it was enabled unconditionally and `tools/golden/exam1.json` was regenerated.
-- **Spacing-mode gating**: `link_underline_center_em = 0.12593` stays gated on `line_spacing_step is not None and pitch == 0`, and `char_spacing_no_liga_px = 2.5` only activates when `user_char_spacing_26() >= 2.5 * 64`, so default renders are completely unaffected by both.
+- **Autonomous defaults**: Followed all ground rules under `KINDLE_RENDER_STRICT_HARFBUZZ=1` (HarfBuzz `6.0.0`).
+- **Dual metrics**: Added paragraph-level **LBA** (Line-Break Agreement against `docs/data/device_lines.jsonl`, 2,064 extracted device lines) and page-level **PAG** (Page-Start Agreement across all 240 pages) alongside the 60-run pixel diff metric (`pages 2–5`).
+- **Default gating**: Neither kept improvement justifies altering default step-1 goldens (`word_spacing_hyph_k = 1.0` applies when `word_spacing_step > 1`; synthetic hyphen tracking subtraction applies when `cfg.user_char_spacing_26() > 0`). All **18/18 default goldens** remain 100% bit-identical to `v1.11.18`.
 
-## 2. Before / After Table (`v1.11.17` -> `v1.11.18`, Pages 2–5 Summed, Thousand px)
+## 2. LBA / PAG & 60-Run Pixel Diff — Before (`v1.11.18`) vs After (`v1.11.19`)
 
-| Variable | Theme | Step 1 | Step 2 | Step 3 | Step 4 | Step 5 | Theme Δ |
-| :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: |
-| **line** | Standard | `19 -> 10` | `0 -> 0` | `10 -> 10` | `110 -> 110` | `36 -> 36` | `-10k` |
-| **line** | Compact | `153 -> 41` | `175 -> 63` | `471 -> 359` | `249 -> 138` | `115 -> 115` | `-447k` |
-| **line** | Large | `43 -> 32` | `43 -> 32` | `194 -> 183` | `117 -> 117` | `32 -> 32` | `-32k` |
-| **paragraph** | Standard | `19 -> 10` | `19 -> 10` | `19 -> 10` | `19 -> 10` | `19 -> 10` | `-48k` |
-| **paragraph** | Compact | `153 -> 41` | `124 -> 12` | `123 -> 12` | `123 -> 11` | `124 -> 12` | `-559k` |
-| **paragraph** | Large | `43 -> 32` | `45 -> 34` | `58 -> 47` | `49 -> 38` | `29 -> 18` | `-54k` |
-| **word** | Standard | `19 -> 10` | `70 -> 60` | `593 -> 583` | `457 -> 446` | `891 -> 880` | `-52k` |
-| **word** | Compact | `153 -> 41` | `31 -> 31` | `227 -> 227` | `457 -> 457` | `1096 -> 1096` | `-112k` |
-| **word** | Large | `43 -> 32` | `491 -> 480` | `665 -> 654` | `737 -> 725` | `803 -> 791` | `-57k` |
-| **char** | Standard | `19 -> 10` | `400 -> 381` | `604 -> 494` | `580 -> 561` | `671 -> 652` | `-177k` |
-| **char** | Compact | `153 -> 41` | `409 -> 409` | `547 -> 533` | `470 -> 471` | `478 -> 481` | `-122k` |
-| **char** | Large | `43 -> 32` | `448 -> 378` | `527 -> 511` | `471 -> 457` | `628 -> 586` | `-153k` |
+| Metric / Theme | `v1.11.18` | `v1.11.19` | Delta |
+| :--- | ---: | ---: | ---: |
+| **Pixel Diff — Standard (20 runs, p2–5)** | 4,290,767 | **4,286,877** | **-3,890** |
+| **Pixel Diff — Compact (20 runs, p2–5)** | 4,591,765 | **4,589,786** | **-1,979** |
+| **Pixel Diff — Large (20 runs, p2–5)** | 5,211,916 | **5,175,484** | **-36,432** |
+| **Pixel Diff — GRAND TOTAL (60 runs)** | **14,094,448** | **14,052,147** | **-42,301** (`-12,255,291` / `-46.6%` vs `v1.11.14`) |
+| **LBA — `word 1..5` (15 cells)** | 505 / 1,039 (48.60%) | **509 / 1,039 (48.99%)** | **+4 lines** (`Compact.word2 +2`, `Large.word3 +2`) |
+| **LBA — `char 1..5` (15 cells)** | 245 / 1,009 (24.28%) | 245 / 1,009 (24.28%) | 0 lines (`-9,997` px across 12/12 `char 2..5` cells) |
+| **PAG — All 240 pages (`v18` baseline)** | 222 / 240 (92.5%) | — | `line 58/60`, `para 58/60`, `char 57/60`, `word 49/60` |
+| **Cells worsened (> 0 px)** | — | **0 / 60** | Zero regressions |
 
-- **Standard**: `4,578,050 -> 4,290,767` (`-287,283` px)
-- **Compact**: `5,831,191 -> 4,591,765` (`-1,239,426` px)
-- **Large**: `5,507,764 -> 5,211,916` (`-295,848` px)
-- **GRAND TOTAL**: **`15,917,005 -> 14,094,448` (`-1,822,557` px vs `v1.11.17`; `-12,212,990` px / `-46.4%` vs `v1.11.14`)**
+## 3. Fitted Model, Parameters & Sensitivity
+- **`Config.word_spacing_hyph_k: float = 1.0`** (`kindle_render/config.py`, `kindle_render/layout.py`):
+  - When `word_spacing_step > 1`, `break_kp` scales consecutive/window hyphenation penalties by `word_spacing_hyph_k = 1.0` instead of `1.5`.
+  - **Sensitivity (3-theme `word 2..5`, base `6,432,289`)**: `0.0 -> 6,597,305 (+165k)`, `0.5 -> 6,495,897 (+64k)`, **`1.0 -> 6,399,985 (-32,304)`**, `1.5 -> 6,432,289 (0)`, `2.5 -> 6,682,918 (+251k)`. Clear interior optimum at `1.0`.
+  - Other `break_kp` knobs (`line_penalty` `1.0/3.0`, `window_weight` `0.5`, `stretch_k` `1.5/3.0`) were neutral (`0`) or regressed (`+19k` to `+295k`).
+- **Tracked synthetic hyphen placement (`kindle_render/layout.py`, S6b)**:
+  - In `layout_line`, when `hy` is emitted and `cfg.user_char_spacing_26() > 0`, `pen -= cfg.user_char_spacing_26()` removes the spurious trailing tracking advance before the synthetic hyphen `"-"` without altering `nat` or `Penalty.width` (`hw`). Improves all 12/12 `char 2..5` cells (`-9,997` px total).
+- **S3(e) width-domain verification**: Confirmed device breaks using widened word/char widths (not step-1 widths stretched post-break).
 
-## 3. Root Cause of Compact Page 4 (`111,752 -> 0`)
-- Natural glyph widths on all 29 ragged body lines across Standard/Compact/Large have **`width_device / width_ours = 1.00000`** (`mean_dw = +0.00 px`), and Compact p4 line 2 (`"burned unregarded; ... and"`) had `+24.02 px` of positive slack (no shrink needed).
-- The device's break sequence actually had a **lower** Knuth-Plass cost (`47.50`) than ours (`55.28`), because `kindle_render/layout.py:441-447` matched `family’s` (`a_idx = 6`) against the French elision rule (`1 <= a_idx <= 6`), stripping `family’` into `lead_punct` and leaving `alpha = "s"` unhyphenated (blocking `fam-ily’s`).
-- Fixing apostrophe handling to strip trailing `'s`/`’s` into `trail_punct` when `len(left) >= min_word_length` (and requiring `len(right) >= 2` for French prefix elision) dropped Compact p4 from **`111,752 -> 0` (bitwise exact)** across all 7+ cells and improved default `exam1` by **`-41,673` diff px**.
+## 4. Pagination Rule (S4)
+- Across all 240 pages, baseline PAG is `96.7%` (`58/60`) on `line` and `paragraph` and `95.0%` (`57/60`) on `char`.
+- The remaining `11/60` mismatches in `word` (`49/60 = 81.7%`) occur at wide `word` steps `3–5` where upstream paragraph line counts differ by `±1` line and shift page boundaries—not from an independent widow/orphan pagination rule defect. No pagination rule override was added.
 
-## 4. Underline Model (S2)
-- Subpixel `link_underline` on `p2` accounted for `100%` of remaining `Standard line 1` (`19,270`) and `Large line 1` (`21,439`) diffs (`0` text diff px).
-- Modeling `y_off_top = _bl_frac + link_underline_center_em * sz_px - 0.5 * thk_fl` (`_bl_frac = bf - round(bf)`, `link_underline_center_em = 0.12593`) keeps `Standard line 2` at **`0`** while halving Standard (`19,270 -> 9,590`) and Large (`21,439 -> 10,693`) underline diffs (`~-360k` px across step-1 runs).
+## 5. S8 Default-Case Dividend
+- Neither `word_spacing_hyph_k = 1.0` nor tracked hyphen shift alters default step-1 renders (`word_spacing_step` is `None`/1 and `user_char_spacing_26() == 0`).
+- All **18/18 default goldens** (`probe`, `exam1` 99.10% / `1,465,320`, `exam2` 99.32%, `exam3_normal`, `exam3_small`, `e3_compact`, `e3_large`, `tables_images` 44p / `ti_compact` 35p / `ti_large` 57p with 3-theme total `24,122,051`, `sizes_00..sizes_07`) remain **100% bit-identical** to `v1.11.18`. No goldens regenerated.
 
-## 5. Acceptance Regions (S3 & S4)
-- **Word**: Smooth em-decay `max_sh = G * (0.099 if ragged else 0.179) * max(0.10, 1.0 - 3.27 * extra_word_em)` (`6,432,289`) decisively beat constant-px shrink (`0.3/0.6/1.0` px/space -> `7.42M / 7.12M / 7.69M`, reverted).
-- **Char**: `char_spacing_step_em = 0.056`, `char_spacing_shrink_mult = 0.80`, plus `char_spacing_no_liga_px = 2.5` (disabling ligatures when tracking `>= 2.5 px`, improving all 3 themes simultaneously by `-70,492` px without regressing Compact char 2).
+## 6. Kept & Reverted Experiments (Full Log in `docs/hypotheses/spacing_fit5.md`)
+- **KEPT**:
+  - `word_spacing_hyph_k = 1.0` (`word_spacing_step > 1`): `-32,304` px (`6,432,289 -> 6,399,985`, `Large word 3 p3: 32,304 -> 0`, LBA `+4`, 0 regressions).
+  - S6b synthetic hyphen tracking subtraction (`pen -= user_char_spacing_26()` in `layout_line`): `-9,997` px (`5,914,910 -> 5,904,913`, 12/12 `char 2..5` cells improved, 0 regressions).
+- **REVERTED**:
+  - S6a (`+extra_track26` on `Penalty.width` `hw`): `+1,334,091` px (`5,914,910 -> 7,249,001`).
+  - `word_spacing_hyph_k` at `0.0` (`+165,016`), `0.5` (`+63,608`), `2.5` (`+250,629`).
+  - `char` `hyph_k` at `0.5` (`+70,509`), `1.0` (`0`), `2.0` (`+87,740`).
+  - `line_penalty` `1.0`/`3.0` (`0`), `window_weight` `0.5` (`0`), `stretch_k` `1.5` (`+295,033`) / `3.0` (`+19,204`).
+  - S7 `h1` `mt` `0.045` audit: residuals `Std [0,0,0,-1,+2]`, `Cmp [0,+1,+1,0,+2]`, `Lrg [0,0,-1,0,+1]` px — Pareto-optimal, kept as-is.
 
-## 6. Kept / Reverted Experiments
-- **KEPT**: S1b possessive `'s` hyphenation fix (`-1.24M` Compact + `-41,673` default `exam1`), S2 float-baseline link underline (`~-360k`), S4 `char_spacing_no_liga_px = 2.5` (`-70,492` across all 3 themes).
-- **REVERTED**: S3(e) constant-px shrink (`+690k..+1.26M` worse).
+## 7. Worst 5 Pages Per Variable (`v1.11.19`) & Hyphenation Dictionary Audit
+- **`line`**: `Com s3 p3=156,533`, `Com s3 p5=145,464`, `Com s4 p3=91,762`, `Lar s3 p3=89,507`, `Com s5 p4=74,175`
+- **`paragraph`**: `Lar s3 p5=31,369`, `Com s1 p5=29,317`, `Lar s4 p5=21,397`, `Lar s2 p4=21,397`, `Lar s1 p3=21,397`
+- **`word`**: `Com s5 p4=431,441`, `Sta s5 p4=400,969`, `Com s5 p3=392,683`, `Lar s3 p5=358,810`, `Lar s4 p5=348,598`
+- **`char`**: `Sta s5 p5=285,619`, `Lar s5 p5=265,382`, `Com s5 p4=249,417`, `Lar s3 p5=246,162`, `Com s4 p4=237,454`
+- **Hyphenation dictionary audit**: All target device hyphenation points (`fu-neral`, `mis-un-der-stood`, `great-est`, `fea-tures`, `ar-range-ment`, `fam-ily`) are already present in `hyph_en_YJ.bin`.
+- Side-by-side worst-page visual diagnostics saved under `docs/hypotheses/spacing_fit5/`.
 
-## 7. Remaining Worst 5 Pages Per Variable (Side-by-Side PNGs in `docs/hypotheses/spacing_fit4/`)
-- **line**: `Com s3 p3 (156,533)`, `Com s3 p5 (145,464)`, `Com s4 p3 (91,762)`, `Lar s3 p3 (89,507)`, `Com s5 p4 (74,175)` — `1 px` `h1` `mt` offset on Compact steps 3–5 and Large step 3.
-- **paragraph**: `Lar s3 p5 (31,369)`, `Com s1 p5 (29,317)`, `Lar s4 p5 (21,397)`, `Lar s2 p4 (21,397)`, `Lar s1 p3 (21,397)` — Standard paragraph 1..5 are all `9.6k` (underline only) and Compact paragraph 2..5 are all `11.3k..11.9k` (underline only)!
-- **word**: `Com s5 p4 (431,441)`, `Sta s5 p4 (400,969)`, `Com s5 p3 (392,683)`, `Lar s3 p5 (358,810)`, `Lar s4 p5 (348,598)` — high-step stretch-vs-hyphenation break differences.
-- **char**: `Sta s5 p5 (285,892)`, `Lar s5 p5 (265,763)`, `Com s5 p4 (249,697)`, `Lar s3 p5 (246,468)`, `Com s4 p4 (237,821)` — high-step tracking break differences.
+## 8. Gate Results (`KINDLE_RENDER_STRICT_HARFBUZZ=1`)
+- `tools/check_imports.py`: **PASS** (`errors=0`)
+- `tools/test_harfbuzz_lock.py`: **PASS** (`version=6.0.0`, `locked=6.0.0`)
+- `tools/test_bugfixes.py`: **PASS** (`ALL BUGFIX TESTS PASSED`)
+- `tools/corpus.py --golden-only` (all **18/18** corpora: `probe`, `exam1`, `exam2`, `exam3_normal`, `exam3_small`, `e3_compact`, `e3_large`, `tables_images`, `ti_compact`, `ti_large`, `sizes_00..sizes_07`): **18/18 PASS** (`golden_passed=True`, `layout_golden_passed=True`, `deterministic=True` on `probe`).
 
-## 8. Gate Results (`KINDLE_RENDER_STRICT_HARFBUZZ=1`, HarfBuzz `6.0.0`)
-- **Unit gates**: `check_imports` PASS, `test_harfbuzz_lock` (`6.0.0`) PASS, `test_bugfixes` PASS.
-- **Default Goldens (`18/18` PASS)**:
-  - **`exam1` (UPDATED ON PURPOSE)**: `1,506,993 -> 1,465,320` (**`-41,673` diff px**, `e01_prologue 70,279 -> 28,795`, `50/70` exact pages unchanged, `pos_lines 1452 -> 1455/1568`).
-  - **All 17 other goldens (100% BIT-IDENTICAL to `v1.11.17`)**: `probe`, `exam2`, `exam3_normal`, `exam3_small`, `e3_compact`, `e3_large`, `tables_images` (44p, 3-theme total `24,122,051`), `ti_compact` (35p), `ti_large` (57p), `sizes_00..sizes_07` (8/8).
+## 9. Overlay Contents & Checksums
+See `GATES.txt`, `VERSION.txt`, `DELETIONS.txt`, `COMMIT_MESSAGE.txt`, and the overlay manifest in `1.11.19_overlay_spacing5.zip`.
